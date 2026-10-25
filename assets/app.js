@@ -214,12 +214,20 @@
   }
   $('#timer-toggle').addEventListener('click', () => { if (!block) { selectBlock(ROUTINE.find((x) => !state.checks[x.id]) || ROUTINE[0], true); } else if (handle) { stop(); remaining = Math.max(0, Math.ceil((endAt - Date.now()) / 1000)); } else start(); });
   $('#timer-reset').addEventListener('click', () => { if (block) { stop(); remaining = block.min * 60; $('#timer').textContent = fmt(remaining); } });
-  $('#run-all').addEventListener('click', () => {
+  function runRoutine() {
     markOnboarded();
     const first = ROUTINE.find((x) => !state.checks[x.id]);
     if (!first) { $('#timer-label').textContent = 'All blocks done today — nicely played!'; return; }
     runAll = true; audio(); selectBlock(first, true);
+  }
+  $('#run-all').addEventListener('click', runRoutine);
+  // Today card: continue the routine, or (when it is all done) pick the first block to practise again.
+  $('#t-go').addEventListener('click', () => {
+    if (ROUTINE.some((x) => !state.checks[x.id])) runRoutine();
+    else { runAll = false; selectBlock(ROUTINE[0], false); }
   });
+  $('#show-intro').addEventListener('click', () => { showIntro = true; renderToday(); $('#hero-sa').focus(); });
+  $('#hero-start').addEventListener('click', () => { if (showIntro) { showIntro = false; renderToday(); } });
 
   // Sa selector (several synced selects) + tanpura drone
   const saSelects = [...document.querySelectorAll('.sa-sync')];
