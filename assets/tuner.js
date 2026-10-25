@@ -11,7 +11,7 @@
   // ---------- pitch detection (YIN) ----------
   // Returns {freq, clarity} or null when there is silence or no clear pitch.
   function detect(buf, sr, opts) {
-    const o = Object.assign({ minF: 90, maxF: 1700, thresh: 0.12, gate: 0.008 }, opts);
+    const o = Object.assign({ minF: 90, maxF: 1700, thresh: 0.12, gate: 0.003 }, opts);
     const N = buf.length;
     let sum = 0;
     for (let i = 0; i < N; i++) sum += buf[i] * buf[i];
@@ -46,6 +46,30 @@
     return { freq: sr / better, clarity: Math.max(0, 1 - d[tau]), rms };
   }
 
+  // Smooths readings and rejects one-off jumps (octave slips, breath noise): a new pitch more than
+  // 70 cents from the recent median is only accepted after four consistent readings in a row.
+  function makeFilter() {
+    let hist = [], cand = null, cnt = 0;
+    const med = (a) => { const t = [...a].sort((x, y) => x - y); return t[t.length >> 1]; };
+    const cents = (a, b) => 1200 * Math.abs(Math.log2(a / b));
+    return {
+      push(f) {
+        if (hist.length >= 3) {
+          const m = med(hist);
+          if (cents(f, m) > 70) {
+            if (cand && cents(f, cand) < 70) cnt++; else { cand = f; cnt = 1; }
+            if (cnt < 4) return m;
+            hist = [f]; cand = null; cnt = 0; return f;
+          }
+        }
+        cand = null; cnt = 0;
+        hist.push(f); if (hist.length > 7) hist.shift();
+        return med(hist);
+      },
+      reset() { hist = []; cand = null; cnt = 0; }
+    };
+  }
+
   // ---------- frequency -> swar ----------
   // saHz is the flute's Sa. Returns the nearest swar, the octave, and the cents off it.
   function toSwar(freq, saHz, targetClass) {
@@ -63,7 +87,7 @@
   const westernName = (saIndex, cls) => NOTE[(saIndex + cls) % 12];
 
   // ---------- UI ----------
-  const state = { stream: null, src: null, an: null, raf: 0, buf: null, last: 0, hist: [], voicedAt: 0, trace: [], current: null };
+  const state = { stream: null, src: null, an: null, raf: 0, buf: null, last: 0, filter: makeFilter(), voicedAt: 0, trace: [], current: null, bytes: null };
   const App = () => root.FluteApp, Sound = () => root.FluteAudio.Engine;
 
   function median(a) { const s = [...a].sort((x, y) => x - y); return s[s.length >> 1]; }
@@ -71,16 +95,19 @@
 
   async function start() {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { setMsg('This browser cannot use the microphone here. Try Chrome, Edge, Firefox or Safari over https.'); return; }
+    const c = Sound().ensure(); // inside the tap, so iOS lets the audio context run
     try {
       state.stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
     } catch (e) {
       setMsg(e && e.name === 'NotAllowedError' ? 'Microphone access was blocked. Allow it in your browser\'s site settings, then try again.' : 'No microphone was found.');
       return;
     }
-    const c = Sound().ensure();
+    if (c.state === 'suspended') await c.resume();
     state.an = c.createAnalyser(); state.an.fftSize = 4096; state.an.smoothingTimeConstant = 0;
     state.src = c.createMediaStreamSource(state.stream); state.src.connect(state.an);
-    state.buf = new Float32Array(state.an.fftSize); state.hist = []; state.trace = [];
+    state.buf = new Float32Array(state.an.fftSize); state.filter.reset(); state.trace = [];
+    state.bytes = state.an.getFloatTimeDomainData ? null : new Uint8Array(state.an.fftSize);
+    state.voicedAt = performance.now();
     $('#tuner-toggle').textContent = '■ Stop listening'; $('#tuner-toggle').classList.add('on');
     setMsg('Listening… play a long, steady note.');
     state.raf = requestAnimationFrame(loop);
@@ -99,18 +126,18 @@
     state.raf = requestAnimationFrame(loop);
     if (t - state.last < 33) return; // about 30 readings a second
     state.last = t;
-    state.an.getFloatTimeDomainData(state.buf);
+    if (state.bytes) { state.an.getByteTimeDomainData(state.bytes); for (let i = 0; i < state.bytes.length; i++) state.buf[i] = (state.bytes[i] - 128) / 128; }
+    else state.an.getFloatTimeDomainData(state.buf);
     const r = detect(state.buf, Sound().ctx.sampleRate);
     const now = performance.now();
-    if (r && r.clarity > 0.8) {
-      state.hist.push(r.freq); if (state.hist.length > 5) state.hist.shift();
+    if (r && r.clarity > 0.85) {
       state.voicedAt = now;
-      const f = median(state.hist), tgt = $('#tuner-target').value;
+      const f = state.filter.push(r.freq), tgt = $('#tuner-target').value;
       const saHz = Sound().saHz * 2, det = toSwar(f, saHz, null), tg = tgt === 'auto' ? null : toSwar(f, saHz, Number(tgt));
       const on = tg && Math.abs(tg.cents) <= 60 ? tg : det;
       state.current = { f, det, sw: on, aim: tg && !(Math.abs(tg.cents) <= 60) ? tg : null };
       state.trace.push({ t: now, cents: Math.max(-60, Math.min(60, on.cents)), n: on.n });
-    } else if (now - state.voicedAt > 350) { state.hist = []; state.current = null; state.trace.push({ t: now, cents: null }); }
+    } else if (now - state.voicedAt > 400) { state.filter.reset(); state.current = null; state.trace.push({ t: now, cents: null }); }
     state.trace = state.trace.filter((p) => now - p.t < 8000);
     render(state.current);
   }
@@ -126,7 +153,8 @@
   function render(cur) {
     const big = $('#tuner-swar'), sub = $('#tuner-sub'), needle = $('#tuner-needle'), verdict = $('#tuner-verdict'), tgtSel = $('#tuner-target').value;
     if (!cur) {
-      big.textContent = '—'; sub.textContent = state.stream ? 'Waiting for a note' : 'Not listening';
+      big.textContent = '—';
+      sub.textContent = !state.stream ? 'Not listening' : performance.now() - state.voicedAt > 3000 ? 'No clear note heard. Move closer, play a little louder, or mute the site sound.' : 'Waiting for a note';
       needle.style.left = '50%'; needle.classList.remove('ok');
       verdict.textContent = ''; lastVerdict = ''; drawTrace(); $('#tuner-steady').textContent = '—'; $('#tuner-setsa').disabled = true;
       return;
@@ -194,6 +222,6 @@
     document.addEventListener('visibilitychange', () => { if (document.hidden && state.stream) stop(); });
     render(null);
   }
-  root.FluteTuner = { detect, toSwar };
+  root.FluteTuner = { detect, toSwar, makeFilter };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })(window);
