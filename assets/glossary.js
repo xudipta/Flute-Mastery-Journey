@@ -8,6 +8,7 @@
     ['andolan', [], 'A slow, wide oscillation on a swar, a hallmark of ragas like Darbari Kanada.'],
     ['aroha', [], 'The ascending order of swars in a raga.'],
     ['avaroha', [], 'The descending order of swars in a raga.'],
+    ['cents', ['cent'], 'A hundredth of a semitone, used to say how sharp or flat a note is. Within about 10 cents sounds in tune.'],
     ['bandish', ['bandishes'], 'A fixed composition in a raga, set to a taal.'],
     ['bansuri', [], 'The bamboo side-blown flute of Indian classical music. It has six finger holes.'],
     ['bol', ['bols'], 'A spoken syllable for a tabla stroke, such as Dha, Dhin, Na or Tin.'],

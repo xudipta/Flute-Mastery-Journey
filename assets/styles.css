@@ -299,3 +299,26 @@ h1#page-title { margin: 0 0 1rem; }
 
 footer a { color: var(--accent-ink); }
 @media (prefers-color-scheme: light) { .cal-day.lv2 { background: #0d6b40; color: #fff; } .cal-legend .lv2 { background: #0d6b40; } }
+
+/* tuner */
+.tuner-card { background: var(--panel); border-radius: 18px; padding: 1.25rem; }
+.tuner-top { display: flex; flex-wrap: wrap; gap: .75rem 1rem; align-items: center; }
+.tuner-top label { display: inline-flex; gap: .5rem; align-items: center; font-weight: 600; }
+.tuner-top select { font: inherit; background: var(--bg); color: var(--ink); border: 1px solid var(--muted); border-radius: 8px; padding: .3rem .4rem; }
+.btn.on { background: var(--accent2); color: #fff; }
+.tuner-read { text-align: center; margin: 1rem 0 .25rem; }
+.tuner-swar { font-size: clamp(3rem, 12vw, 5rem); font-weight: 800; line-height: 1; color: var(--accent-ink); }
+.tuner-sub { color: var(--muted); min-height: 1.5em; }
+.gauge { position: relative; height: 2.6rem; margin: 1rem .5rem .25rem; border-radius: 999px; background: var(--bg); }
+.gauge .zone { position: absolute; left: 40%; width: 20%; top: 0; bottom: 0; background: color-mix(in srgb, var(--ok) 35%, transparent); border-radius: 6px; }
+.gauge .mid { position: absolute; left: 50%; top: 4px; bottom: 4px; width: 2px; background: var(--muted); opacity: .6; }
+.gauge .needle { position: absolute; top: 3px; bottom: 3px; width: 8px; margin-left: -4px; left: 50%; border-radius: 4px; background: var(--accent2); transition: left .08s linear, background .15s; }
+.gauge .needle.ok { background: var(--ok); }
+.gauge i { position: absolute; bottom: -1.4rem; font-style: normal; font-size: .75rem; color: var(--muted); }
+.gauge .g-l { left: .5rem; } .gauge .g-r { right: .5rem; }
+.tuner-verdict { text-align: center; font-weight: 700; min-height: 1.6em; margin: 1.75rem 0 .5rem; }
+.tuner-verdict.ok { color: var(--ok); }
+@media (prefers-color-scheme: light) { .tuner-verdict.ok { color: #0d6b40; } }
+.tuner-trace { width: 100%; height: 140px; background: var(--bg); border-radius: 12px; display: block; }
+.tuner-foot { display: flex; flex-wrap: wrap; gap: .5rem 1rem; justify-content: space-between; align-items: center; margin-top: .75rem; }
+@media (prefers-reduced-motion: reduce) { .gauge .needle { transition: none; } }

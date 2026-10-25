@@ -469,7 +469,7 @@
 
   // Small API for progress.js (calendar, routine editor, backup).
   window.FluteApp = {
-    BLOCKS, state: () => state, settings, dateKey, todayKey, streak, practised, practisedDays, defaultPlan,
+    BLOCKS, state: () => state, settings, dateKey, setSa, todayKey, streak, practised, practisedDays, defaultPlan,
     routine: () => ROUTINE,
     saveState: () => store.set(state),
     setPlan(plan) {
