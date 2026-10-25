@@ -234,3 +234,6 @@ select { min-height: 2.6rem; }
 .timer-card { background: var(--panel); border-radius: 18px; }
 h1#page-title { margin: 0 0 1rem; }
 @media (prefers-color-scheme: light) { .badge { background: #0d6b40; color: #fff; } }
+
+.app-line { margin-top: 0; }
+.app-line > * { margin: 0 .5rem; }
