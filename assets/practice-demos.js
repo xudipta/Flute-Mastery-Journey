@@ -169,7 +169,7 @@
     const lines = [{ label: '1 · Establish Sa', tokens: 'S:4', caption: 'Hold Sa until the tanpura feels settled.' }];
     for (let i = 1; i < up.length - 1; i++) {
       const path = up.slice(0, i + 1).concat(up.slice(0, i).reverse()).map((t, k, a) => (k === i || k === a.length - 1 ? t + ':2' : t));
-      lines.push({ label: `${i + 1} · Reach ${up[i].replace("'", '')}`, tokens: path.join(' '), legato: true, caption: `Glide up to ${up[i]} and back to Sa with meend.` });
+      lines.push({ label: `${i + 1} · Reach ${D.parseSwar(up[i]).name}`, tokens: path.join(' '), legato: true, caption: `Glide up to ${D.parseSwar(up[i]).name} and back to Sa with meend.` });
     }
     const vadi = info.vadi && up.find((t) => t === info.vadi);
     if (vadi) lines.push({ label: `${lines.length + 1} · Rest on the vadi`, tokens: `S ${vadi}:4 S:2`, legato: true, caption: 'The vadi is the most important swar: linger on it.' });
