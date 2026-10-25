@@ -37,7 +37,7 @@
       <a href="#practice" data-spy="practice">Practice</a>
       <a href="#ragas" data-spy="ragas">Ragas</a>
       <a href="#tabla" data-spy="tabla">Tabla</a>
-      <a href="#fingering" data-spy="fingering roadmap techniques">Learn</a>
+      <a href="#fingering" data-spy="fingering roadmap techniques glossary">Learn</a>
     </nav>
   </header>
 
@@ -126,9 +126,14 @@
 
     <section id="fingering">
       <h2>Finger-hole guide</h2>
-      <p class="lead">The bansuri has six finger holes — three for the left hand, three for the right. Choose a swar to see which holes are covered.</p>
+      <p class="lead">The bansuri has six finger holes — three for the left hand, three for the right. Tap a swar to see which holes are covered and hear it at your Sa.</p>
       <div class="fingering">
-        <div class="note-picker" id="note-picker" role="group" aria-label="Choose a note"></div>
+        <div class="chart-tools">
+          <label><input type="checkbox" id="chart-komal"> Show komal &amp; tivra</label>
+          <label><input type="checkbox" id="chart-names"> Show note names</label>
+          <button id="chart-scale" class="btn small" type="button">▶ Play the scale</button>
+        </div>
+        <div id="note-picker" class="note-groups"></div>
         <div class="flute-wrap">
           <svg id="flute" viewBox="0 0 640 150" role="img" aria-label="Bansuri finger-hole chart"></svg>
           <p id="note-info" class="note-info"></p>
@@ -144,6 +149,12 @@
     <section id="techniques">
       <h2>Core bansuri techniques</h2>
       <div class="cards" id="technique-cards"></div>
+    </section>
+
+    <section id="glossary">
+      <h2>Glossary</h2>
+      <p class="lead">Terms you will meet on this site. Underlined words in the text show their meaning when you tap or hover them.</p>
+      <dl class="gloss" id="glossary-list"></dl>
     </section>
   </main>
 
@@ -170,7 +181,7 @@
     <a href="#practice" data-spy="practice"><span aria-hidden="true">🧘</span>Practice</a>
     <a href="#ragas" data-spy="ragas"><span aria-hidden="true">🎼</span>Ragas</a>
     <a href="#tabla" data-spy="tabla"><span aria-hidden="true">🥁</span>Tabla</a>
-    <a href="#fingering" data-spy="fingering roadmap techniques"><span aria-hidden="true">📖</span>Learn</a>
+    <a href="#fingering" data-spy="fingering roadmap techniques glossary"><span aria-hidden="true">📖</span>Learn</a>
   </nav>
   <dialog id="demo" aria-labelledby="demo-title">
     <div class="demo-head">
@@ -181,8 +192,10 @@
   </dialog>
   <script src="assets/audio.js"></script>
   <script src="assets/ragas.js"></script>
+  <script src="assets/glossary.js"></script>
   <script src="assets/demo.js"></script>
   <script src="assets/app.js"></script>
   <script src="assets/practice-demos.js"></script>
+  <script src="assets/glossary-ui.js"></script>
 </body>
 </html>

@@ -8,17 +8,6 @@
     { id: 'cool', title: 'Bandish / cool-down', min: 5, text: 'Play a composition or a gentle bhajan-style melody. End softly on Sa.' }
   ];
 
-  // Six finger holes: H1-H3 left hand, H4-H6 right hand. Progressive-lift beginner chart: [label, short, covered, half-covered].
-  const NOTES = [
-    ['Pa (low)', 'Pa', ['H1', 'H2', 'H3', 'H4', 'H5', 'H6'], []],
-    ['Dha', 'Dha', ['H1', 'H2', 'H3', 'H4', 'H5'], []],
-    ['Ni', 'Ni', ['H1', 'H2', 'H3', 'H4'], []],
-    ['Sa', 'Sa', ['H1', 'H2', 'H3'], []],
-    ['Re', 'Re', ['H1', 'H2'], []],
-    ['Ga', 'Ga', ['H1'], []],
-    ['Ma', 'Ma', [], ['H1']]
-  ];
-  const HOLES = [['H1', 180], ['H2', 235], ['H3', 290], ['H4', 400], ['H5', 455], ['H6', 510]];
 
   const STAGES = [
     ['Stage 1 · Foundations', 'Months 1–3', ['Hold the bansuri, learn posture and breath control', 'Produce a clear tone across the blowing edge', 'Shuddha swaras Sa Re Ga Ma Pa Dha Ni and simple alankars']],
@@ -204,6 +193,7 @@
     Sound.setSa(saFreq(settings.sa));
     if (Sound.ctx) Sound.restartDrone();
     renderToday();
+    if (typeof renderPicker === 'function' && namesBox.checked) { renderPicker(); showNote(chartTok); }
   }
   saSelects.forEach((s) => s.addEventListener('change', () => setSa(Number(s.value))));
   showSa();
@@ -297,25 +287,62 @@
     new Set(links.flatMap((a) => a.dataset.spy.split(' '))).forEach((id) => { const s = document.getElementById(id); if (s) io.observe(s); });
   }
 
-  // Finger-hole chart
+  // Finger-hole chart: tap a swar to see the fingering and hear it at your Sa.
   const chart = FluteDemo.createChart($('#flute'));
-  const picker = $('#note-picker');
-  function showNote(label) {
-    const entry = NOTES.find((n) => n[0] === label);
-    const hole = (h) => Number(h.slice(1));
-    chart.show(entry[2].map(hole), entry[3].map(hole), false);
-    picker.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.label === label));
-    const num = (arr) => arr.map((h) => h.slice(1)).join(', ') || 'none';
-    const half = entry[3].length ? ` Hole ${num(entry[3])} is half-covered.` : '';
-    $('#note-info').textContent = `${entry[1]}: holes fully covered — ${num(entry[2])}.${half} A simplified beginner chart; exact fingering varies with the bansuri's pitch and your guru's school.`;
+  const picker = $('#note-picker'), komalBox = $('#chart-komal'), namesBox = $('#chart-names'), scaleBtn = $('#chart-scale');
+  const LETTERS = 'SrRgGmMPdDnN', NATURAL = 'SRGmPDN';
+  const CHART = [];
+  for (let a = -5; a <= 18; a++) {
+    const l = LETTERS[((a % 12) + 12) % 12];
+    CHART.push({ a, l, semi: ((a % 12) + 12) % 12, tok: (a < 0 ? '.' : '') + l + (a >= 12 ? "'" : ''), reg: a < 0 ? 'Lower octave' : a < 12 ? 'Middle octave' : 'Upper octave' });
   }
-  NOTES.forEach(([label, short]) => {
-    const b = document.createElement('button');
-    b.type = 'button'; b.textContent = short; b.dataset.label = label;
-    b.addEventListener('click', () => showNote(label));
-    picker.appendChild(b);
+  let chartTok = 'S';
+  function renderPicker() {
+    picker.innerHTML = '';
+    ['Lower octave', 'Middle octave', 'Upper octave'].forEach((reg) => {
+      const notes = CHART.filter((n) => n.reg === reg && (komalBox.checked || NATURAL.includes(n.l)));
+      if (!notes.length) return;
+      const wrap = document.createElement('div'); wrap.className = 'note-group';
+      wrap.setAttribute('role', 'group'); wrap.setAttribute('aria-label', reg);
+      wrap.innerHTML = `<span class="group-label">${reg}</span>`;
+      notes.forEach((n) => {
+        const sw = FluteDemo.parseSwar(n.tok), b = document.createElement('button');
+        b.type = 'button'; b.dataset.tok = n.tok; b.setAttribute('aria-pressed', n.tok === chartTok);
+        b.innerHTML = sw.label + (namesBox.checked ? `<small>${SA_NAMES[(settings.sa + n.semi) % 12]}</small>` : '');
+        b.addEventListener('click', () => { scaleOn = false; scaleBtn.textContent = '▶ Play the scale'; showNote(n.tok); playNote(n.tok); });
+        wrap.appendChild(b);
+      });
+      picker.appendChild(wrap);
+    });
+  }
+  function showNote(tok) {
+    const sw = FluteDemo.parseSwar(tok); chartTok = tok;
+    chart.show(sw.closed, sw.half, sw.over);
+    picker.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.tok === tok));
+    const n = CHART.find((c) => c.tok === tok);
+    const name = namesBox.checked ? ` (${SA_NAMES[(settings.sa + n.semi) % 12]} at your Sa)` : '';
+    $('#note-info').textContent = FluteDemo.describe(sw).replace(/\.$/, '') + name + '. A simplified chart; exact fingering varies with the bansuri and your guru\'s school.';
+  }
+  function playNote(tok) { FluteDemo.player.play([{ tok, beats: 2 }], 80, { onStep() {}, onEnd() {} }); }
+  let scaleOn = false;
+  const resetScale = () => { scaleOn = false; scaleBtn.textContent = '▶ Play the scale'; };
+  FluteDemo.player.hooks.push(resetScale);
+  scaleBtn.addEventListener('click', () => {
+    if (scaleOn) { FluteDemo.player.stop(); return; }
+    const items = "S R G m P D N S'".split(' ').map((tok) => ({ tok, beats: 1, ref: tok }));
+    items[items.length - 1].beats = 2;
+    FluteDemo.player.play(items, 80, { onStep(step) { if (step) showNote(step.ref); }, onEnd() { showNote('S'); } });
+    scaleOn = true; scaleBtn.textContent = '■ Stop';
   });
-  showNote('Sa');
+  komalBox.addEventListener('change', () => { renderPicker(); });
+  namesBox.addEventListener('change', () => { renderPicker(); showNote(chartTok); });
+  picker.addEventListener('keydown', (e) => {
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    const all = [...picker.querySelectorAll('button')], i = all.indexOf(document.activeElement);
+    if (i < 0) return;
+    e.preventDefault(); const nx = all[(i + (e.key === 'ArrowRight' ? 1 : -1) + all.length) % all.length]; nx.focus();
+  });
+  renderPicker(); showNote('S');
 
   // Roadmap, ragas, techniques
   $('#roadmap-list').innerHTML = STAGES.map(([t, when, items]) =>

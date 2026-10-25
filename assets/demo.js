@@ -84,7 +84,7 @@
     return { events, steps, total: t };
   }
   const player = {
-    bus: null, line: null, raf: 0, run: 0,
+    bus: null, line: null, raf: 0, run: 0, hooks: [],
     play(items, bpm, opts) {
       this.stop();
       const spb = 60 / bpm, ln = toLine(items, spb, Sound.saHz);
@@ -108,7 +108,7 @@
     },
     stop() {
       this.run++; cancelAnimationFrame(this.raf);
-      resetPreview();
+      resetPreview(); this.hooks.forEach((f) => f());
       if (this.line) this.line.stop();
       if (this.bus) this.bus.stop();
       this.line = this.bus = null;
