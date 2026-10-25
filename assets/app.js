@@ -174,10 +174,18 @@
     'Dadra · 6': { vib: [3, 3], marks: ['X', 'O'], bols: ['Dha','Dhi','Na','Dha','Tu','Na'] },
     'Keherwa · 8': { vib: [4, 4], marks: ['X', 'O'], bols: ['Dha','Ge','Na','Ti','Na','Ka','Dhi','Na'] },
     'Jhaptaal · 10': { vib: [2, 3, 2, 3], marks: ['X', '2', 'O', '3'], bols: ['Dhi','Na','Dhi','Dhi','Na','Ti','Na','Dhi','Dhi','Na'] },
+    'Ektaal · 12': { vib: [2, 2, 2, 2, 2, 2], marks: ['X', '2', 'O', 'O', '3', '4'], bols: ['Dhin','Dhin','DhaGe','TiraKita','Tu','Na','Kat','Ta','DhaGe','TiraKita','Dhin','Na'] },
     'Rupak · 7': { vib: [3, 2, 2], marks: ['O', '2', '3'], bols: ['Tin','Tin','Na','Dhi','Na','Dhi','Na'] }
   };
-  const BOL_SOUND = { Dha: [1, 1], Dhin: [1, 1], Dhi: [1, 1], Tin: [1, 0], Ta: [1, 0], Na: [1, 0], Ti: [1, 0], Tu: [1, 0], Ge: [0, 1], Ka: [0, 1] };
-  function tablaHit(bol, when) {
+  const BOL_SOUND = { Ra: [1, 0], Ki: [1, 0], Dha: [1, 1], Dhin: [1, 1], Dhi: [1, 1], Tin: [1, 0], Ta: [1, 0], Na: [1, 0], Ti: [1, 0], Tu: [1, 0], Ge: [0, 1], Ka: [0, 1], Kat: [0, 1] };
+  // Compound bols are two or four quick strokes within one beat.
+  const COMPOUND = { DhaGe: ['Dha', 'Ge'], TiraKita: ['Ti', 'Ra', 'Ki', 'Ta'] };
+  function tablaHit(bol, when, spb) {
+    if (COMPOUND[bol]) {
+      const parts = COMPOUND[bol], step = spb / parts.length;
+      parts.forEach((p, k) => tablaHit(p, when + k * step, spb));
+      return;
+    }
     const [dayan, bayan] = BOL_SOUND[bol] || [1, 0];
     if (dayan) {
       const o = ctx.createOscillator(), g = ctx.createGain();
@@ -217,7 +225,7 @@
     const t = TAALS[taalSelect.value], spb = 60 / Number(bpm.value);
     while (nextTime < ctx.currentTime + 0.15) {
       const idx = nextBeat % t.bols.length, when = nextTime;
-      tablaHit(t.bols[idx], when);
+      tablaHit(t.bols[idx], when, spb);
       setTimeout(() => { beatEls.forEach((e, j) => e.classList.toggle('on', j === idx)); }, Math.max(0, (when - ctx.currentTime) * 1000));
       nextBeat++; nextTime += spb;
     }
