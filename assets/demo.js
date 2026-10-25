@@ -100,6 +100,7 @@
         let cur = -1;
         for (let i = 0; i < ln.steps.length; i++) if (now >= ln.steps[i].start && now < ln.steps[i].start + ln.steps[i].dur) cur = i;
         if (cur !== last) { last = cur; opts.onStep(cur >= 0 ? ln.steps[cur] : null); }
+        if (opts.onFrame) opts.onFrame(cur >= 0 ? ln.steps[cur] : null, cur >= 0 ? (now - ln.steps[cur].start) / ln.steps[cur].dur : 0);
         if (now > ln.total + 0.15) { this.stop(); opts.onEnd(); return; }
         this.raf = requestAnimationFrame(tick);
       };

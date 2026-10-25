@@ -115,13 +115,14 @@
   ROUTINE.forEach((r) => {
     const li = document.createElement('li');
     li.dataset.id = r.id;
-    li.innerHTML = `<input type="checkbox" aria-label="Done: ${r.title}"><div><h3>${r.title} · ${r.min} min</h3><p>${r.text}</p><button type="button">Start timer</button></div>`;
+    li.innerHTML = `<input type="checkbox" aria-label="Done: ${r.title}"><div><h3>${r.title} · ${r.min} min</h3><p>${r.text}</p><button type="button" data-timer>Start timer</button> <button type="button" data-how>▶ Show me how</button></div>`;
     const box = li.querySelector('input');
     rows[r.id] = { li, box };
     box.checked = !!state.checks[r.id];
     li.classList.toggle('done', box.checked);
     box.addEventListener('change', () => setChecked(r.id, box.checked));
-    li.querySelector('button').addEventListener('click', () => { runAll = false; selectBlock(r, true); });
+    li.querySelector('[data-timer]').addEventListener('click', () => { runAll = false; selectBlock(r, true); });
+    li.querySelector('[data-how]').addEventListener('click', () => PracticeDemos.open(r.id));
     list.appendChild(li);
   });
   $('#routine-total').textContent = ROUTINE.reduce((a, r) => a + r.min, 0);
@@ -195,6 +196,7 @@
     'Ektaal · 12': { vib: [2, 2, 2, 2, 2, 2], marks: ['X', '2', 'O', 'O', '3', '4'], bols: ['Dhin','Dhin','DhaGe','TiraKita','Tu','Na','Kat','Ta','DhaGe','TiraKita','Dhin','Na'] },
     'Rupak · 7': { vib: [3, 2, 2], marks: ['O', '2', '3'], bols: ['Tin','Tin','Na','Dhi','Na','Dhi','Na'] }
   };
+  window.TAALS = TAALS;
   const taalSelect = $('#taal-select'), grid = $('#taal-grid'), bpm = $('#bpm'), tablaVol = $('#tabla-vol');
   Object.keys(TAALS).forEach((k) => { const o = document.createElement('option'); o.textContent = k; taalSelect.appendChild(o); });
   if (!TAALS[settings.taal]) settings.taal = 'Teentaal · 16';
