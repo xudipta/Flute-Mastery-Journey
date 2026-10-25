@@ -151,3 +151,25 @@ body { padding-bottom: 5.5rem; }
 .demo-note { color: var(--muted); font-size: .85rem; }
 .soon { color: var(--muted); font-size: .85rem; font-style: italic; }
 .card .btn { margin-top: .75rem; }
+
+/* practice demos */
+.demo-intro { margin: .75rem 0; color: var(--muted); }
+.picker { display: inline-flex; gap: .5rem; align-items: center; margin-bottom: .75rem; font-weight: 600; }
+.picker select { font: inherit; background: var(--bg); color: var(--ink); border: 1px solid var(--muted); border-radius: 8px; padding: .3rem .4rem; min-height: 2.4rem; }
+.demo-controls .btn.on { outline: 3px solid var(--accent2); }
+.hold-meter { height: 10px; border-radius: 999px; background: var(--bg); overflow: hidden; margin: .5rem 0; }
+.hold-fill { height: 100%; width: 0; background: var(--accent); }
+.breath-demo { display: grid; grid-template-columns: minmax(160px, 240px) 1fr; gap: 1.25rem; align-items: center; margin-top: 1rem; }
+.posture { width: 100%; height: auto; }
+.posture .fig { fill: var(--bg); stroke: var(--muted); stroke-width: 3; }
+.posture .line { fill: none; stroke-linecap: round; }
+.posture .belly { fill: var(--accent2); opacity: .75; transform-box: fill-box; transform-origin: center; }
+.posture .lbl { fill: var(--muted); font-size: 11px; text-anchor: middle; }
+.b-phase { font-size: 1.4rem; font-weight: 700; color: var(--accent); }
+.b-count { font-size: 3rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+.cues { color: var(--muted); padding-left: 1.2rem; }
+.cue-row { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; margin: .5rem 0 1rem; }
+.cue { display: flex; align-items: center; gap: .75rem; background: var(--bg); border-radius: 14px; padding: .6rem 1rem; font-weight: 700; }
+.cue-icon { font-size: 2rem; }
+.cue-stage { color: var(--accent); font-weight: 700; }
+@media (max-width: 560px) { .breath-demo { grid-template-columns: 1fr; } .posture { max-width: 200px; margin: 0 auto; } }
