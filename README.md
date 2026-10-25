@@ -1,14 +1,14 @@
 # 🎶 Flute Mastery Journey
 
-An interactive, animated guide for daily flute practice and step-by-step skill development — from beginner to professional.
+An interactive, animated guide to the **Indian classical bansuri** — daily riyaaz, finger-hole charts, ragas, taal and technique, from beginner to professional.
 
 **Live site:** https://xudipta.github.io/Flute-Mastery-Journey/
 
 ## Features
-- Daily practice routine with per-block timers, a breathing animation and a streak tracker (saved in your browser)
-- Interactive finger-placement chart (D4–C5)
-- Five-stage roadmap from foundations to professional playing
-- Core technique cards
+- Daily riyaaz routine with per-block timers, a breathing animation and a streak tracker (saved in your browser)
+- Tanpura-style drone with selectable Sa
+- Interactive six-hole finger chart (Pa to Ma)
+- Five-stage roadmap, raga cards and bansuri technique cards (meend, kan, taan, tonguing)
 
 ## Run locally
 It is a plain static site (no build step):
@@ -18,13 +18,13 @@ python3 -m http.server 8000   # then open http://localhost:8000
 ```
 
 ## Deployment
-GitHub Pages deploys via `.github/workflows/pages.yml` on every push to `main`.
+GitHub Pages deploys via `.github/workflows/pages.yml` on every push to `dev`.
 In the repository go to **Settings → Pages → Source: GitHub Actions** (one-time).
 
 ## Structure
 ```
 index.html          page markup
 assets/styles.css   styling (light/dark aware)
-assets/app.js       routine, timer, fingering chart, content data
+assets/app.js       routine, timer, drone, finger chart, content data
 assets/favicon.svg
 ```

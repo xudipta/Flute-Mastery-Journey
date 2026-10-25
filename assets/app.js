@@ -1,41 +1,54 @@
 (() => {
   const ROUTINE = [
-    { id: 'breath', title: 'Breathing & posture', min: 3, text: 'Stand tall, relax shoulders. Inhale 4 counts, exhale 8 counts, repeat.' },
-    { id: 'tone', title: 'Long tones', min: 7, text: 'Hold each note from low D up to C for 8 slow beats. Aim for a steady, centred sound.' },
-    { id: 'scales', title: 'Scales & arpeggios', min: 8, text: 'One major scale a day, slow with a metronome, then up one notch.' },
-    { id: 'tech', title: 'Technique focus', min: 7, text: 'Pick a technique below (articulation, slurs, vibrato) and work it deliberately.' },
-    { id: 'rep', title: 'Repertoire', min: 10, text: 'Play through a piece. Isolate the hardest bar and loop it slowly.' },
-    { id: 'cool', title: 'Cool-down', min: 2, text: 'Play a quiet, easy melody. End on a note you enjoy.' }
+    { id: 'breath', title: 'Pranayama & posture', min: 5, text: 'Sit tall, shoulders soft. Slow diaphragmatic breaths: inhale 4 counts, exhale 8, then blow a steady airstream without the flute.' },
+    { id: 'sa', title: 'Sur sadhana (long tones)', min: 10, text: 'With the tanpura on, hold Sa, then Pa, then each swar for a full breath. Listen for a steady, round tone.' },
+    { id: 'alankar', title: 'Alankars / paltas', min: 10, text: 'Practise patterns like Sa Re Ga, Re Ga Ma… in ascending and descending order, slowly and evenly.' },
+    { id: 'raga', title: 'Raga alaap', min: 15, text: 'Choose a raga. Unfold it slowly: establish Sa, touch each swar with meend, rest on the vadi and samvadi.' },
+    { id: 'taal', title: 'Taan & taal practice', min: 10, text: 'Clap or keep Teentaal (16 beats). Play simple taans and tihais that land exactly on sam.' },
+    { id: 'cool', title: 'Bandish / cool-down', min: 5, text: 'Play a composition or a gentle bhajan-style melody. End softly on Sa.' }
   ];
 
-  // Closed keys per note. Th=thumb, L1-L3 left hand, R1-R3 right hand, RP right pinky.
+  // Six finger holes: H1-H3 left hand, H4-H6 right hand. Progressive-lift beginner chart.
   const NOTES = [
-    ['D4', ['L1', 'L2', 'L3', 'R1', 'R2', 'R3', 'RP']],
-    ['E4', ['L1', 'L2', 'L3', 'R1', 'R2', 'R3']],
-    ['F4', ['Th', 'L1', 'L2', 'L3', 'R1', 'R3']],
-    ['G4', ['Th', 'L1', 'L2', 'L3']],
-    ['A4', ['Th', 'L1', 'L2']],
-    ['B4', ['Th', 'L1']],
-    ['C5', ['L2']]
+    ['Pa (low)', 'Pa', ['H1', 'H2', 'H3', 'H4', 'H5', 'H6']],
+    ['Dha', 'Dha', ['H1', 'H2', 'H3', 'H4', 'H5']],
+    ['Ni', 'Ni', ['H1', 'H2', 'H3', 'H4']],
+    ['Sa', 'Sa', ['H1', 'H2', 'H3']],
+    ['Re', 'Re', ['H1', 'H2']],
+    ['Ga', 'Ga', ['H1']],
+    ['Ma', 'Ma', []]
   ];
-  const KEYS = [['Th', 60], ['L1', 150], ['L2', 205], ['L3', 260], ['R1', 380], ['R2', 435], ['R3', 490], ['RP', 560]];
+  const HOLES = [['H1', 180], ['H2', 235], ['H3', 290], ['H4', 400], ['H5', 455], ['H6', 510]];
 
   const STAGES = [
-    ['Stage 1 · Foundations', 'Weeks 1–8', ['Assemble, hold and care for the flute', 'Produce a clear tone on the headjoint, then full flute', 'Notes D4–C5, quarter and half notes']],
-    ['Stage 2 · Building control', 'Months 3–6', ['Full range incl. low C and second octave', 'Major scales to 3 sharps/flats', 'Tonguing, slurs and basic dynamics']],
-    ['Stage 3 · Musicianship', 'Months 6–12', ['All major and minor scales', 'Vibrato, phrasing and intonation', 'Simple sonatas and etudes']],
-    ['Stage 4 · Advanced technique', 'Years 2–4', ['Third octave and harmonics', 'Double and triple tonguing', 'Orchestral excerpts, exams or auditions']],
-    ['Stage 5 · Professional', 'Years 4+', ['Concert repertoire and stage presence', 'Extended techniques: flutter tongue, multiphonics', 'Teaching, ensemble and solo performance']]
+    ['Stage 1 · Foundations', 'Months 1–3', ['Hold the bansuri, learn posture and breath control', 'Produce a clear tone across the blowing edge', 'Shuddha swaras Sa Re Ga Ma Pa Dha Ni and simple alankars']],
+    ['Stage 2 · First ragas', 'Months 3–8', ['Raga Bhoopali and Raga Yaman, with their aroha and avaroha', 'Meend (glide) and kan (grace note)', 'Keeping Teentaal and Dadra, and playing simple bandishes']],
+    ['Stage 3 · Alaap & control', 'Year 1–2', ['Raga Bhairav, Kafi, Bhimpalasi and Desh', 'Slow alaap with a steady breath', 'Madhya saptak and the start of taar saptak']],
+    ['Stage 4 · Laykari & taan', 'Years 2–4', ['Fast taans, murki and gamak', 'Jod, jhala and tihai; gat in Madhya and Drut laya', 'Playing with a tabla accompanist']],
+    ['Stage 5 · Concert level', 'Years 4+', ['Full raga exposition: alaap, jod, jhala and gat', 'Playing different-sized bansuris', 'Learning under a guru, performing and teaching']]
+  ];
+
+  const RAGAS = [
+    ['🌅', 'Raga Bhairav', 'Morning raga. Sa, komal Re, Ga, Ma, Pa, komal Dha, Ni. Serious, devotional mood.'],
+    ['🌙', 'Raga Yaman', 'Evening raga. Uses tivra Ma. Graceful and serene — a good first full raga.'],
+    ['🌄', 'Raga Bhoopali', 'Pentatonic (Sa Re Ga Pa Dha). Sweet and easy to shape; ideal for beginners.'],
+    ['🌧️', 'Raga Kafi', 'Late-night, light-classical feel. Komal Ga and Ni; great for expressive meend.'],
+    ['🌞', 'Raga Desh', 'Monsoon and evening raga. Both Ni; yearning mood.'],
+    ['🔔', 'Raga Bhimpalasi', 'Afternoon raga. Komal Ga and Ni; tender, longing character.']
   ];
 
   const TECHNIQUES = [
-    ['🌬️', 'Breath support', 'Breathe low into the belly; keep air speed steady with a relaxed throat.'],
-    ['👄', 'Embouchure', 'Small, flexible aperture. Angle the air to aim at the far edge of the embouchure hole.'],
-    ['🗣️', 'Articulation', 'Say "too" or "doo" lightly; the tongue starts the note, air keeps it alive.'],
-    ['🔗', 'Slurs & legato', 'Connect notes with continuous air and quiet fingers.'],
-    ['〰️', 'Vibrato', 'Pulse the air from the diaphragm in even waves, starting slow.'],
-    ['🎚️', 'Dynamics', 'Control volume with air speed and lip aperture, not by biting down.']
+    ['🌬️', 'Breath control', 'Breathe from the diaphragm and keep air speed steady so long phrases stay unbroken.'],
+    ['👄', 'Embouchure', 'Rest the blowing hole against your lower lip, aim the air across the edge, and keep your lips soft and flexible.'],
+    ['〰️', 'Meend', 'Glide smoothly between swaras by sliding fingers off or half-covering holes while the air stays steady.'],
+    ['✨', 'Kan', 'A quick grace note touched just before the main swar, ornamenting the line.'],
+    ['⚡', 'Taan & murki', 'Rapid note runs (taan) and short twisting ornaments (murki) — practise slowly, then raise speed.'],
+    ['🗣️', 'Tonguing (tu-ku)', 'Double-tongue articulation used in jhala and fast passages.'],
+    ['🥁', 'Taal & laya', 'Count beats with the hands (tali/khali) to hold Teentaal, Dadra and Keherwa.'],
+    ['🎚️', 'Dynamics', 'Shape phrases with air pressure; breathe lightly in the lower octave and increase for taar saptak.']
   ];
+
+  const SA_NAMES = ['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
 
   const $ = (s) => document.querySelector(s);
   const todayKey = () => new Date().toISOString().slice(0, 10);
@@ -103,40 +116,74 @@
   $('#timer-toggle').addEventListener('click', () => (handle ? stop() : start()));
   $('#timer-reset').addEventListener('click', () => { if (block) { stop(); remaining = block.min * 60; $('#timer').textContent = fmt(remaining); } });
 
-  // Fingering chart
+  // Tanpura-style drone: Pa below, Sa, Sa, Sa above, cycled with a slow pluck envelope.
+  const saSelect = $('#sa-select');
+  SA_NAMES.forEach((n, i) => { const o = document.createElement('option'); o.value = i; o.textContent = n; saSelect.appendChild(o); });
+  saSelect.value = 2;
+  let ctx = null, droneTimer = null, droneOn = false;
+  const saFreq = () => 130.81 * Math.pow(2, Number(saSelect.value) / 12);
+  function pluck(freq, when) {
+    const o = ctx.createOscillator(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+    o.type = 'sawtooth'; o.frequency.value = freq;
+    f.type = 'lowpass'; f.frequency.value = 1400;
+    g.gain.setValueAtTime(0.0001, when);
+    g.gain.exponentialRampToValueAtTime(0.12, when + 0.05);
+    g.gain.exponentialRampToValueAtTime(0.0001, when + 4);
+    o.connect(f); f.connect(g); g.connect(ctx.destination);
+    o.start(when); o.stop(when + 4.1);
+  }
+  function cycle() {
+    const sa = saFreq(), t = ctx.currentTime + 0.05;
+    [sa * 0.75, sa, sa, sa / 2].forEach((f, i) => pluck(f, t + i * 1));
+  }
+  function toggleDrone() {
+    droneOn = !droneOn;
+    $('#drone-toggle').classList.toggle('on', droneOn);
+    if (droneOn) {
+      ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
+      ctx.resume(); cycle(); droneTimer = setInterval(cycle, 4000);
+    } else { clearInterval(droneTimer); }
+  }
+  $('#drone-toggle').addEventListener('click', toggleDrone);
+  saSelect.addEventListener('change', () => { if (droneOn) { clearInterval(droneTimer); cycle(); droneTimer = setInterval(cycle, 4000); } });
+
+  // Finger-hole chart
   const svg = $('#flute');
   const ns = 'http://www.w3.org/2000/svg';
   const add = (tag, attrs, parent = svg) => { const e = document.createElementNS(ns, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent.appendChild(e); return e; };
-  add('rect', { class: 'body', x: 20, y: 52, width: 600, height: 16, rx: 8 });
-  add('rect', { class: 'body', x: 20, y: 46, width: 40, height: 28, rx: 6 });
-  const keyEls = {};
-  KEYS.forEach(([id, x]) => {
-    keyEls[id] = add('circle', { class: 'key', cx: x, cy: id === 'Th' ? 92 : 60, r: 14 });
-    const t = add('text', { x, y: id === 'Th' ? 125 : 100 });
-    t.textContent = id === 'Th' ? 'Thumb' : id;
+  add('rect', { class: 'body', x: 20, y: 60, width: 600, height: 24, rx: 12 });
+  add('ellipse', { class: 'hole', cx: 85, cy: 72, rx: 14, ry: 8 });
+  add('text', { x: 85, y: 108 }).textContent = 'Blowing hole';
+  add('text', { x: 235, y: 36 }).textContent = 'LEFT HAND';
+  add('text', { x: 455, y: 36 }).textContent = 'RIGHT HAND';
+  const holeEls = {};
+  HOLES.forEach(([id, x], i) => {
+    holeEls[id] = add('circle', { class: 'key', cx: x, cy: 72, r: 13 });
+    add('text', { x, y: 108 }).textContent = String(i + 1);
   });
-  add('text', { x: 205, y: 28 }).textContent = 'LEFT HAND';
-  add('text', { x: 490, y: 28 }).textContent = 'RIGHT HAND';
+  add('text', { x: 560, y: 140 }).textContent = 'Open end';
   const picker = $('#note-picker');
-  function showNote(name) {
-    const entry = NOTES.find((n) => n[0] === name);
-    Object.entries(keyEls).forEach(([id, el]) => el.classList.toggle('on', entry[1].includes(id)));
-    picker.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', b.textContent === name));
-    $('#note-info').textContent = `${name}: ${entry[1].join(', ')} pressed. Simplified beginner fingering — check a full chart for alternates.`;
+  function showNote(label) {
+    const entry = NOTES.find((n) => n[0] === label);
+    Object.entries(holeEls).forEach(([id, el]) => el.classList.toggle('on', entry[2].includes(id)));
+    picker.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.label === label));
+    const closed = entry[2].map((h) => h.slice(1)).join(', ') || 'none';
+    $('#note-info').textContent = `${entry[1]}: holes covered — ${closed}. A simplified beginner chart; exact fingering varies with the bansuri's pitch and your guru's school.`;
   }
-  NOTES.forEach(([n]) => {
+  NOTES.forEach(([label, short]) => {
     const b = document.createElement('button');
-    b.type = 'button'; b.textContent = n;
-    b.addEventListener('click', () => showNote(n));
+    b.type = 'button'; b.textContent = short; b.dataset.label = label;
+    b.addEventListener('click', () => showNote(label));
     picker.appendChild(b);
   });
-  showNote('G4');
+  showNote('Sa');
 
-  // Roadmap & techniques
+  // Roadmap, ragas, techniques
   $('#roadmap-list').innerHTML = STAGES.map(([t, when, items]) =>
     `<article class="stage"><h3>${t}</h3><small>${when}</small><ul>${items.map((i) => `<li>${i}</li>`).join('')}</ul></article>`).join('');
-  $('#technique-cards').innerHTML = TECHNIQUES.map(([i, t, d]) =>
-    `<article class="card"><div class="icon">${i}</div><h3>${t}</h3><p>${d}</p></article>`).join('');
+  const cards = (arr) => arr.map(([i, t, d]) => `<article class="card"><div class="icon">${i}</div><h3>${t}</h3><p>${d}</p></article>`).join('');
+  $('#raga-cards').innerHTML = cards(RAGAS);
+  $('#technique-cards').innerHTML = cards(TECHNIQUES);
 
   $('#reset-progress').addEventListener('click', () => {
     if (confirm('Clear all saved practice progress?')) { state = { days: {}, checks: {}, checkDate: todayKey() }; store.set(state); location.reload(); }

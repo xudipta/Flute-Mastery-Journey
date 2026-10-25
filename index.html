@@ -3,18 +3,19 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Flute Mastery Journey</title>
-  <meta name="description" content="An interactive, animated guide for daily flute practice: routines, finger placement and playing techniques from beginner to professional.">
+  <title>Bansuri Mastery Journey</title>
+  <meta name="description" content="An interactive, animated guide to Indian classical bansuri: daily riyaaz, finger-hole charts, ragas, taal and techniques from beginner to professional.">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="assets/styles.css">
 </head>
 <body>
   <header class="site-header">
-    <a class="brand" href="#top">🎶 Flute Mastery Journey</a>
+    <a class="brand" href="#top">🪈 Flute Mastery Journey · Bansuri</a>
     <nav>
       <a href="#practice">Practice</a>
-      <a href="#fingering">Fingering</a>
+      <a href="#fingering">Finger holes</a>
       <a href="#roadmap">Roadmap</a>
+      <a href="#ragas">Ragas</a>
       <a href="#techniques">Techniques</a>
     </nav>
   </header>
@@ -22,8 +23,8 @@
   <main id="top">
     <section class="hero">
       <div class="notes" aria-hidden="true"><span>♪</span><span>♫</span><span>♩</span><span>♬</span><span>♪</span></div>
-      <h1>From first breath to professional tone.</h1>
-      <p>Daily practice routines, visual finger guides and structured techniques — built around one idea: consistency makes music.</p>
+      <h1>From first <em>sur</em> to concert-stage raga.</h1>
+      <p>A daily riyaaz guide for the Indian classical bansuri: finger-hole charts, ragas, taal and the techniques of meend, kan and taan — built on one idea: consistency makes music.</p>
       <a class="btn" href="#practice">Start today's practice</a>
       <div class="stats">
         <div><strong id="streak">0</strong><span>day streak</span></div>
@@ -33,8 +34,8 @@
     </section>
 
     <section id="practice">
-      <h2>Daily practice routine</h2>
-      <p class="lead">Tick each block as you finish it. Complete the routine to log a session and grow your streak.</p>
+      <h2>Daily riyaaz</h2>
+      <p class="lead">Tick each block as you finish it. Complete the routine to log a session and grow your streak. Turn on the tanpura drone to practise in tune with your Sa.</p>
       <div class="practice-grid">
         <ol id="routine" class="routine"></ol>
         <aside class="timer-card">
@@ -44,6 +45,11 @@
             <button id="timer-toggle" class="btn small">Start</button>
             <button id="timer-reset" class="btn small ghost">Reset</button>
           </div>
+          <div class="drone">
+            <label for="sa-select">Sa (tonic)</label>
+            <select id="sa-select"></select>
+            <button id="drone-toggle" class="btn small ghost">🎵 Tanpura drone</button>
+          </div>
           <div class="breath" aria-hidden="true"><div id="breath-circle"></div><span id="breath-text">Breathe</span></div>
         </aside>
       </div>
@@ -51,12 +57,12 @@
     </section>
 
     <section id="fingering">
-      <h2>Finger placement guide</h2>
-      <p class="lead">Choose a note to see which keys to press. Pressed keys light up.</p>
+      <h2>Finger-hole guide</h2>
+      <p class="lead">The bansuri has six finger holes — three for the left hand, three for the right. Choose a swar to see which holes are covered.</p>
       <div class="fingering">
         <div class="note-picker" id="note-picker" role="group" aria-label="Choose a note"></div>
         <div class="flute-wrap">
-          <svg id="flute" viewBox="0 0 640 140" role="img" aria-label="Flute finger chart"></svg>
+          <svg id="flute" viewBox="0 0 640 150" role="img" aria-label="Bansuri finger-hole chart"></svg>
           <p id="note-info" class="note-info"></p>
         </div>
       </div>
@@ -67,8 +73,14 @@
       <div class="roadmap" id="roadmap-list"></div>
     </section>
 
+    <section id="ragas">
+      <h2>Ragas to learn</h2>
+      <p class="lead">Start with simple, pentatonic or sweet ragas, and play each in its proper time of day.</p>
+      <div class="cards" id="raga-cards"></div>
+    </section>
+
     <section id="techniques">
-      <h2>Core techniques</h2>
+      <h2>Core bansuri techniques</h2>
       <div class="cards" id="technique-cards"></div>
     </section>
   </main>

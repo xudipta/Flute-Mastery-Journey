@@ -55,10 +55,15 @@ h2 { font-size: 1.75rem; margin: 0 0 .5rem; }
 .note-picker button { font: inherit; font-weight: 600; width: 3.2rem; padding: .45rem 0; border-radius: 10px; border: 1px solid var(--muted); background: transparent; color: var(--ink); cursor: pointer; }
 .note-picker button[aria-pressed="true"] { background: var(--accent2); border-color: var(--accent2); color: #fff; }
 #flute { width: 100%; height: auto; }
-#flute .body { fill: #c9c7f0; }
+#flute .body { fill: #c98a4a; }
+#flute .hole { fill: var(--bg); stroke: #7a4a1c; stroke-width: 2; }
 #flute .key { fill: var(--panel); stroke: var(--muted); stroke-width: 2; transition: fill .25s, transform .25s; transform-box: fill-box; transform-origin: center; }
 #flute .key.on { fill: var(--accent); stroke: var(--accent); transform: scale(1.12); }
 #flute text { fill: var(--muted); font-size: 11px; text-anchor: middle; }
+.drone { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; justify-content: center; margin-top: 1rem; }
+.drone select { font: inherit; background: var(--bg); color: var(--ink); border: 1px solid var(--muted); border-radius: 8px; padding: .25rem .4rem; }
+.drone .btn.on { background: var(--accent); color: #1b1840; border-color: var(--accent); }
+.hero em { font-style: normal; color: var(--accent); }
 .note-info { color: var(--muted); margin: .5rem 0 0; }
 .roadmap { display: grid; gap: 1rem; position: relative; }
 .stage { background: var(--panel); border-radius: 14px; padding: 1rem 1.25rem; border-left: 4px solid var(--accent2); }
