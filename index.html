@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Flute Mastery Journey</title>
+  <meta name="description" content="An interactive, animated guide for daily flute practice: routines, finger placement and playing techniques from beginner to professional.">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="#top">🎶 Flute Mastery Journey</a>
+    <nav>
+      <a href="#practice">Practice</a>
+      <a href="#fingering">Fingering</a>
+      <a href="#roadmap">Roadmap</a>
+      <a href="#techniques">Techniques</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="notes" aria-hidden="true"><span>♪</span><span>♫</span><span>♩</span><span>♬</span><span>♪</span></div>
+      <h1>From first breath to professional tone.</h1>
+      <p>Daily practice routines, visual finger guides and structured techniques — built around one idea: consistency makes music.</p>
+      <a class="btn" href="#practice">Start today's practice</a>
+      <div class="stats">
+        <div><strong id="streak">0</strong><span>day streak</span></div>
+        <div><strong id="total">0</strong><span>sessions logged</span></div>
+        <div><strong id="minutes">0</strong><span>minutes today</span></div>
+      </div>
+    </section>
+
+    <section id="practice">
+      <h2>Daily practice routine</h2>
+      <p class="lead">Tick each block as you finish it. Complete the routine to log a session and grow your streak.</p>
+      <div class="practice-grid">
+        <ol id="routine" class="routine"></ol>
+        <aside class="timer-card">
+          <div class="timer" id="timer">00:00</div>
+          <p id="timer-label">Pick a block to start its timer</p>
+          <div class="timer-actions">
+            <button id="timer-toggle" class="btn small">Start</button>
+            <button id="timer-reset" class="btn small ghost">Reset</button>
+          </div>
+          <div class="breath" aria-hidden="true"><div id="breath-circle"></div><span id="breath-text">Breathe</span></div>
+        </aside>
+      </div>
+      <p id="done-msg" class="done" hidden>🎉 Routine complete — session logged. See you tomorrow!</p>
+    </section>
+
+    <section id="fingering">
+      <h2>Finger placement guide</h2>
+      <p class="lead">Choose a note to see which keys to press. Pressed keys light up.</p>
+      <div class="fingering">
+        <div class="note-picker" id="note-picker" role="group" aria-label="Choose a note"></div>
+        <div class="flute-wrap">
+          <svg id="flute" viewBox="0 0 640 140" role="img" aria-label="Flute finger chart"></svg>
+          <p id="note-info" class="note-info"></p>
+        </div>
+      </div>
+    </section>
+
+    <section id="roadmap">
+      <h2>The roadmap</h2>
+      <div class="roadmap" id="roadmap-list"></div>
+    </section>
+
+    <section id="techniques">
+      <h2>Core techniques</h2>
+      <div class="cards" id="technique-cards"></div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Built with patience. Progress is saved only in your browser. <button id="reset-progress" class="link">Reset progress</button></p>
+  </footer>
+  <script src="assets/app.js"></script>
+</body>
+</html>
