@@ -139,7 +139,8 @@
     lfo.frequency.value = 5; lg.gain.value = 4; lfo.connect(lg);
     parts.forEach(({ o }) => lg.connect(o.detune)); nodes.push(lfo);
     const nz = c.createBufferSource(), nf = c.createBiquadFilter(), ng = c.createGain();
-    nz.buffer = noiseBuffer(c); nz.loop = true; nf.type = 'bandpass'; nf.frequency.value = 2600; nf.Q.value = 0.7; ng.gain.value = 0.035;
+    // A faint, narrow band of air around the note's upper partials: breathy, not hissy.
+    nz.buffer = noiseBuffer(c); nz.loop = true; nf.type = 'bandpass'; nf.frequency.value = Math.min(2200, (events[0] ? events[0].f : 440) * 3); nf.Q.value = 3; ng.gain.value = 0.006;
     nz.connect(nf); nf.connect(ng); ng.connect(out); nodes.push(nz);
     const peak = 0.55;
     let prev = null, end = 0;
