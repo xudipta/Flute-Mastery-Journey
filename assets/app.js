@@ -90,9 +90,10 @@
     $('#total').textContent = Object.keys(state.days).length;
     $('#minutes').textContent = checked;
     $('#done-msg').hidden = !state.days[todayKey()];
+    if (typeof renderToday === 'function') renderToday();
   }
 
-  const settings = Object.assign({ sa: 2, bpm: 90, taal: 'Teentaal · 16', tablaVol: 100, droneVol: 100 }, state.settings);
+  const settings = Object.assign({ sa: 2, bpm: 90, taal: 'Teentaal · 16', tablaVol: 100, droneVol: 100, onboarded: false, favs: [] }, state.settings);
   const saveSettings = () => { state.settings = settings; store.set(state); };
   const Sound = FluteAudio.Engine;
   const saFreq = (i) => 130.81 * Math.pow(2, i / 12);
@@ -101,9 +102,33 @@
   Sound.onCreate = () => { Sound.setVolume('tabla', settings.tablaVol / 100); Sound.setVolume('drone', 0.8 * settings.droneVol / 100); };
   function audio() { Sound.ensure(); return Sound; }
 
+  // Returning visitors see "Today" instead of the intro.
+  let showIntro = false;
+  function markOnboarded() { if (!settings.onboarded) { settings.onboarded = true; saveSettings(); } }
+  function renderToday() {
+    const returning = settings.onboarded || Object.keys(state.days).length > 0;
+    const today = $('#today'), intro = $('#hero-intro');
+    if (!today) return;
+    today.hidden = !returning || showIntro; intro.hidden = returning && !showIntro;
+    if (today.hidden) return;
+    const total = ROUTINE.reduce((s, r) => s + r.min, 0);
+    const done = ROUTINE.filter((r) => state.checks[r.id]).reduce((s, r) => s + r.min, 0);
+    const next = ROUTINE.find((r) => !state.checks[r.id]);
+    const sn = streak();
+    $('#t-fill').style.width = Math.round(100 * done / total) + '%';
+    $('.t-bar').setAttribute('aria-valuenow', Math.round(100 * done / total));
+    $('#t-line').textContent = next
+      ? `${done} of ${total} minutes done${sn ? ` · ${sn}-day streak` : ''}. Next up: ${next.title} (${next.min} min).`
+      : `All ${total} minutes done. Today's riyaaz is complete${sn ? ` · ${sn}-day streak` : ''}.`;
+    $('#t-go').textContent = next ? (done ? `▶ Continue: ${next.title}` : '▶ Start today\'s riyaaz') : '↺ Practise a block again';
+    $('#t-ragas').textContent = `🕒 ${nowGroup()} ragas`;
+  }
+  const nowGroup = () => { const h = new Date().getHours(); return h >= 4 && h < 12 ? 'Morning' : h < 17 ? 'Afternoon' : h < 21 ? 'Evening' : 'Night'; };
+
   // Routine
   const rows = {};
   function setChecked(id, val) {
+    if (val) markOnboarded();
     state.checks[id] = val;
     rows[id].box.checked = val;
     rows[id].li.classList.toggle('done', val);
@@ -131,7 +156,7 @@
   let block = null, remaining = 0, handle = null, endAt = 0, runAll = false;
   const fmt = (s) => String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
   function selectBlock(r, autostart) {
-    stop();
+    markOnboarded(); stop();
     block = r; remaining = r.min * 60;
     document.querySelectorAll('.routine li').forEach((x) => x.classList.toggle('active', x === rows[r.id].li));
     rows[r.id].li.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
@@ -160,20 +185,27 @@
   $('#timer-toggle').addEventListener('click', () => { if (!block) { selectBlock(ROUTINE.find((x) => !state.checks[x.id]) || ROUTINE[0], true); } else if (handle) { stop(); remaining = Math.max(0, Math.ceil((endAt - Date.now()) / 1000)); } else start(); });
   $('#timer-reset').addEventListener('click', () => { if (block) { stop(); remaining = block.min * 60; $('#timer').textContent = fmt(remaining); } });
   $('#run-all').addEventListener('click', () => {
+    markOnboarded();
     const first = ROUTINE.find((x) => !state.checks[x.id]);
     if (!first) { $('#timer-label').textContent = 'All blocks done today — nicely played!'; return; }
     runAll = true; audio(); selectBlock(first, true);
   });
 
-  // Sa selector + tanpura drone
-  const saSelect = $('#sa-select');
-  SA_NAMES.forEach((n, i) => { const o = document.createElement('option'); o.value = i; o.textContent = n; saSelect.appendChild(o); });
-  saSelect.value = settings.sa;
-  saSelect.addEventListener('change', () => {
-    settings.sa = Number(saSelect.value); saveSettings();
+  // Sa selector (several synced selects) + tanpura drone
+  const saSelects = [...document.querySelectorAll('.sa-sync')];
+  saSelects.forEach((sel) => SA_NAMES.forEach((n, i) => { const o = document.createElement('option'); o.value = i; o.textContent = n; sel.appendChild(o); }));
+  function showSa() {
+    saSelects.forEach((s) => { s.value = settings.sa; });
+    $('#pill-sa-name').textContent = SA_NAMES[settings.sa];
+  }
+  function setSa(i) {
+    settings.sa = i; settings.onboarded = true; saveSettings(); showSa();
     Sound.setSa(saFreq(settings.sa));
     if (Sound.ctx) Sound.restartDrone();
-  });
+    renderToday();
+  }
+  saSelects.forEach((s) => s.addEventListener('change', () => setSa(Number(s.value))));
+  showSa();
   const droneBtn = $('#drone-toggle'), droneVol = $('#drone-vol');
   droneVol.value = settings.droneVol;
   droneBtn.addEventListener('click', () => {
@@ -254,14 +286,14 @@
   buildGrid();
 
   // Highlight the current section in the nav.
-  const links = [...document.querySelectorAll('.site-header nav a')];
+  const links = [...document.querySelectorAll('a[data-spy]')];
   if ('IntersectionObserver' in window) {
     const io = new IntersectionObserver((entries) => {
       entries.forEach((en) => {
-        if (en.isIntersecting) links.forEach((a) => a.classList.toggle('active', a.getAttribute('href') === '#' + en.target.id));
+        if (en.isIntersecting) links.forEach((a) => a.classList.toggle('active', a.dataset.spy.split(' ').includes(en.target.id)));
       });
     }, { rootMargin: '-40% 0px -55% 0px' });
-    links.forEach((a) => { const s = document.querySelector(a.getAttribute('href')); if (s) io.observe(s); });
+    new Set(links.flatMap((a) => a.dataset.spy.split(' '))).forEach((id) => { const s = document.getElementById(id); if (s) io.observe(s); });
   }
 
   // Finger-hole chart
@@ -288,24 +320,82 @@
   $('#roadmap-list').innerHTML = STAGES.map(([t, when, items]) =>
     `<article class="stage"><h3>${t}</h3><small>${when}</small><ul>${items.map((i) => `<li>${i}</li>`).join('')}</ul></article>`).join('');
   const cards = (arr) => arr.map(([i, t, d]) => `<article class="card"><div class="icon">${i}</div><h3>${t}</h3><p>${d}</p></article>`).join('');
-  function showRagas(group) {
-    $('#raga-cards').innerHTML = RAGAS.filter((r) => group === 'All' || r[2] === group)
-      .map(([i, t, g, d]) => `<article class="card"><div class="icon">${i}</div><h3>Raga ${t}</h3><p><strong>${g}.</strong> ${d}</p>${
-        window.RAGA_NOTATION[t] ? `<button type="button" class="btn small" data-raga="${t}" data-group="${g}">▶ How to play</button>` : '<p class="soon">Demo notation coming soon</p>'}</article>`).join('');
-    $('#raga-filter').querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', b.textContent === group));
+  const STARTER = ['Bhoopali', 'Durga', 'Hamsadhwani', 'Yaman', 'Kafi', 'Khamaj'];
+  const rf = { group: 'All', q: '', starter: false, fav: false };
+  const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const arohaText = (n) => window.RAGA_NOTATION[n].aroha.split(/\s+/).map((t) => FluteDemo.parseSwar(t).label).join(' ');
+  function showRagas() {
+    const q = rf.q.trim().toLowerCase();
+    const shown = RAGAS.filter((r) => (rf.group === 'All' || r[2] === rf.group)
+      && (!rf.starter || STARTER.includes(r[1])) && (!rf.fav || settings.favs.includes(r[1]))
+      && (!q || (r[1] + ' ' + r[2] + ' ' + r[3]).toLowerCase().includes(q)));
+    $('#raga-cards').innerHTML = shown.map(([i, t, g, d]) => {
+      const fav = settings.favs.includes(t), n = window.RAGA_NOTATION[t];
+      return `<article class="card raga-card"><button type="button" class="star" data-fav="${t}" aria-pressed="${fav}" aria-label="${fav ? 'Remove' : 'Add'} ${t} ${fav ? 'from' : 'to'} favourites">${fav ? '★' : '☆'}</button>
+        <div class="icon">${i}</div><h3>Raga ${t}</h3>${STARTER.includes(t) ? '<span class="badge">Starter</span>' : ''}
+        <p><strong>${g}.</strong> ${esc(d)}</p>${n ? `<p class="aroha"><b>Aroha:</b> ${arohaText(t)}</p>
+        <div class="card-actions"><button type="button" class="btn small" data-hear="${t}">▶ Hear aroha</button><button type="button" class="btn small ghost" data-raga="${t}" data-group="${g}">How to play</button></div>` : '<p class="soon">Demo notation coming soon</p>'}</article>`;
+    }).join('') || '<p class="empty">No ragas match. Try clearing a filter.</p>';
+    $('#raga-count').textContent = `${shown.length} of ${RAGAS.length} ragas`;
+    $('#raga-filter').querySelectorAll('button').forEach((b) => {
+      const k = b.dataset.kind;
+      b.setAttribute('aria-pressed', k === 'group' ? rf.group === b.dataset.v : rf[k]);
+    });
   }
-  RAGA_GROUPS.forEach((g) => {
+  const chips = [...RAGA_GROUPS.map((g) => ['group', g, g]), ['starter', 'true', '🌱 Starter'], ['fav', 'true', '★ Favourites']];
+  chips.forEach(([kind, v, label]) => {
     const b = document.createElement('button');
-    b.type = 'button'; b.textContent = g; b.style.width = 'auto'; b.style.padding = '.45rem .9rem';
-    b.addEventListener('click', () => showRagas(g));
+    b.type = 'button'; b.textContent = label; b.dataset.kind = kind; b.dataset.v = v; b.style.width = 'auto'; b.style.padding = '.45rem .9rem';
+    b.addEventListener('click', () => { if (kind === 'group') rf.group = v; else rf[kind] = !rf[kind]; showRagas(); });
     $('#raga-filter').appendChild(b);
   });
-  showRagas('All');
+  $('#raga-search').addEventListener('input', (e) => { rf.q = e.target.value; showRagas(); });
+  $('#raga-now').textContent = `🕒 Ragas for now (${nowGroup()})`;
+  function ragasForNow() {
+    Object.assign(rf, { group: nowGroup(), q: '', starter: false, fav: false }); $('#raga-search').value = ''; showRagas();
+    document.getElementById('ragas').scrollIntoView({ behavior: 'smooth' });
+  }
+  $('#raga-now').addEventListener('click', ragasForNow);
+  $('#t-ragas').addEventListener('click', (e) => { e.preventDefault(); ragasForNow(); });
+  showRagas();
   $('#raga-cards').addEventListener('click', (e) => {
-    const b = e.target.closest('[data-raga]');
-    if (b) FluteDemo.ragaDemo(b.dataset.raga, b.dataset.group);
+    const fav = e.target.closest('[data-fav]'), hear = e.target.closest('[data-hear]'), how = e.target.closest('[data-raga]');
+    if (fav) {
+      const n = fav.dataset.fav, i = settings.favs.indexOf(n);
+      if (i >= 0) settings.favs.splice(i, 1); else settings.favs.push(n);
+      saveSettings(); showRagas();
+    } else if (hear) { audio(); FluteDemo.preview(hear.dataset.hear, hear); }
+    else if (how) FluteDemo.ragaDemo(how.dataset.raga, how.dataset.group);
   });
   $('#technique-cards').innerHTML = cards(TECHNIQUES);
+
+  // Tools bar: expandable panel, synced controls, keyboard shortcuts
+  const panel = $('#dock-panel'), pill = $('#pill-sa');
+  function togglePanel(open) {
+    open = open === undefined ? panel.hidden : open;
+    panel.hidden = !open; pill.setAttribute('aria-expanded', open);
+  }
+  pill.addEventListener('click', () => togglePanel());
+  document.addEventListener('click', (e) => { if (!panel.hidden && !e.target.closest('#dock')) togglePanel(false); });
+  const dockTv = $('#dock-tabla-vol'), dockTaal = $('#dock-taal-select');
+  dockTv.value = tablaVol.value;
+  dockTv.addEventListener('input', () => { tablaVol.value = dockTv.value; tablaVol.dispatchEvent(new Event('input')); });
+  tablaVol.addEventListener('input', () => { dockTv.value = tablaVol.value; });
+  Object.keys(TAALS).forEach((k) => { const o = document.createElement('option'); o.textContent = k; dockTaal.appendChild(o); });
+  dockTaal.value = taalSelect.value;
+  dockTaal.addEventListener('change', () => { taalSelect.value = dockTaal.value; taalSelect.dispatchEvent(new Event('change')); });
+  taalSelect.addEventListener('change', () => { dockTaal.value = taalSelect.value; });
+  document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey || e.metaKey || e.altKey || e.target.closest('input, select, textarea, [contenteditable]') || document.querySelector('dialog[open]')) return;
+    const k = e.key.toLowerCase();
+    if (k === 't') droneBtn.click();
+    else if (k === 'b') $('#dock-tabla').click();
+    else if (k === '[') $('#bpm-down').click();
+    else if (k === ']') $('#bpm-up').click();
+    else if (k === '/') { e.preventDefault(); document.getElementById('ragas').scrollIntoView({ behavior: 'smooth' }); $('#raga-search').focus(); }
+    else if (k === 'escape') togglePanel(false);
+    else return;
+  });
 
   $('#reset-progress').addEventListener('click', () => {
     if (confirm('Clear all saved practice progress?')) { state = { days: {}, checks: {}, checkDate: todayKey() }; store.set(state); location.reload(); }

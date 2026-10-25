@@ -108,11 +108,25 @@
     },
     stop() {
       this.run++; cancelAnimationFrame(this.raf);
+      resetPreview();
       if (this.line) this.line.stop();
       if (this.bus) this.bus.stop();
       this.line = this.bus = null;
     }
   };
+
+  // One-tap preview of a raga's aroha from its card.
+  let previewBtn = null;
+  function resetPreview() { if (previewBtn) { previewBtn.textContent = '▶ Hear aroha'; previewBtn.classList.remove('on'); previewBtn = null; } }
+  function preview(name, btn) {
+    const info = root.RAGA_NOTATION[name];
+    if (!info) return;
+    if (previewBtn === btn) { player.stop(); return; }
+    const items = info.aroha.split(/\s+/).map((tok) => ({ tok, beats: 1 }));
+    items[items.length - 1].beats = 2;
+    player.play(items, 80, { onStep() {}, onEnd() {} });
+    previewBtn = btn; btn.textContent = '■ Stop'; btn.classList.add('on');
+  }
 
   // ---------- dialog ----------
   let cleanup = null;
@@ -209,5 +223,5 @@
     });
   }
 
-  root.FluteDemo = { parseSwar, describe, createChart, player, openDialog, closeDialog, ragaDemo, SPEEDS };
+  root.FluteDemo = { parseSwar, describe, createChart, player, openDialog, closeDialog, ragaDemo, preview, SPEEDS };
 })(window);
