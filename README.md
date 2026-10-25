@@ -13,6 +13,8 @@ An interactive, animated guide to the **Indian classical bansuri** — daily riy
 - Glossary: underlined terms show a tooltip, plus a full glossary section
 - Animated "How to play" demos for 16 ragas (aroha, avaroha, pakad on a finger-hole diagram with sound)
 - "Show me how" animated demos for each daily practice block (breathing, long tones, alankars, alaap, taan & taal, cool-down)
+- Your progress: practice calendar with day notes, streaks, and backup/restore (export and import)
+- Editable routine: presets (15, 30, 55 min), on/off, minutes and order
 - Five-stage roadmap, 23 raga cards filterable by time of day, and bansuri technique cards (meend, kan, taan, tonguing)
 
 ## Install and offline
@@ -41,6 +43,7 @@ assets/app.js       routine, timer, tools bar, finger chart, content data
 assets/audio.js     tabla, tanpura, bell and flute-line synthesis, audio engine
 assets/demo.js      finger chart, swar fingering model, demo dialog and player
 assets/ragas.js     raga notation data
+assets/progress.js  calendar, day notes, routine editor, backup/restore
 assets/glossary.js, glossary-ui.js  glossary data, tooltips and glossary section
 assets/practice-demos.js  demos for the daily practice blocks
 assets/favicon.svg
