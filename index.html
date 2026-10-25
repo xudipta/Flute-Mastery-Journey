@@ -23,8 +23,8 @@
   <main id="top">
     <section class="hero">
       <div class="notes" aria-hidden="true"><span>♪</span><span>♫</span><span>♩</span><span>♬</span><span>♪</span></div>
+      <h1 id="page-title">From first <em>sur</em> to concert-stage raga.</h1>
       <div class="hero-intro" id="hero-intro">
-        <h1>From first <em>sur</em> to concert-stage raga.</h1>
         <p>A daily riyaaz guide for the Indian classical bansuri: finger-hole charts, ragas, taal and the techniques of meend, kan and taan — built on one idea: consistency makes music.</p>
         <div class="sa-pick">
           <label>My bansuri's Sa <select class="sa-sync" id="hero-sa"></select></label>
@@ -38,7 +38,6 @@
         </ol>
       </div>
       <div class="today" id="today" hidden>
-        <h1>Today's riyaaz</h1>
         <p id="t-line" class="t-line"></p>
         <div class="t-bar" role="progressbar" aria-label="Minutes practised today" aria-valuemin="0" aria-valuemax="100"><div id="t-fill"></div></div>
         <div class="t-actions">
@@ -65,7 +64,7 @@
           </div>
           <ol id="routine" class="routine"></ol>
         </div>
-        <aside class="timer-card">
+        <div class="timer-card" role="group" aria-label="Practice timer">
           <div class="timer" id="timer">00:00</div>
           <p id="timer-label">Pick a block to start its timer</p>
           <div class="timer-actions">
@@ -73,7 +72,7 @@
             <button id="timer-reset" class="btn small ghost">Reset</button>
           </div>
           <div class="breath" aria-hidden="true"><div id="breath-circle"></div><span id="breath-text">Breathe</span></div>
-        </aside>
+        </div>
       </div>
       <p id="done-msg" class="done" hidden>🎉 Routine complete — session logged. See you tomorrow!</p>
     </section>

@@ -110,6 +110,7 @@
     const today = $('#today'), intro = $('#hero-intro');
     if (!today) return;
     today.hidden = !returning || showIntro; intro.hidden = returning && !showIntro;
+    $('#page-title').innerHTML = today.hidden ? 'From first <em>sur</em> to concert-stage raga.' : 'Today\'s riyaaz';
     if (today.hidden) return;
     const total = ROUTINE.reduce((s, r) => s + r.min, 0);
     const done = ROUTINE.filter((r) => state.checks[r.id]).reduce((s, r) => s + r.min, 0);
