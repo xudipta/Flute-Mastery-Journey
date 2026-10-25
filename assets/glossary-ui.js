@@ -35,6 +35,13 @@
         b.type = 'button'; b.className = 'term'; b.dataset.term = entry.term; b.textContent = hit.nodeValue;
         hit.replaceWith(b);
         text = after;
+        // Keep punctuation right after a term on its line, so "meend," never wraps before the comma.
+        const punct = /^[,.;:!?)\]]+/.exec(after.nodeValue);
+        if (punct) {
+          text = after.splitText(punct[0].length);
+          const w = document.createElement('span'); w.className = 'term-wrap';
+          b.replaceWith(w); w.append(b, after);
+        }
       }
     });
   }

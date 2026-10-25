@@ -116,6 +116,16 @@ body { padding-bottom: 5.5rem; }
 .dock .bpm { display: flex; align-items: center; gap: .3rem; }
 .dock-timer { border-color: var(--accent2); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .dock-timer[hidden] { display: none; }
+.dock { transition: transform .25s, visibility 0s; }
+.dock.tuck { transform: translateY(100%); visibility: hidden; transition: transform .25s, visibility 0s .25s; }
+output.vol { font-weight: 600; font-variant-numeric: tabular-nums; min-width: 3.2rem; }
+.dock-panel output.vol { color: var(--muted); font-size: .85rem; }
+#done-msg .next { display: block; margin-top: .4rem; color: var(--muted); }
+#done-msg .next a { margin-left: 0; }
+.toast { position: fixed; z-index: 12; left: 50%; transform: translateX(-50%); bottom: calc(4.5rem + env(safe-area-inset-bottom)); display: flex; align-items: center; gap: .25rem; width: max-content; max-width: calc(100vw - 2rem); padding: .3rem .4rem .3rem 1rem; border-radius: 14px; background: var(--ink); color: var(--bg); box-shadow: 0 6px 20px rgba(0, 0, 0, .25); }
+.toast[hidden] { display: none; }
+.toast .link { color: var(--bg); font-weight: 700; }
+@media (max-width: 720px) { .toast { bottom: calc(7.6rem + env(safe-area-inset-bottom)); } }
 /* narrow phones: while a block timer shows, it takes the tempo control's place (tempo stays in the Tools section) */
 @media (max-width: 420px) { .dock.has-timer .bpm { display: none; } }
 .dock output { min-width: 2.2rem; text-align: center; font-variant-numeric: tabular-nums; font-weight: 700; }
@@ -255,6 +265,7 @@ h1#page-title { margin: 0 0 1rem; }
 
 /* glossary */
 .term { font: inherit; color: inherit; background: none; border: 0; padding: 0; margin: 0; cursor: help; border-bottom: 1px dotted var(--accent-ink); display: inline; }
+.term-wrap { white-space: nowrap; }
 .term:hover, .term:focus-visible { background: color-mix(in srgb, var(--accent) 22%, transparent); }
 #tip { position: fixed; inset: auto; margin: 0; padding: .6rem .8rem; border: 1px solid var(--muted); border-radius: 10px; background: var(--panel); color: var(--ink); font-size: .88rem; line-height: 1.4; box-shadow: 0 8px 24px rgba(0, 0, 0, .25); z-index: 50; pointer-events: none; }
 #tip[hidden] { display: none; }
@@ -280,6 +291,7 @@ h1#page-title { margin: 0 0 1rem; }
 .cal-day.lv1 { background: color-mix(in srgb, var(--ok) 38%, var(--bg)); }
 .cal-day.lv2 { background: var(--ok); color: #06210f; font-weight: 700; }
 .cal-day.today { border-color: var(--accent-ink); }
+.cal-day:disabled { opacity: .4; cursor: default; }
 .cal-day.sel { outline: 3px solid var(--accent2); outline-offset: 1px; }
 .cal-day.has-note::after { content: ''; position: absolute; top: 4px; right: 5px; width: 6px; height: 6px; border-radius: 50%; background: var(--accent2); }
 .cal-legend { color: var(--muted); font-size: .8rem; margin: .6rem 0 0; }

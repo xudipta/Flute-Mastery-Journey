@@ -96,7 +96,8 @@
           <div class="breath" aria-hidden="true"><div id="breath-circle"></div><span id="breath-text">Breathe</span></div>
         </div>
       </div>
-      <p id="done-msg" class="done" hidden>🎉 Routine complete — session logged. See you tomorrow! <a href="#progress" id="add-note">Add a note about today</a></p>
+      <p id="done-msg" class="done" hidden>🎉 Routine complete — session logged. See you tomorrow! <a href="#progress" id="add-note">Add a note about today</a>
+        <span class="next">Want to keep playing? <a href="#ragas" id="done-ragas">Ragas for this time of day</a> · <a href="#tuner">Check your tone with the tuner</a></span></p>
     </section>
 
     <section id="progress">
@@ -147,7 +148,7 @@
         <div class="taal-controls">
           <label>Taal <select id="taal-select"></select></label>
           <label>Tempo <input type="range" id="bpm" min="40" max="240" value="90"> <output id="bpm-out">90</output> BPM</label>
-          <label>Volume <input type="range" id="tabla-vol" min="0" max="200" value="100"></label>
+          <label>Volume <input type="range" id="tabla-vol" min="0" max="200" value="100" title="Double-click to reset to 100%"> <output id="tabla-vol-out" class="vol">100%</output></label>
           <button id="taal-toggle" class="btn small">▶ Play</button>
         </div>
         <div id="taal-grid" class="taal-grid" aria-live="off"></div>
@@ -227,11 +228,12 @@
     <div id="dock-panel" class="dock-panel" hidden>
       <label>Sa <select id="sa-select" class="sa-sync"></select></label>
       <label>Taal <select id="dock-taal-select"></select></label>
-      <label>Tanpura volume <input type="range" id="drone-vol" min="0" max="200" value="100"></label>
-      <label>Tabla volume <input type="range" id="dock-tabla-vol" min="0" max="200" value="100"></label>
+      <label><span>Tanpura volume <output id="drone-vol-out" class="vol">100%</output></span><input type="range" id="drone-vol" min="0" max="200" value="100" title="Double-click to reset to 100%"></label>
+      <label><span>Tabla volume <output id="dock-tabla-vol-out" class="vol">100%</output></span><input type="range" id="dock-tabla-vol" min="0" max="200" value="100" title="Double-click to reset to 100%"></label>
       <p class="shortcuts">Shortcuts: <kbd>T</kbd> tanpura · <kbd>B</kbd> tabla · <kbd>[</kbd> <kbd>]</kbd> tempo · <kbd>/</kbd> search ragas</p>
     </div>
   </div>
+  <div id="toast" class="toast" role="status" hidden><span id="toast-text"></span> <button id="toast-undo" class="link" type="button">Undo</button></div>
   <nav class="tabbar" aria-label="Sections">
     <a href="#practice" data-spy="practice progress"><span aria-hidden="true">🧘</span>Practice</a>
     <a href="#ragas" data-spy="ragas"><span aria-hidden="true">🎼</span>Ragas</a>

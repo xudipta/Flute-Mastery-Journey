@@ -36,14 +36,17 @@
     const A = App(), log = A.state().log, y = view.getFullYear(), m = view.getMonth();
     $('#cal-title').textContent = `${MONTHS[m]} ${y}`;
     const first = new Date(y, m, 1), lead = (first.getDay() + 6) % 7, count = new Date(y, m + 1, 0).getDate(), today = A.todayKey();
-    const cells = [];
+    const cells = [], keys = [];
+    for (let d = 1; d <= count; d++) keys.push(A.dateKey(new Date(y, m, d)));
+    // One day is in the tab order (the selected day, else today, else the 1st); arrow keys move between days.
+    const tabKey = keys.includes(selected) ? selected : keys.includes(today) ? today : keys[0];
     for (let i = 0; i < lead; i++) cells.push('<span class="cal-empty"></span>');
-    for (let d = 1; d <= count; d++) {
-      const k = A.dateKey(new Date(y, m, d)), e = log[k], did = A.practised(k);
+    keys.forEach((k, i) => {
+      const d = i + 1, e = log[k], did = A.practised(k), future = k > today;
       const cls = ['cal-day', did ? (e.complete ? 'lv2' : 'lv1') : '', k === today ? 'today' : '', k === selected ? 'sel' : '', e && e.note ? 'has-note' : ''].join(' ');
-      const label = `${d} ${MONTHS[m]}: ${did ? (e.minutes ? e.minutes + ' minutes' : 'practised') + (e.complete ? ', full routine' : '') : 'no practice'}${e && e.note ? ', has a note' : ''}`;
-      cells.push(`<button type="button" class="${cls}" data-k="${k}" aria-label="${label}" aria-pressed="${k === selected}">${d}</button>`);
-    }
+      const label = `${d} ${MONTHS[m]}: ${future ? 'not yet' : did ? (e.minutes ? e.minutes + ' minutes' : 'practised') + (e.complete ? ', full routine' : '') : 'no practice'}${e && e.note ? ', has a note' : ''}`;
+      cells.push(`<button type="button" class="${cls}" data-k="${k}" aria-label="${label}" aria-pressed="${k === selected}" tabindex="${k === tabKey ? 0 : -1}"${future ? ' disabled' : ''}>${d}</button>`);
+    });
     $('#cal-grid').innerHTML = cells.join('');
   }
   function renderDetail() {
@@ -180,7 +183,24 @@
     $('#cal-prev').addEventListener('click', () => { view.setMonth(view.getMonth() - 1); renderCalendar(); });
     $('#cal-next').addEventListener('click', () => { view.setMonth(view.getMonth() + 1); renderCalendar(); });
     $('#cal-today').addEventListener('click', () => { view = new Date(); view.setDate(1); selected = App().todayKey(); refresh(); });
-    $('#cal-grid').addEventListener('click', (e) => { const b = e.target.closest('[data-k]'); if (b) { selected = b.dataset.k; renderCalendar(); renderDetail(); const ta = $('#day-note'); if (ta && matchMedia('(pointer: fine)').matches) ta.focus(); } });
+    $('#cal-grid').addEventListener('click', (e) => {
+      const b = e.target.closest('[data-k]'); if (!b) return;
+      selected = b.dataset.k; renderCalendar(); renderDetail();
+      // Keyboard (Enter/Space) keeps focus on the day; a mouse click goes straight to the note.
+      if (e.detail === 0) $(`#cal-grid [data-k="${selected}"]`).focus();
+      else { const ta = $('#day-note'); if (ta && matchMedia('(pointer: fine)').matches) ta.focus(); }
+    });
+    $('#cal-grid').addEventListener('keydown', (e) => {
+      const b = e.target.closest('[data-k]'); if (!b) return;
+      const days = [...$('#cal-grid').querySelectorAll('[data-k]')], i = days.indexOf(b);
+      const dow = (new Date(b.dataset.k + 'T00:00:00').getDay() + 6) % 7;
+      const j = { ArrowLeft: i - 1, ArrowRight: i + 1, ArrowUp: i - 7, ArrowDown: i + 7, Home: i - dow, End: i + 6 - dow }[e.key];
+      if (j === undefined) return;
+      e.preventDefault();
+      const t = days[Math.max(0, Math.min(days.length - 1, j))];
+      if (!t || t.disabled) return;
+      b.tabIndex = -1; t.tabIndex = 0; t.focus();
+    });
     $('#add-note').addEventListener('click', () => { view = new Date(); view.setDate(1); selected = App().todayKey(); refresh(); setTimeout(() => { const t = $('#day-note'); if (t) t.focus(); }, 400); });
     setupEditor(); setupData(); refresh();
   }

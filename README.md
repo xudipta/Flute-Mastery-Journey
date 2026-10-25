@@ -5,10 +5,10 @@ An interactive, animated guide to the **Indian classical bansuri** — daily riy
 **Live site:** https://xudipta.github.io/Flute-Mastery-Journey/
 
 ## Features
-- Daily riyaaz routine with per-block timers, a breathing animation and a streak tracker (saved in your browser)
+- Daily riyaaz routine with per-block timers (a running block survives a reload and shows in the tools bar), a breathing animation and a streak tracker (saved in your browser)
 - Keeps the screen on while a timer, the tanpura or the tabla is running, and keeps the sound and the end-of-block bell steady when the phone locks or another app is in front
 - "Today" card for returning visitors, a first-run Sa picker, and a raga finder (search, time of day, starter ragas, favourites, one-tap aroha preview)
-- Pitch tuner: listens through the microphone, shows the swar and cents sharp/flat against your Sa, with a pitch trace and a steadiness score (analysed on the device)
+- Pitch tuner: pauses the tanpura and tabla while it listens through the microphone, shows the swar and cents sharp/flat against your Sa, with a pitch trace and a steadiness score (analysed on the device)
 - Synthesised tanpura (Pa-Sa-Sa-low Sa, with harmonic shimmer) and tabla, controlled from a tools bar that stays on screen
 - Tabla taal player (Teentaal, Dadra, Keherwa, Jhaptaal, Ektaal, Rupak) with adjustable tempo
 - Tap-to-hear six-hole finger chart across three octaves (komal/tivra and note-name options, play the scale), with half-covered holes

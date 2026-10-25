@@ -173,7 +173,7 @@
       rows[r.id] = { li, box };
       box.checked = !!state.checks[r.id];
       li.classList.toggle('done', box.checked);
-      box.addEventListener('change', () => setChecked(r.id, box.checked));
+      box.addEventListener('change', () => { setChecked(r.id, box.checked); if (!box.checked) offerUndo(r); });
       li.querySelector('[data-timer]').addEventListener('click', () => { runAll = false; selectBlock(r, true); });
       li.querySelector('[data-how]').addEventListener('click', () => PracticeDemos.open(r.id));
       list.appendChild(li);
@@ -181,6 +181,19 @@
     $('#routine-total').textContent = ROUTINE.reduce((a, r) => a + r.min, 0);
   }
   renderRoutine();
+
+  // Unticking removes the block's minutes from today, so a mis-tap can be undone for a few seconds.
+  let undoTimer = null;
+  function offerUndo(r) {
+    const toast = $('#toast');
+    $('#toast-text').textContent = `Unticked “${r.title}”.`;
+    toast.hidden = false; clearTimeout(undoTimer);
+    undoTimer = setTimeout(() => { toast.hidden = true; }, 6000);
+    $('#toast-undo').onclick = () => {
+      toast.hidden = true; clearTimeout(undoTimer);
+      if (rows[r.id] && !state.checks[r.id]) { setChecked(r.id, true); rows[r.id].box.focus(); }
+    };
+  }
 
   // Timer (uses wall-clock time so it stays correct if the tab is throttled)
   // The end-of-block bell is scheduled on the audio clock when a block starts, so it rings on time even when
@@ -194,6 +207,7 @@
     $('#timer').textContent = fmt(remaining);
     const show = !!block && remaining > 0 && (!!handle || remaining < block.min * 60);
     chip.hidden = !show; $('#dock').classList.toggle('has-timer', show);
+    saveTimer(show);
     const title = show ? `${handle ? '⏱' : '⏸'} ${fmt(remaining)} · ${block.title}` : baseTitle;
     if (document.title !== title) document.title = title;
     if (!show) return;
@@ -202,23 +216,34 @@
     $('#dock-timer-name').textContent = block.title;
     chip.setAttribute('aria-label', `${block.title}: ${fmt(remaining)} left${handle ? '' : ', paused'}. Go to the timer`);
   }
+  // A block under way is saved, so a reload (or the phone discarding the tab) does not lose it. While it runs
+  // the saved entry (end time) does not change, so this only writes on start, pause, reset and finish.
+  function saveTimer(show) {
+    const t = show ? { id: block.id, date: todayKey(), runAll, ...(handle ? { endAt } : { remaining }) } : undefined;
+    if (JSON.stringify(t) === JSON.stringify(state.timer)) return;
+    if (t) state.timer = t; else delete state.timer;
+    store.set(state);
+  }
   chip.addEventListener('click', () => {
     $('.timer-card').scrollIntoView({ block: 'center', behavior: 'smooth' });
     $('#timer-toggle').focus({ preventScroll: true });
   });
-  function selectBlock(r, autostart) {
+  function selectBlock(r, autostart, noScroll) {
     markOnboarded(); stop();
     block = r; remaining = r.min * 60;
     document.querySelectorAll('.routine li').forEach((x) => x.classList.toggle('active', x === rows[r.id].li));
-    rows[r.id].li.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    if (!noScroll) rows[r.id].li.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     $('#timer-label').textContent = r.title;
     renderTimer();
     if (autostart) start();
   }
-  function start() {
+  // `restored`: started on page load rather than by a tap, so audio may not start yet; the bell then falls
+  // back to ringing from blockDone().
+  function start(restored) {
     if (!block || handle) return;
     endAt = Date.now() + remaining * 1000;
-    bellAt = audio().ring(Sound.ctx.currentTime + remaining);
+    if (!restored) audio();
+    bellAt = Sound.ctx && Sound.ctx.state === 'running' ? Sound.ring(Sound.ctx.currentTime + remaining) : null;
     $('#timer-toggle').textContent = 'Pause';
     handle = setInterval(() => {
       remaining = Math.max(0, Math.ceil((endAt - Date.now()) / 1000));
@@ -382,6 +407,7 @@
   async function keepAwake() {
     if (!('wakeLock' in navigator) || wakeBusy) return;
     const want = !!handle || taalRun || Sound.droneOn;
+    if (want) $('#dock').classList.remove('tuck'); // something is playing: keep its controls in view
     wakeBusy = true;
     try {
       if (want && !wakeLock && document.visibilityState === 'visible') {
@@ -399,6 +425,26 @@
       if (Sound.droneOn) Sound.droneTick();
     } else keepAwake();
   });
+
+  // Pick up a block that was under way when the page was closed or reloaded today.
+  (function restoreTimer() {
+    const saved = state.timer, r = saved && saved.date === todayKey() && ROUTINE.find((x) => x.id === saved.id);
+    if (!r || state.checks[r.id]) { if (saved) { delete state.timer; store.set(state); } return; }
+    runAll = !!saved.runAll;
+    if (saved.endAt && saved.endAt <= Date.now()) {
+      // It finished while the page was closed: tick it off, and line up the next block without starting it.
+      setChecked(r.id, true);
+      const next = ROUTINE.slice(ROUTINE.indexOf(r) + 1).find((x) => !state.checks[x.id]);
+      if (next && runAll) selectBlock(next, false, true); else { runAll = false; delete state.timer; store.set(state); }
+      $('#timer-label').textContent = `${r.title} finished while you were away ✓` + (next && runAll ? ` Next: ${next.title}` : '');
+      return;
+    }
+    block = r;
+    remaining = saved.endAt ? Math.ceil((saved.endAt - Date.now()) / 1000) : Math.min(r.min * 60, Math.max(1, saved.remaining | 0));
+    rows[r.id].li.classList.add('active');
+    $('#timer-label').textContent = r.title + (saved.endAt ? ' · still running' : ' · paused');
+    if (saved.endAt) start(true); else renderTimer();
+  })();
 
   // Highlight the current section in the nav.
   const links = [...document.querySelectorAll('a[data-spy]')];
@@ -509,6 +555,7 @@
   }
   $('#raga-now').addEventListener('click', ragasForNow);
   $('#t-ragas').addEventListener('click', (e) => { e.preventDefault(); ragasForNow(); });
+  $('#done-ragas').addEventListener('click', (e) => { e.preventDefault(); ragasForNow(); });
   showRagas();
   $('#raga-cards').addEventListener('click', (e) => {
     const fav = e.target.closest('[data-fav]'), hear = e.target.closest('[data-hear]'), how = e.target.closest('[data-raga]');
@@ -533,6 +580,28 @@
   dockTv.value = tablaVol.value;
   dockTv.addEventListener('input', () => { tablaVol.value = dockTv.value; tablaVol.dispatchEvent(new Event('input')); });
   tablaVol.addEventListener('input', () => { dockTv.value = tablaVol.value; });
+  // Volume readouts; double-click a slider to go back to 100%.
+  const vols = [[droneVol, '#drone-vol-out'], [tablaVol, '#tabla-vol-out'], [dockTv, '#dock-tabla-vol-out']];
+  const showVols = () => vols.forEach(([el, out]) => { $(out).textContent = el.value + '%'; });
+  vols.forEach(([el]) => {
+    el.addEventListener('input', showVols);
+    el.addEventListener('dblclick', () => { el.value = 100; el.dispatchEvent(new Event('input')); });
+  });
+  showVols();
+  // Phones: tuck the tools bar away while the user scrolls down, unless something is running or it is in use.
+  // Jumps from links and buttons (tab bar, "Ragas for now") don't count, so the bar is there when you land.
+  let lastY = scrollY, userScrollAt = 0;
+  const dock = $('#dock'), narrow = matchMedia('(max-width: 720px)');
+  ['touchmove', 'wheel'].forEach((t) => addEventListener(t, () => { userScrollAt = Date.now(); }, { passive: true }));
+  addEventListener('keydown', (e) => { if (/^(Arrow|Page|Home|End| )/.test(e.key)) userScrollAt = Date.now(); });
+  addEventListener('scroll', () => {
+    const y = scrollY, d = y - lastY;
+    if (Math.abs(d) < 8) return;
+    lastY = y;
+    const byUser = Date.now() - userScrollAt < 400;
+    const busy = !panel.hidden || !chip.hidden || taalRun || Sound.droneOn || !!dock.querySelector(':focus-visible'); // keyboard focus only, not a tapped button
+    dock.classList.toggle('tuck', narrow.matches && byUser && d > 0 && y > 200 && !busy);
+  }, { passive: true });
   Object.keys(TAALS).forEach((k) => { const o = document.createElement('option'); o.textContent = k; dockTaal.appendChild(o); });
   dockTaal.value = taalSelect.value;
   dockTaal.addEventListener('change', () => { taalSelect.value = dockTaal.value; taalSelect.dispatchEvent(new Event('change')); });
@@ -556,6 +625,14 @@
     BLOCKS, state: () => state, settings, dateKey, setSa, todayKey, streak, practised, practisedDays, defaultPlan,
     routine: () => ROUTINE,
     saveState: () => store.set(state),
+    // Pauses the tanpura and tabla (for the tuner, so the microphone hears only the flute). Returns the names
+    // of what was paused and a restore() that switches them back on.
+    quiet() {
+      const drone = Sound.droneOn, tabla = taalRun, paused = [];
+      if (drone) { droneBtn.click(); paused.push('tanpura'); }
+      if (tabla) { setTaalRunning(false); paused.push('tabla'); }
+      return { paused, restore() { if (drone && !Sound.droneOn) droneBtn.click(); if (tabla && !taalRun) setTaalRunning(true); } };
+    },
     setPlan(plan) {
       if (handle) stop();
       block = null; remaining = 0; runAll = false; $('#timer-label').textContent = 'Pick a block to start its timer'; renderTimer();
