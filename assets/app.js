@@ -183,7 +183,9 @@
   renderRoutine();
 
   // Timer (uses wall-clock time so it stays correct if the tab is throttled)
-  let block = null, remaining = 0, handle = null, endAt = 0, runAll = false;
+  // The end-of-block bell is scheduled on the audio clock when a block starts, so it rings on time even when
+  // the browser delays the interval (screen off, app in the background).
+  let block = null, remaining = 0, handle = null, endAt = 0, runAll = false, bellAt = null;
   const fmt = (s) => String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
   function selectBlock(r, autostart) {
     markOnboarded(); stop();
@@ -197,16 +199,25 @@
   function start() {
     if (!block || handle) return;
     endAt = Date.now() + remaining * 1000;
+    bellAt = audio().ring(Sound.ctx.currentTime + remaining);
     $('#timer-toggle').textContent = 'Pause';
     handle = setInterval(() => {
       remaining = Math.max(0, Math.ceil((endAt - Date.now()) / 1000));
       $('#timer').textContent = fmt(remaining);
       if (remaining <= 0) blockDone();
     }, 250);
+    keepAwake();
   }
-  function stop() { clearInterval(handle); handle = null; $('#timer-toggle').textContent = 'Start'; }
+  function stop() {
+    clearInterval(handle); handle = null; $('#timer-toggle').textContent = 'Start';
+    if (bellAt) { bellAt.cancel(); bellAt = null; }
+    keepAwake();
+  }
   function blockDone() {
-    stop(); audio().ring();
+    // Keep the scheduled bell unless the audio clock fell behind (it pauses while iOS suspends the page).
+    const bellDue = bellAt; bellAt = null;
+    stop();
+    if (!bellDue || bellDue.at > Sound.ctx.currentTime + 0.5) { if (bellDue) bellDue.cancel(); audio().ring(); }
     setChecked(block.id, true);
     $('#timer-label').textContent = block.title + ' — done!';
     const i = ROUTINE.indexOf(block), next = ROUTINE.slice(i + 1).find((x) => !state.checks[x.id]);
@@ -251,6 +262,7 @@
     const on = !Sound.droneOn;
     if (on) audio().startDrone(); else Sound.stopDrone();
     droneBtn.setAttribute('aria-pressed', on); droneBtn.classList.toggle('on', on);
+    keepAwake();
   });
   droneVol.addEventListener('input', () => {
     settings.droneVol = Number(droneVol.value); saveSettings();
@@ -272,7 +284,7 @@
   Object.keys(TAALS).forEach((k) => { const o = document.createElement('option'); o.textContent = k; taalSelect.appendChild(o); });
   if (!TAALS[settings.taal]) settings.taal = 'Teentaal · 16';
   taalSelect.value = settings.taal; tablaVol.value = settings.tablaVol;
-  let beatEls = [], taalRun = false, taalTimer = null, nextBeat = 0, nextTime = 0;
+  let beatEls = [], taalRun = false, taalTimer = null, nextBeat = 0, nextTime = 0, tablaBus = null, queued = [], taalGen = 0;
   function buildGrid() {
     const t = TAALS[taalSelect.value]; grid.innerHTML = ''; beatEls = []; let i = 0;
     $('#dock-taal').textContent = taalSelect.value.split(' · ')[0];
@@ -287,26 +299,47 @@
     });
   }
   function schedule() {
-    const t = TAALS[taalSelect.value], spb = 60 / Number(bpm.value), c = Sound.ctx;
-    while (nextTime < c.currentTime + 0.15) {
+    const t = TAALS[taalSelect.value], spb = 60 / Number(bpm.value), c = Sound.ctx, gen = taalGen;
+    queued = queued.filter((q) => q.when > c.currentTime);
+    while (nextTime < c.currentTime + FluteAudio.lookahead(0.15)) {
       const idx = nextBeat % t.bols.length, when = nextTime;
-      Sound.hit(t.bols[idx], when, spb);
-      setTimeout(() => { if (taalRun) beatEls.forEach((e, j) => e.classList.toggle('on', j === idx)); }, Math.max(0, (when - c.currentTime) * 1000));
+      Sound.hit(t.bols[idx], when, spb, tablaBus);
+      queued.push({ beat: nextBeat, when });
+      setTimeout(() => { if (taalRun && gen === taalGen) beatEls.forEach((e, j) => e.classList.toggle('on', j === idx)); }, Math.max(0, (when - c.currentTime) * 1000));
       nextBeat++; nextTime += spb;
     }
+  }
+  // Beats queued seconds ahead (while the page was hidden) would ignore a change of tempo or taal, or keep
+  // playing after Stop. Cut them and carry on from the next beat (from beat 0 when `restart`).
+  function dropQueued(restart) {
+    const c = Sound.ctx, ahead = queued.some((q) => q.when > c.currentTime + 0.3);
+    if (!ahead && !restart) return;
+    taalGen++;
+    if (ahead) { tablaBus.stop(); tablaBus = Sound.bus('tabla'); }
+    const next = queued.find((q) => q.when > c.currentTime + 0.05);
+    nextBeat = restart ? 0 : next ? next.beat : nextBeat;
+    nextTime = restart || !next ? c.currentTime + 0.1 : next.when;
+    queued = [];
   }
   function setTaalRunning(on) {
     taalRun = on;
     $('#taal-toggle').textContent = on ? '■ Stop' : '▶ Play';
     $('#dock-tabla').classList.toggle('on', on); $('#dock-tabla').setAttribute('aria-pressed', on);
-    clearInterval(taalTimer);
-    if (on) { audio(); nextBeat = 0; nextTime = Sound.ctx.currentTime + 0.1; taalTimer = setInterval(schedule, 25); }
-    else beatEls.forEach((e) => e.classList.remove('on'));
+    clearInterval(taalTimer); taalGen++;
+    if (on) { audio(); tablaBus = Sound.bus('tabla'); queued = []; nextBeat = 0; nextTime = Sound.ctx.currentTime + 0.1; taalTimer = setInterval(schedule, 25); }
+    else {
+      beatEls.forEach((e) => e.classList.remove('on'));
+      // Let the last hit ring out, but silence anything queued beyond it.
+      if (tablaBus && queued.some((q) => q.when > Sound.ctx.currentTime + 0.3)) tablaBus.stop();
+      tablaBus = null; queued = [];
+    }
+    keepAwake();
   }
   function setBpm(v) {
     v = Math.min(240, Math.max(40, Math.round(v)));
     bpm.value = v; settings.bpm = v; saveSettings();
     $('#bpm-out').textContent = v; $('#dock-bpm').textContent = v;
+    if (taalRun) dropQueued(false);
   }
   bpm.value = settings.bpm; setBpm(settings.bpm);
   $('#taal-toggle').addEventListener('click', () => setTaalRunning(!taalRun));
@@ -320,9 +353,33 @@
   });
   taalSelect.addEventListener('change', () => {
     settings.taal = taalSelect.value; saveSettings(); buildGrid();
-    if (taalRun) { nextBeat = 0; nextTime = Sound.ctx.currentTime + 0.1; }
+    if (taalRun) dropQueued(true);
   });
   buildGrid();
+
+  // Keep the screen on while a block timer, the tabla or the tanpura runs, so a phone on a stand does not
+  // lock mid-practice. The browser drops the lock when the page is hidden; it is asked for again on return.
+  let wakeLock = null, wakeBusy = false;
+  async function keepAwake() {
+    if (!('wakeLock' in navigator) || wakeBusy) return;
+    const want = !!handle || taalRun || Sound.droneOn;
+    wakeBusy = true;
+    try {
+      if (want && !wakeLock && document.visibilityState === 'visible') {
+        wakeLock = await navigator.wakeLock.request('screen');
+        wakeLock.addEventListener('release', () => { wakeLock = null; });
+      } else if (!want && wakeLock) { await wakeLock.release(); wakeLock = null; }
+    } catch (e) { /* not allowed here (e.g. low battery); practice works without it */ }
+    wakeBusy = false;
+    if (want !== (!!handle || taalRun || Sound.droneOn)) keepAwake();
+  }
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      // Top up the audio queue now, before the browser starts delaying timers.
+      if (taalRun) schedule();
+      if (Sound.droneOn) Sound.droneTick();
+    } else keepAwake();
+  });
 
   // Highlight the current section in the nav.
   const links = [...document.querySelectorAll('a[data-spy]')];
