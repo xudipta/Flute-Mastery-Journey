@@ -7,6 +7,7 @@ An interactive, animated guide to the **Indian classical bansuri** — daily riy
 ## Features
 - Daily riyaaz routine with per-block timers, a breathing animation and a streak tracker (saved in your browser)
 - "Today" card for returning visitors, a first-run Sa picker, and a raga finder (search, time of day, starter ragas, favourites, one-tap aroha preview)
+- Pitch tuner: listens through the microphone, shows the swar and cents sharp/flat against your Sa, with a pitch trace and a steadiness score (analysed on the device)
 - Synthesised tanpura (Pa-Sa-Sa-low Sa, with harmonic shimmer) and tabla, controlled from a tools bar that stays on screen
 - Tabla taal player (Teentaal, Dadra, Keherwa, Jhaptaal, Ektaal, Rupak) with adjustable tempo
 - Tap-to-hear six-hole finger chart across three octaves (komal/tivra and note-name options, play the scale), with half-covered holes
@@ -43,6 +44,7 @@ assets/app.js       routine, timer, tools bar, finger chart, content data
 assets/audio.js     tabla, tanpura, bell and flute-line synthesis, audio engine
 assets/demo.js      finger chart, swar fingering model, demo dialog and player
 assets/ragas.js     raga notation data
+assets/tuner.js     microphone pitch tuner (YIN detector)
 assets/progress.js  calendar, day notes, routine editor, backup/restore
 assets/glossary.js, glossary-ui.js  glossary data, tooltips and glossary section
 assets/practice-demos.js  demos for the daily practice blocks
