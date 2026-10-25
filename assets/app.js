@@ -92,94 +92,105 @@
     $('#done-msg').hidden = !state.days[todayKey()];
   }
 
+  const settings = Object.assign({ sa: 2, bpm: 90, taal: 'Teentaal · 16', tablaVol: 100, droneVol: 100 }, state.settings);
+  const saveSettings = () => { state.settings = settings; store.set(state); };
+  const Sound = FluteAudio.Engine;
+  const saFreq = (i) => 130.81 * Math.pow(2, i / 12);
+  Sound.setSa(saFreq(settings.sa));
+  // Create the audio context on first use (needs a user gesture) and apply saved volumes.
+  function audio() {
+    const fresh = !Sound.ctx;
+    Sound.ensure();
+    if (fresh) { Sound.setVolume('tabla', settings.tablaVol / 100); Sound.setVolume('drone', 0.8 * settings.droneVol / 100); }
+    return Sound;
+  }
+
   // Routine
+  const rows = {};
+  function setChecked(id, val) {
+    state.checks[id] = val;
+    rows[id].box.checked = val;
+    rows[id].li.classList.toggle('done', val);
+    if (ROUTINE.every((x) => state.checks[x.id])) state.days[todayKey()] = true;
+    else delete state.days[todayKey()];
+    store.set(state); renderStats();
+  }
   const list = $('#routine');
   ROUTINE.forEach((r) => {
     const li = document.createElement('li');
     li.dataset.id = r.id;
     li.innerHTML = `<input type="checkbox" aria-label="Done: ${r.title}"><div><h3>${r.title} · ${r.min} min</h3><p>${r.text}</p><button type="button">Start timer</button></div>`;
     const box = li.querySelector('input');
+    rows[r.id] = { li, box };
     box.checked = !!state.checks[r.id];
     li.classList.toggle('done', box.checked);
-    box.addEventListener('change', () => {
-      state.checks[r.id] = box.checked;
-      li.classList.toggle('done', box.checked);
-      if (ROUTINE.every((x) => state.checks[x.id])) state.days[todayKey()] = true;
-      else delete state.days[todayKey()];
-      store.set(state); renderStats();
-    });
-    li.querySelector('button').addEventListener('click', () => selectBlock(r, li, true));
+    box.addEventListener('change', () => setChecked(r.id, box.checked));
+    li.querySelector('button').addEventListener('click', () => { runAll = false; selectBlock(r, true); });
     list.appendChild(li);
   });
+  $('#routine-total').textContent = ROUTINE.reduce((a, r) => a + r.min, 0);
 
-  // Timer
-  let block = null, remaining = 0, handle = null;
+  // Timer (uses wall-clock time so it stays correct if the tab is throttled)
+  let block = null, remaining = 0, handle = null, endAt = 0, runAll = false;
   const fmt = (s) => String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
-  function selectBlock(r, li, autostart) {
+  function selectBlock(r, autostart) {
     stop();
     block = r; remaining = r.min * 60;
-    document.querySelectorAll('.routine li').forEach((x) => x.classList.toggle('active', x === li));
+    document.querySelectorAll('.routine li').forEach((x) => x.classList.toggle('active', x === rows[r.id].li));
+    rows[r.id].li.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     $('#timer-label').textContent = r.title;
     $('#timer').textContent = fmt(remaining);
     if (autostart) start();
   }
   function start() {
     if (!block || handle) return;
+    endAt = Date.now() + remaining * 1000;
     $('#timer-toggle').textContent = 'Pause';
     handle = setInterval(() => {
-      remaining--; $('#timer').textContent = fmt(Math.max(remaining, 0));
-      if (remaining <= 0) { stop(); $('#timer-label').textContent = block.title + ' — done!'; }
-    }, 1000);
+      remaining = Math.max(0, Math.ceil((endAt - Date.now()) / 1000));
+      $('#timer').textContent = fmt(remaining);
+      if (remaining <= 0) blockDone();
+    }, 250);
   }
   function stop() { clearInterval(handle); handle = null; $('#timer-toggle').textContent = 'Start'; }
-  $('#timer-toggle').addEventListener('click', () => (handle ? stop() : start()));
+  function blockDone() {
+    stop(); audio().ring();
+    setChecked(block.id, true);
+    $('#timer-label').textContent = block.title + ' — done!';
+    const i = ROUTINE.indexOf(block), next = ROUTINE.slice(i + 1).find((x) => !state.checks[x.id]);
+    if (runAll && next) selectBlock(next, true); else runAll = false;
+  }
+  $('#timer-toggle').addEventListener('click', () => { if (!block) { selectBlock(ROUTINE.find((x) => !state.checks[x.id]) || ROUTINE[0], true); } else if (handle) { stop(); remaining = Math.max(0, Math.ceil((endAt - Date.now()) / 1000)); } else start(); });
   $('#timer-reset').addEventListener('click', () => { if (block) { stop(); remaining = block.min * 60; $('#timer').textContent = fmt(remaining); } });
+  $('#run-all').addEventListener('click', () => {
+    const first = ROUTINE.find((x) => !state.checks[x.id]);
+    if (!first) { $('#timer-label').textContent = 'All blocks done today — nicely played!'; return; }
+    runAll = true; audio(); selectBlock(first, true);
+  });
 
-  // Tanpura-style drone: Pa below, Sa, Sa, Sa above, cycled with a slow pluck envelope.
+  // Sa selector + tanpura drone
   const saSelect = $('#sa-select');
   SA_NAMES.forEach((n, i) => { const o = document.createElement('option'); o.value = i; o.textContent = n; saSelect.appendChild(o); });
-  saSelect.value = 2;
-  let ctx = null, droneTimer = null, droneOn = false;
-  const saFreq = () => 130.81 * Math.pow(2, Number(saSelect.value) / 12);
-  let tablaOut = null;
-  const getCtx = () => (ctx = ctx || new (window.AudioContext || window.webkitAudioContext)());
-  // Tabla goes through a gain stage (user volume) and a compressor so it stays loud without clipping.
-  function tablaBus() {
-    if (!tablaOut) {
-      const c = getCtx(), comp = c.createDynamicsCompressor(), vol = c.createGain();
-      vol.gain.value = Number($('#tabla-vol').value) / 100;
-      comp.connect(vol); vol.connect(c.destination);
-      tablaOut = { input: comp, vol };
-    }
-    return tablaOut;
-  }
-  function pluck(freq, when) {
-    const o = ctx.createOscillator(), f = ctx.createBiquadFilter(), g = ctx.createGain();
-    o.type = 'sawtooth'; o.frequency.value = freq;
-    f.type = 'lowpass'; f.frequency.value = 1400;
-    g.gain.setValueAtTime(0.0001, when);
-    g.gain.exponentialRampToValueAtTime(0.12, when + 0.05);
-    g.gain.exponentialRampToValueAtTime(0.0001, when + 4);
-    o.connect(f); f.connect(g); g.connect(ctx.destination);
-    o.start(when); o.stop(when + 4.1);
-  }
-  function cycle() {
-    const sa = saFreq(), t = ctx.currentTime + 0.05;
-    [sa * 0.75, sa, sa, sa / 2].forEach((f, i) => pluck(f, t + i * 1));
-  }
-  function toggleDrone() {
-    droneOn = !droneOn;
-    $('#drone-toggle').classList.toggle('on', droneOn);
-    if (droneOn) {
-      getCtx().resume(); cycle(); droneTimer = setInterval(cycle, 4000);
-    } else { clearInterval(droneTimer); }
-  }
-  $('#drone-toggle').addEventListener('click', toggleDrone);
-  saSelect.addEventListener('change', () => { if (droneOn) { clearInterval(droneTimer); cycle(); droneTimer = setInterval(cycle, 4000); } });
+  saSelect.value = settings.sa;
+  saSelect.addEventListener('change', () => {
+    settings.sa = Number(saSelect.value); saveSettings();
+    Sound.setSa(saFreq(settings.sa));
+    if (Sound.ctx) Sound.restartDrone();
+  });
+  const droneBtn = $('#drone-toggle'), droneVol = $('#drone-vol');
+  droneVol.value = settings.droneVol;
+  droneBtn.addEventListener('click', () => {
+    const on = !Sound.droneOn;
+    if (on) audio().startDrone(); else Sound.stopDrone();
+    droneBtn.setAttribute('aria-pressed', on); droneBtn.classList.toggle('on', on);
+  });
+  droneVol.addEventListener('input', () => {
+    settings.droneVol = Number(droneVol.value); saveSettings();
+    if (Sound.ctx) Sound.setVolume('drone', 0.8 * settings.droneVol / 100);
+  });
 
-
-  // Tabla taal player. Bols are synthesised: dayan (tuned to Sa) and bayan (bass).
-  // beats: [bol, dayan?, bayan?]; vib = beats per vibhag; marks: 'X' sam, number tali, 'O' khali.
+  // Tabla taal player (sounds are synthesised in audio.js).
+  // vib = beats per vibhag; marks: 'X' sam, number tali, 'O' khali.
   const TAALS = {
     'Teentaal · 16': { vib: [4, 4, 4, 4], marks: ['X', '2', 'O', '3'], bols: ['Dha','Dhin','Dhin','Dha','Dha','Dhin','Dhin','Dha','Dha','Tin','Tin','Ta','Ta','Dhin','Dhin','Dha'] },
     'Dadra · 6': { vib: [3, 3], marks: ['X', 'O'], bols: ['Dha','Dhi','Na','Dha','Tu','Na'] },
@@ -188,40 +199,14 @@
     'Ektaal · 12': { vib: [2, 2, 2, 2, 2, 2], marks: ['X', '2', 'O', 'O', '3', '4'], bols: ['Dhin','Dhin','DhaGe','TiraKita','Tu','Na','Kat','Ta','DhaGe','TiraKita','Dhin','Na'] },
     'Rupak · 7': { vib: [3, 2, 2], marks: ['O', '2', '3'], bols: ['Tin','Tin','Na','Dhi','Na','Dhi','Na'] }
   };
-  const BOL_SOUND = { Ra: [1, 0], Ki: [1, 0], Dha: [1, 1], Dhin: [1, 1], Dhi: [1, 1], Tin: [1, 0], Ta: [1, 0], Na: [1, 0], Ti: [1, 0], Tu: [1, 0], Ge: [0, 1], Ka: [0, 1], Kat: [0, 1] };
-  // Compound bols are two or four quick strokes within one beat.
-  const COMPOUND = { DhaGe: ['Dha', 'Ge'], TiraKita: ['Ti', 'Ra', 'Ki', 'Ta'] };
-  function tablaHit(bol, when, spb) {
-    if (COMPOUND[bol]) {
-      const parts = COMPOUND[bol], step = spb / parts.length;
-      parts.forEach((p, k) => tablaHit(p, when + k * step, spb));
-      return;
-    }
-    const [dayan, bayan] = BOL_SOUND[bol] || [1, 0];
-    if (dayan) {
-      const o = ctx.createOscillator(), g = ctx.createGain();
-      o.type = 'sine'; o.frequency.setValueAtTime(saFreq() * 2.5, when);
-      o.frequency.exponentialRampToValueAtTime(saFreq() * 2, when + 0.25);
-      g.gain.setValueAtTime(0.0001, when);
-      g.gain.exponentialRampToValueAtTime(1, when + 0.005);
-      g.gain.exponentialRampToValueAtTime(0.0001, when + 0.35);
-      o.connect(g); g.connect(tablaBus().input); o.start(when); o.stop(when + 0.4);
-    }
-    if (bayan) {
-      const o = ctx.createOscillator(), g = ctx.createGain();
-      o.type = 'sine'; o.frequency.setValueAtTime(140, when);
-      o.frequency.exponentialRampToValueAtTime(70, when + 0.3);
-      g.gain.setValueAtTime(0.0001, when);
-      g.gain.exponentialRampToValueAtTime(1.6, when + 0.01);
-      g.gain.exponentialRampToValueAtTime(0.0001, when + 0.45);
-      o.connect(g); g.connect(tablaBus().input); o.start(when); o.stop(when + 0.5);
-    }
-  }
-  const taalSelect = $('#taal-select'), grid = $('#taal-grid'), bpm = $('#bpm');
+  const taalSelect = $('#taal-select'), grid = $('#taal-grid'), bpm = $('#bpm'), tablaVol = $('#tabla-vol');
   Object.keys(TAALS).forEach((k) => { const o = document.createElement('option'); o.textContent = k; taalSelect.appendChild(o); });
+  if (!TAALS[settings.taal]) settings.taal = 'Teentaal · 16';
+  taalSelect.value = settings.taal; tablaVol.value = settings.tablaVol;
   let beatEls = [], taalRun = false, taalTimer = null, nextBeat = 0, nextTime = 0;
   function buildGrid() {
     const t = TAALS[taalSelect.value]; grid.innerHTML = ''; beatEls = []; let i = 0;
+    $('#dock-taal').textContent = taalSelect.value.split(' · ')[0];
     t.vib.forEach((n, v) => {
       const box = document.createElement('div'); box.className = 'vibhag';
       for (let k = 0; k < n; k++, i++) {
@@ -233,27 +218,53 @@
     });
   }
   function schedule() {
-    const t = TAALS[taalSelect.value], spb = 60 / Number(bpm.value);
-    while (nextTime < ctx.currentTime + 0.15) {
+    const t = TAALS[taalSelect.value], spb = 60 / Number(bpm.value), c = Sound.ctx;
+    while (nextTime < c.currentTime + 0.15) {
       const idx = nextBeat % t.bols.length, when = nextTime;
-      tablaHit(t.bols[idx], when, spb);
-      setTimeout(() => { beatEls.forEach((e, j) => e.classList.toggle('on', j === idx)); }, Math.max(0, (when - ctx.currentTime) * 1000));
+      Sound.hit(t.bols[idx], when, spb);
+      setTimeout(() => { if (taalRun) beatEls.forEach((e, j) => e.classList.toggle('on', j === idx)); }, Math.max(0, (when - c.currentTime) * 1000));
       nextBeat++; nextTime += spb;
     }
   }
-  function toggleTaal() {
-    taalRun = !taalRun;
-    $('#taal-toggle').textContent = taalRun ? '■ Stop' : '▶ Play';
-    if (taalRun) {
-      getCtx().resume(); nextBeat = 0; nextTime = ctx.currentTime + 0.1;
-      taalTimer = setInterval(schedule, 25);
-    } else { clearInterval(taalTimer); beatEls.forEach((e) => e.classList.remove('on')); }
+  function setTaalRunning(on) {
+    taalRun = on;
+    $('#taal-toggle').textContent = on ? '■ Stop' : '▶ Play';
+    $('#dock-tabla').classList.toggle('on', on); $('#dock-tabla').setAttribute('aria-pressed', on);
+    clearInterval(taalTimer);
+    if (on) { audio(); nextBeat = 0; nextTime = Sound.ctx.currentTime + 0.1; taalTimer = setInterval(schedule, 25); }
+    else beatEls.forEach((e) => e.classList.remove('on'));
   }
-  $('#taal-toggle').addEventListener('click', toggleTaal);
-  $('#tabla-vol').addEventListener('input', () => { if (tablaOut) tablaOut.vol.gain.value = Number($('#tabla-vol').value) / 100; });
-  bpm.addEventListener('input', () => { $('#bpm-out').textContent = bpm.value; });
-  taalSelect.addEventListener('change', () => { buildGrid(); nextBeat = 0; });
+  function setBpm(v) {
+    v = Math.min(240, Math.max(40, Math.round(v)));
+    bpm.value = v; settings.bpm = v; saveSettings();
+    $('#bpm-out').textContent = v; $('#dock-bpm').textContent = v;
+  }
+  bpm.value = settings.bpm; setBpm(settings.bpm);
+  $('#taal-toggle').addEventListener('click', () => setTaalRunning(!taalRun));
+  $('#dock-tabla').addEventListener('click', () => setTaalRunning(!taalRun));
+  bpm.addEventListener('input', () => setBpm(Number(bpm.value)));
+  $('#bpm-down').addEventListener('click', () => setBpm(Number(bpm.value) - 5));
+  $('#bpm-up').addEventListener('click', () => setBpm(Number(bpm.value) + 5));
+  tablaVol.addEventListener('input', () => {
+    settings.tablaVol = Number(tablaVol.value); saveSettings();
+    if (Sound.ctx) Sound.setVolume('tabla', settings.tablaVol / 100);
+  });
+  taalSelect.addEventListener('change', () => {
+    settings.taal = taalSelect.value; saveSettings(); buildGrid();
+    if (taalRun) { nextBeat = 0; nextTime = Sound.ctx.currentTime + 0.1; }
+  });
   buildGrid();
+
+  // Highlight the current section in the nav.
+  const links = [...document.querySelectorAll('.site-header nav a')];
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((en) => {
+        if (en.isIntersecting) links.forEach((a) => a.classList.toggle('active', a.getAttribute('href') === '#' + en.target.id));
+      });
+    }, { rootMargin: '-40% 0px -55% 0px' });
+    links.forEach((a) => { const s = document.querySelector(a.getAttribute('href')); if (s) io.observe(s); });
+  }
 
   // Finger-hole chart
   const svg = $('#flute');
