@@ -7,8 +7,9 @@ An interactive, animated guide to the **Indian classical bansuri** — daily riy
 ## Features
 - Daily riyaaz routine with per-block timers, a breathing animation and a streak tracker (saved in your browser)
 - Tanpura-style drone with selectable Sa
-- Interactive six-hole finger chart (Pa to Ma)
-- Five-stage roadmap, raga cards and bansuri technique cards (meend, kan, taan, tonguing)
+- Tabla taal player (Teentaal, Dadra, Keherwa, Jhaptaal, Rupak) with adjustable tempo
+- Interactive six-hole finger chart (Pa to Ma, with half-covered hole)
+- Five-stage roadmap, 23 raga cards filterable by time of day, and bansuri technique cards (meend, kan, taan, tonguing)
 
 ## Run locally
 It is a plain static site (no build step):

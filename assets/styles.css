@@ -79,3 +79,17 @@ footer { text-align: center; padding: 2rem 1rem 3rem; color: var(--muted); font-
 .link { background: none; border: 0; color: var(--accent); cursor: pointer; font: inherit; text-decoration: underline; }
 @media (max-width: 720px) { .practice-grid { grid-template-columns: 1fr; } .timer-card { position: static; } nav a { margin-left: .6rem; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+.taal-card { background: var(--panel); border-radius: 18px; padding: 1.25rem; }
+.taal-controls { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; margin-bottom: 1rem; }
+.taal-controls select { font: inherit; background: var(--bg); color: var(--ink); border: 1px solid var(--muted); border-radius: 8px; padding: .25rem .4rem; }
+.taal-grid { display: flex; flex-wrap: wrap; gap: .5rem; }
+.vibhag { display: flex; gap: .35rem; padding: .35rem; border: 1px dashed var(--muted); border-radius: 12px; }
+.beat { min-width: 3.6rem; text-align: center; padding: .4rem .3rem; border-radius: 10px; background: var(--bg); border: 2px solid transparent; transition: background .08s, border-color .08s; }
+.beat small { display: block; color: var(--accent); font-weight: 700; }
+.beat b { font-weight: 600; }
+.beat.on { background: var(--accent2); color: #fff; border-color: var(--accent); }
+.beat.on small { color: #fff; }
+#flute .half { fill: var(--accent); opacity: 0; transition: opacity .25s; }
+#flute .half.on { opacity: 1; }
+#flute .key.halfring { stroke: var(--accent); }

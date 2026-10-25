@@ -13,6 +13,7 @@
     <a class="brand" href="#top">🪈 Flute Mastery Journey · Bansuri</a>
     <nav>
       <a href="#practice">Practice</a>
+      <a href="#tabla">Tabla</a>
       <a href="#fingering">Finger holes</a>
       <a href="#roadmap">Roadmap</a>
       <a href="#ragas">Ragas</a>
@@ -56,6 +57,19 @@
       <p id="done-msg" class="done" hidden>🎉 Routine complete — session logged. See you tomorrow!</p>
     </section>
 
+    <section id="tabla">
+      <h2>Tabla taal player</h2>
+      <p class="lead">Practise with a synthesised tabla theka. The dayan is tuned to your selected Sa. Sam is the first beat (✕), tali is a clap (number), khali is a wave (○).</p>
+      <div class="taal-card">
+        <div class="taal-controls">
+          <label>Taal <select id="taal-select"></select></label>
+          <label>Tempo <input type="range" id="bpm" min="40" max="240" value="90"> <output id="bpm-out">90</output> BPM</label>
+          <button id="taal-toggle" class="btn small">▶ Play</button>
+        </div>
+        <div id="taal-grid" class="taal-grid" aria-live="off"></div>
+      </div>
+    </section>
+
     <section id="fingering">
       <h2>Finger-hole guide</h2>
       <p class="lead">The bansuri has six finger holes — three for the left hand, three for the right. Choose a swar to see which holes are covered.</p>
@@ -75,7 +89,8 @@
 
     <section id="ragas">
       <h2>Ragas to learn</h2>
-      <p class="lead">Start with simple, pentatonic or sweet ragas, and play each in its proper time of day.</p>
+      <p class="lead">Each raga has its own time of day and mood. Start with the simple, pentatonic ones and filter by time.</p>
+      <div class="note-picker" id="raga-filter" role="group" aria-label="Filter ragas by time"></div>
       <div class="cards" id="raga-cards"></div>
     </section>
 
