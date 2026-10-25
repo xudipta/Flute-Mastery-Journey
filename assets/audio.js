@@ -168,6 +168,9 @@
   }
 
   // ---------- engine (browser runtime) ----------
+  // While the page is hidden (screen off, another app in front) browsers may run timers only about once a
+  // second, so the drone and tabla schedule a few seconds ahead instead of a fraction of a second.
+  const lookahead = (visible) => (typeof document !== 'undefined' && document.hidden ? 3 : visible);
   const Engine = {
     ctx: null, saHz: 146.83, tabla: null, drone: null, tanpuraBufs: null, droneOn: false, droneTimer: null, droneNext: 0, droneStep: 0, droneSrc: [],
     ensure() {
@@ -187,15 +190,20 @@
     },
     setSa(hz) { this.saHz = hz; this.tanpuraBufs = null; },
     setVolume(which, v) { if (this[which]) this[which].vol.value = v; },
-    hit(bol, when, spb) { tablaHit(this.ctx, this.tabla.input, bol, when, spb, this.saHz); },
-    // A separate output for one demo; stop() fades it out and cuts everything scheduled on it.
-    bus() {
+    hit(bol, when, spb, bus) { tablaHit(this.ctx, bus ? bus.input : this.tabla.input, bol, when, spb, this.saHz); },
+    // A separate output for one demo (or one tabla run); stop() fades it out and cuts everything scheduled on it.
+    bus(to = 'flute') {
       const c = this.ensure(), g = c.createGain();
-      g.connect(this.flute.input);
+      g.connect(this[to].input);
       return { input: g, stop() { g.gain.setTargetAtTime(0, c.currentTime, 0.03); setTimeout(() => g.disconnect(), 400); } };
     },
     line(events, bus, t0) { return fluteLine(this.ctx, bus.input, events, t0); },
-    ring() { bell(this.ensure(), this.ctx.destination, this.ctx.currentTime + 0.02); },
+    // Rings the bell at audio time `at` (default: now). The returned cancel() silences it if it has not rung yet.
+    ring(at) {
+      const c = this.ensure(), g = c.createGain(), when = Math.max(at || 0, c.currentTime + 0.02);
+      g.connect(c.destination); bell(c, g, when);
+      return { at: when, cancel() { g.disconnect(); } };
+    },
     buffers() {
       if (!this.tanpuraBufs) {
         const c = this.ctx;
@@ -209,7 +217,7 @@
     },
     droneTick() {
       const c = this.ctx, bufs = this.buffers(), gap = 1.15;
-      while (this.droneNext < c.currentTime + 0.4) {
+      while (this.droneNext < c.currentTime + lookahead(0.4)) {
         const s = c.createBufferSource(), g = c.createGain();
         s.buffer = bufs[this.droneStep % 4];
         g.gain.value = this.droneStep % 4 === 0 ? 0.7 : 0.9;
@@ -233,5 +241,5 @@
     restartDrone() { if (this.droneOn) { this.stopDrone(); this.startDrone(); } }
   };
 
-  root.FluteAudio = { Engine, tablaHit, buildTablaChain, tanpuraString, tanpuraStrings, bell, fluteLine };
+  root.FluteAudio = { Engine, lookahead, tablaHit, buildTablaChain, tanpuraString, tanpuraStrings, bell, fluteLine };
 })(typeof window !== 'undefined' ? window : globalThis);
