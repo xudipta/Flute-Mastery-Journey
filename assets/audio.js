@@ -124,6 +124,48 @@
     [[880, 0.6], [880 * 2.76, 0.3], [880 * 5.4, 0.15]].forEach(([f, p], i) => tone(c, dest, 'sine', f, f, when, p, 0.003, 1.6 / (i + 1)));
   }
 
+  // ---------- bansuri-like melodic line ----------
+  // events: {f, start, dur, legato}. Times are seconds from t0. A legato event glides from the previous
+  // note on the same oscillators (meend); otherwise the note is re-articulated. Returns {stop()}.
+  function fluteLine(c, dest, events, t0) {
+    const out = c.createGain(), nodes = [];
+    out.gain.value = 0; out.connect(dest);
+    const parts = [[1, 0.6], [2, 0.2], [3, 0.07]].map(([m, a]) => {
+      const o = c.createOscillator(), g = c.createGain();
+      o.type = 'sine'; g.gain.value = a; o.connect(g); g.connect(out); nodes.push(o);
+      return { o, m };
+    });
+    const lfo = c.createOscillator(), lg = c.createGain();
+    lfo.frequency.value = 5; lg.gain.value = 4; lfo.connect(lg);
+    parts.forEach(({ o }) => lg.connect(o.detune)); nodes.push(lfo);
+    const nz = c.createBufferSource(), nf = c.createBiquadFilter(), ng = c.createGain();
+    nz.buffer = noiseBuffer(c); nz.loop = true; nf.type = 'bandpass'; nf.frequency.value = 2600; nf.Q.value = 0.7; ng.gain.value = 0.035;
+    nz.connect(nf); nf.connect(ng); ng.connect(out); nodes.push(nz);
+    const peak = 0.55;
+    let prev = null, end = 0;
+    events.forEach((ev, i) => {
+      const s = t0 + ev.start, e = s + ev.dur, glide = ev.legato && prev;
+      parts.forEach(({ o, m }) => {
+        if (glide) {
+          o.frequency.setValueAtTime(prev.f * m, s);
+          o.frequency.exponentialRampToValueAtTime(ev.f * m, s + Math.min(0.18, ev.dur * 0.5));
+        } else o.frequency.setValueAtTime(ev.f * m, s);
+      });
+      if (!glide) out.gain.setTargetAtTime(peak, s, 0.02);
+      const next = events[i + 1];
+      if (!(next && next.legato)) out.gain.setTargetAtTime(0, e - 0.06, 0.03);
+      prev = ev; end = e;
+    });
+    nodes.forEach((n) => { n.start(t0); n.stop(end + 0.6); });
+    return {
+      stop() {
+        const now = c.currentTime;
+        out.gain.cancelScheduledValues(now); out.gain.setTargetAtTime(0, now, 0.03);
+        nodes.forEach((n) => { try { n.stop(now + 0.25); } catch (e) { /* already stopped */ } });
+      }
+    };
+  }
+
   // ---------- engine (browser runtime) ----------
   const Engine = {
     ctx: null, saHz: 146.83, tabla: null, drone: null, tanpuraBufs: null, droneOn: false, droneTimer: null, droneNext: 0, droneStep: 0, droneSrc: [],
@@ -134,6 +176,10 @@
         const vol = c.createGain(), comp = c.createDynamicsCompressor();
         vol.connect(comp); comp.connect(c.destination);
         this.drone = { input: vol, vol: vol.gain };
+        const fl = c.createGain(), fc = c.createDynamicsCompressor();
+        fl.connect(fc); fc.connect(c.destination);
+        this.flute = { input: fl, vol: fl.gain };
+        if (this.onCreate) this.onCreate();
       }
       if (this.ctx.state === 'suspended') this.ctx.resume();
       return this.ctx;
@@ -141,6 +187,13 @@
     setSa(hz) { this.saHz = hz; this.tanpuraBufs = null; },
     setVolume(which, v) { if (this[which]) this[which].vol.value = v; },
     hit(bol, when, spb) { tablaHit(this.ctx, this.tabla.input, bol, when, spb, this.saHz); },
+    // A separate output for one demo; stop() fades it out and cuts everything scheduled on it.
+    bus() {
+      const c = this.ensure(), g = c.createGain();
+      g.connect(this.flute.input);
+      return { input: g, stop() { g.gain.setTargetAtTime(0, c.currentTime, 0.03); setTimeout(() => g.disconnect(), 400); } };
+    },
+    line(events, bus, t0) { return fluteLine(this.ctx, bus.input, events, t0); },
     ring() { bell(this.ensure(), this.ctx.destination, this.ctx.currentTime + 0.02); },
     buffers() {
       if (!this.tanpuraBufs) {
@@ -179,5 +232,5 @@
     restartDrone() { if (this.droneOn) { this.stopDrone(); this.startDrone(); } }
   };
 
-  root.FluteAudio = { Engine, tablaHit, buildTablaChain, tanpuraString, tanpuraStrings, bell };
+  root.FluteAudio = { Engine, tablaHit, buildTablaChain, tanpuraString, tanpuraStrings, bell, fluteLine };
 })(typeof window !== 'undefined' ? window : globalThis);

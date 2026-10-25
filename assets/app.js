@@ -98,12 +98,8 @@
   const saFreq = (i) => 130.81 * Math.pow(2, i / 12);
   Sound.setSa(saFreq(settings.sa));
   // Create the audio context on first use (needs a user gesture) and apply saved volumes.
-  function audio() {
-    const fresh = !Sound.ctx;
-    Sound.ensure();
-    if (fresh) { Sound.setVolume('tabla', settings.tablaVol / 100); Sound.setVolume('drone', 0.8 * settings.droneVol / 100); }
-    return Sound;
-  }
+  Sound.onCreate = () => { Sound.setVolume('tabla', settings.tablaVol / 100); Sound.setVolume('drone', 0.8 * settings.droneVol / 100); };
+  function audio() { Sound.ensure(); return Sound; }
 
   // Routine
   const rows = {};
@@ -267,29 +263,12 @@
   }
 
   // Finger-hole chart
-  const svg = $('#flute');
-  const ns = 'http://www.w3.org/2000/svg';
-  const add = (tag, attrs, parent = svg) => { const e = document.createElementNS(ns, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent.appendChild(e); return e; };
-  add('rect', { class: 'body', x: 20, y: 60, width: 600, height: 24, rx: 12 });
-  add('ellipse', { class: 'hole', cx: 85, cy: 72, rx: 14, ry: 8 });
-  add('text', { x: 85, y: 108 }).textContent = 'Blowing hole';
-  add('text', { x: 235, y: 36 }).textContent = 'LEFT HAND';
-  add('text', { x: 455, y: 36 }).textContent = 'RIGHT HAND';
-  const holeEls = {}, halfEls = {};
-  HOLES.forEach(([id, x], i) => {
-    holeEls[id] = add('circle', { class: 'key', cx: x, cy: 72, r: 13 });
-    halfEls[id] = add('path', { class: 'half', d: `M${x} 59 A13 13 0 0 0 ${x} 85 Z` });
-    add('text', { x, y: 108 }).textContent = String(i + 1);
-  });
-  add('text', { x: 560, y: 140 }).textContent = 'Open end';
+  const chart = FluteDemo.createChart($('#flute'));
   const picker = $('#note-picker');
   function showNote(label) {
     const entry = NOTES.find((n) => n[0] === label);
-    Object.entries(holeEls).forEach(([id, el]) => {
-      el.classList.toggle('on', entry[2].includes(id));
-      el.classList.toggle('halfring', entry[3].includes(id));
-      halfEls[id].classList.toggle('on', entry[3].includes(id));
-    });
+    const hole = (h) => Number(h.slice(1));
+    chart.show(entry[2].map(hole), entry[3].map(hole), false);
     picker.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.label === label));
     const num = (arr) => arr.map((h) => h.slice(1)).join(', ') || 'none';
     const half = entry[3].length ? ` Hole ${num(entry[3])} is half-covered.` : '';
@@ -309,7 +288,8 @@
   const cards = (arr) => arr.map(([i, t, d]) => `<article class="card"><div class="icon">${i}</div><h3>${t}</h3><p>${d}</p></article>`).join('');
   function showRagas(group) {
     $('#raga-cards').innerHTML = RAGAS.filter((r) => group === 'All' || r[2] === group)
-      .map(([i, t, g, d]) => `<article class="card"><div class="icon">${i}</div><h3>Raga ${t}</h3><p><strong>${g}.</strong> ${d}</p></article>`).join('');
+      .map(([i, t, g, d]) => `<article class="card"><div class="icon">${i}</div><h3>Raga ${t}</h3><p><strong>${g}.</strong> ${d}</p>${
+        window.RAGA_NOTATION[t] ? `<button type="button" class="btn small" data-raga="${t}" data-group="${g}">▶ How to play</button>` : '<p class="soon">Demo notation coming soon</p>'}</article>`).join('');
     $('#raga-filter').querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', b.textContent === group));
   }
   RAGA_GROUPS.forEach((g) => {
@@ -319,6 +299,10 @@
     $('#raga-filter').appendChild(b);
   });
   showRagas('All');
+  $('#raga-cards').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-raga]');
+    if (b) FluteDemo.ragaDemo(b.dataset.raga, b.dataset.group);
+  });
   $('#technique-cards').innerHTML = cards(TECHNIQUES);
 
   $('#reset-progress').addEventListener('click', () => {
