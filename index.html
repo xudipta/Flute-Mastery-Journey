@@ -34,7 +34,7 @@
   <header class="site-header">
     <a class="brand" href="#top">🪈 Flute Mastery Journey</a>
     <nav aria-label="Sections">
-      <a href="#practice" data-spy="practice">Practice</a>
+      <a href="#practice" data-spy="practice progress">Practice</a>
       <a href="#ragas" data-spy="ragas">Ragas</a>
       <a href="#tabla" data-spy="tabla">Tabla</a>
       <a href="#fingering" data-spy="fingering roadmap techniques glossary">Learn</a>
@@ -81,6 +81,7 @@
         <div>
           <div class="routine-head">
             <button id="run-all" class="btn">▶ Start full routine · <span id="routine-total">0</span> min</button>
+            <button id="edit-routine" class="btn small ghost" type="button">✎ Edit routine</button>
             <span class="hint">Timers run one after another; each block ticks itself off with a bell.</span>
           </div>
           <ol id="routine" class="routine"></ol>
@@ -95,7 +96,36 @@
           <div class="breath" aria-hidden="true"><div id="breath-circle"></div><span id="breath-text">Breathe</span></div>
         </div>
       </div>
-      <p id="done-msg" class="done" hidden>🎉 Routine complete — session logged. See you tomorrow!</p>
+      <p id="done-msg" class="done" hidden>🎉 Routine complete — session logged. See you tomorrow! <a href="#progress" id="add-note">Add a note about today</a></p>
+    </section>
+
+    <section id="progress">
+      <h2>Your progress</h2>
+      <p class="lead">Every day you practise is marked. Tap a day to see what you did and add a note.</p>
+      <div class="pstats" id="pstats"></div>
+      <div class="cal-card">
+        <div class="cal-head">
+          <button id="cal-prev" class="dock-btn" type="button" aria-label="Previous month">‹</button>
+          <h3 id="cal-title" aria-live="polite"></h3>
+          <button id="cal-next" class="dock-btn" type="button" aria-label="Next month">›</button>
+          <button id="cal-today" class="btn small ghost" type="button">Today</button>
+        </div>
+        <div class="cal-dow" aria-hidden="true"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
+        <div id="cal-grid" class="cal-grid" role="group" aria-label="Practice calendar"></div>
+        <p class="cal-legend" aria-hidden="true"><i class="lv1"></i> some practice <i class="lv2"></i> full routine</p>
+        <div id="day-detail" class="day-detail" aria-live="polite"></div>
+      </div>
+      <div class="data-panel">
+        <h3>Your data</h3>
+        <p class="hint">Progress is saved only in this browser. Export a backup file to keep it safe or move it to another device.</p>
+        <div class="demo-controls">
+          <button id="data-export" class="btn small" type="button">⬇ Export backup</button>
+          <button id="data-import" class="btn small ghost" type="button">⬆ Import backup</button>
+          <input type="file" id="import-file" accept="application/json,.json" hidden>
+          <button id="reset-progress" class="link" type="button">Reset all progress</button>
+        </div>
+        <p id="data-msg" class="hint" role="status"></p>
+      </div>
     </section>
 
     <section id="ragas">
@@ -159,7 +189,7 @@
   </main>
 
   <footer>
-    <p>Built with patience. Progress is saved only in your browser. <button id="reset-progress" class="link">Reset progress</button></p>
+    <p>Built with patience. Progress is saved only in your browser. <a href="#progress">Back it up in Your progress</a>.</p>
     <p class="app-line"><button id="install" class="link" hidden>⬇ Install as an app</button><span id="ios-hint" hidden>To install on iPhone or iPad, tap Share, then Add to Home Screen.</span><span id="offline-ok" hidden>✓ Ready to use offline</span></p>
   </footer>
   <div class="dock" id="dock" role="region" aria-label="Practice tools">
@@ -178,11 +208,18 @@
     </div>
   </div>
   <nav class="tabbar" aria-label="Sections">
-    <a href="#practice" data-spy="practice"><span aria-hidden="true">🧘</span>Practice</a>
+    <a href="#practice" data-spy="practice progress"><span aria-hidden="true">🧘</span>Practice</a>
     <a href="#ragas" data-spy="ragas"><span aria-hidden="true">🎼</span>Ragas</a>
     <a href="#tabla" data-spy="tabla"><span aria-hidden="true">🥁</span>Tabla</a>
     <a href="#fingering" data-spy="fingering roadmap techniques glossary"><span aria-hidden="true">📖</span>Learn</a>
   </nav>
+  <dialog id="routine-editor" aria-labelledby="re-title">
+    <div class="demo-head"><div><h2 id="re-title">Edit your routine</h2><p class="lead">Turn blocks on or off, set minutes and change the order.</p></div><button id="re-close" class="dock-btn" type="button" aria-label="Close">✕</button></div>
+    <div class="demo-controls" id="re-presets"><span class="hint">Presets:</span></div>
+    <ol id="re-list" class="re-list"></ol>
+    <p id="re-total" class="hint" role="status"></p>
+    <div class="demo-controls"><button id="re-save" class="btn small" type="button">Save routine</button><button id="re-cancel" class="btn small ghost" type="button">Cancel</button></div>
+  </dialog>
   <dialog id="demo" aria-labelledby="demo-title">
     <div class="demo-head">
       <div><h2 id="demo-title"></h2><p id="demo-sub" class="lead"></p></div>
@@ -196,6 +233,7 @@
   <script src="assets/demo.js"></script>
   <script src="assets/app.js"></script>
   <script src="assets/practice-demos.js"></script>
+  <script src="assets/progress.js"></script>
   <script src="assets/glossary-ui.js"></script>
 </body>
 </html>

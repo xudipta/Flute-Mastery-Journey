@@ -1,5 +1,5 @@
 (() => {
-  const ROUTINE = [
+  const BLOCKS = [
     { id: 'breath', title: 'Pranayama & posture', min: 5, text: 'Sit tall, shoulders soft. Slow diaphragmatic breaths: inhale 4 counts, exhale 8, then blow a steady airstream without the flute.' },
     { id: 'sa', title: 'Sur sadhana (long tones)', min: 10, text: 'With the tanpura on, hold Sa, then Pa, then each swar for a full breath. Listen for a steady, round tone.' },
     { id: 'alankar', title: 'Alankars / paltas', min: 10, text: 'Practise patterns like Sa Re Ga, Re Ga Ma… in ascending and descending order, slowly and evenly.' },
@@ -7,6 +7,17 @@
     { id: 'taal', title: 'Taan & taal practice', min: 10, text: 'Clap or keep Teentaal (16 beats). Play simple taans and tihais that land exactly on sam.' },
     { id: 'cool', title: 'Bandish / cool-down', min: 5, text: 'Play a composition or a gentle bhajan-style melody. End softly on Sa.' }
   ];
+  // The routine is the user's plan (order, minutes, on/off) applied to the block definitions above.
+  const defaultPlan = () => BLOCKS.map((b) => ({ id: b.id, min: b.min, on: true }));
+  function planToRoutine(plan) {
+    const out = [];
+    (plan || defaultPlan()).forEach((p) => {
+      const b = BLOCKS.find((x) => x.id === p.id);
+      if (b && p.on) out.push(Object.assign({}, b, { min: p.min }));
+    });
+    return out;
+  }
+  let ROUTINE = [];
 
 
   const STAGES = [
@@ -59,31 +70,55 @@
   const SA_NAMES = ['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
 
   const $ = (s) => document.querySelector(s);
-  const todayKey = () => new Date().toISOString().slice(0, 10);
+  const dateKey = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const todayKey = () => dateKey();
   const store = {
     get() { try { return JSON.parse(localStorage.getItem('flute-journey')) || {}; } catch { return {}; } },
     set(v) { try { localStorage.setItem('flute-journey', JSON.stringify(v)); } catch {} }
   };
-  let state = Object.assign({ days: {}, checks: {}, checkDate: todayKey() }, store.get());
-  if (state.checkDate !== todayKey()) { state.checks = {}; state.checkDate = todayKey(); }
-
+  let state = Object.assign({ log: {}, checks: {}, checkDate: todayKey() }, store.get());
+  if (state.checkDate !== todayKey()) { state.checks = {}; state.checkMins = {}; state.checkDate = todayKey(); }
+  // Older versions stored only completed days as state.days; keep them as completed log entries.
+  if (state.days) {
+    Object.keys(state.days).forEach((k) => { if (!state.log[k]) state.log[k] = { minutes: 0, blocks: [], complete: true, legacy: true, note: '' }; });
+    delete state.days; store.set(state);
+  }
+  // A day counts as practised when at least one block was done (or it is a legacy completed day).
+  const practised = (k) => { const e = state.log[k]; return !!e && (e.minutes > 0 || !!e.legacy); };
+  const practisedDays = () => Object.keys(state.log).filter(practised);
   function streak() {
     let n = 0; const d = new Date();
-    if (!state.days[d.toISOString().slice(0, 10)]) d.setDate(d.getDate() - 1);
-    while (state.days[d.toISOString().slice(0, 10)]) { n++; d.setDate(d.getDate() - 1); }
+    if (!practised(dateKey(d))) d.setDate(d.getDate() - 1);
+    while (practised(dateKey(d))) { n++; d.setDate(d.getDate() - 1); }
     return n;
+  }
+  function recordToday() {
+    const k = todayKey(), ids = Object.keys(state.checks).filter((id) => state.checks[id]), e = state.log[k];
+    state.checkMins = state.checkMins || {};
+    if (!ids.length) {
+      if (e && !e.legacy) { if (e.note) Object.assign(e, { minutes: 0, blocks: [], complete: false }); else delete state.log[k]; }
+      return;
+    }
+    const entry = state.log[k] = Object.assign({ note: '' }, e);
+    delete entry.legacy;
+    // Minutes are stored when a block is ticked, so changing the routine later does not rewrite today.
+    entry.blocks = ids;
+    entry.minutes = ids.reduce((s, id) => s + (state.checkMins[id] || (BLOCKS.find((b) => b.id === id) || {}).min || 0), 0);
+    entry.complete = ROUTINE.length > 0 && ROUTINE.every((r) => state.checks[r.id]);
   }
   function renderStats() {
     const checked = ROUTINE.filter((r) => state.checks[r.id]).reduce((a, r) => a + r.min, 0);
     $('#streak').textContent = streak();
-    $('#total').textContent = Object.keys(state.days).length;
+    $('#total').textContent = practisedDays().length;
     $('#minutes').textContent = checked;
-    $('#done-msg').hidden = !state.days[todayKey()];
+    $('#done-msg').hidden = !(state.log[todayKey()] && state.log[todayKey()].complete);
     if (typeof renderToday === 'function') renderToday();
+    if (window.FluteProgress) window.FluteProgress.refresh();
   }
 
-  const settings = Object.assign({ sa: 2, bpm: 90, taal: 'Teentaal · 16', tablaVol: 100, droneVol: 100, onboarded: false, favs: [] }, state.settings);
+  const settings = Object.assign({ sa: 2, bpm: 90, taal: 'Teentaal · 16', tablaVol: 100, droneVol: 100, onboarded: false, favs: [], routine: null }, state.settings);
   const saveSettings = () => { state.settings = settings; store.set(state); };
+  ROUTINE = planToRoutine(settings.routine);
   const Sound = FluteAudio.Engine;
   const saFreq = (i) => 130.81 * Math.pow(2, i / 12);
   Sound.setSa(saFreq(settings.sa));
@@ -95,7 +130,7 @@
   let showIntro = false;
   function markOnboarded() { if (!settings.onboarded) { settings.onboarded = true; saveSettings(); } }
   function renderToday() {
-    const returning = settings.onboarded || Object.keys(state.days).length > 0;
+    const returning = settings.onboarded || practisedDays().length > 0;
     const today = $('#today'), intro = $('#hero-intro');
     if (!today) return;
     today.hidden = !returning || showIntro; intro.hidden = returning && !showIntro;
@@ -120,27 +155,32 @@
   function setChecked(id, val) {
     if (val) markOnboarded();
     state.checks[id] = val;
+    state.checkMins = state.checkMins || {};
+    if (val) state.checkMins[id] = ROUTINE.find((r) => r.id === id).min; else delete state.checkMins[id];
     rows[id].box.checked = val;
     rows[id].li.classList.toggle('done', val);
-    if (ROUTINE.every((x) => state.checks[x.id])) state.days[todayKey()] = true;
-    else delete state.days[todayKey()];
+    recordToday();
     store.set(state); renderStats();
   }
   const list = $('#routine');
-  ROUTINE.forEach((r) => {
-    const li = document.createElement('li');
-    li.dataset.id = r.id;
-    li.innerHTML = `<input type="checkbox" aria-label="Done: ${r.title}"><div><h3>${r.title} · ${r.min} min</h3><p>${r.text}</p><button type="button" data-timer>Start timer</button> <button type="button" data-how>▶ Show me how</button></div>`;
-    const box = li.querySelector('input');
-    rows[r.id] = { li, box };
-    box.checked = !!state.checks[r.id];
-    li.classList.toggle('done', box.checked);
-    box.addEventListener('change', () => setChecked(r.id, box.checked));
-    li.querySelector('[data-timer]').addEventListener('click', () => { runAll = false; selectBlock(r, true); });
-    li.querySelector('[data-how]').addEventListener('click', () => PracticeDemos.open(r.id));
-    list.appendChild(li);
-  });
-  $('#routine-total').textContent = ROUTINE.reduce((a, r) => a + r.min, 0);
+  function renderRoutine() {
+    list.innerHTML = ''; Object.keys(rows).forEach((k) => delete rows[k]);
+    ROUTINE.forEach((r) => {
+      const li = document.createElement('li');
+      li.dataset.id = r.id;
+      li.innerHTML = `<input type="checkbox" aria-label="Done: ${r.title}"><div><h3>${r.title} · ${r.min} min</h3><p>${r.text}</p><button type="button" data-timer>Start timer</button> <button type="button" data-how>▶ Show me how</button></div>`;
+      const box = li.querySelector('input');
+      rows[r.id] = { li, box };
+      box.checked = !!state.checks[r.id];
+      li.classList.toggle('done', box.checked);
+      box.addEventListener('change', () => setChecked(r.id, box.checked));
+      li.querySelector('[data-timer]').addEventListener('click', () => { runAll = false; selectBlock(r, true); });
+      li.querySelector('[data-how]').addEventListener('click', () => PracticeDemos.open(r.id));
+      list.appendChild(li);
+    });
+    $('#routine-total').textContent = ROUTINE.reduce((a, r) => a + r.min, 0);
+  }
+  renderRoutine();
 
   // Timer (uses wall-clock time so it stays correct if the tab is throttled)
   let block = null, remaining = 0, handle = null, endAt = 0, runAll = false;
@@ -425,10 +465,21 @@
     else return;
   });
 
-  $('#reset-progress').addEventListener('click', () => {
-    if (confirm('Clear all saved practice progress?')) { state = { days: {}, checks: {}, checkDate: todayKey() }; store.set(state); location.reload(); }
-  });
   renderStats();
+
+  // Small API for progress.js (calendar, routine editor, backup).
+  window.FluteApp = {
+    BLOCKS, state: () => state, settings, dateKey, todayKey, streak, practised, practisedDays, defaultPlan,
+    routine: () => ROUTINE,
+    saveState: () => store.set(state),
+    setPlan(plan) {
+      if (handle) stop();
+      block = null; runAll = false; $('#timer-label').textContent = 'Pick a block to start its timer'; $('#timer').textContent = '00:00';
+      settings.routine = plan; ROUTINE = planToRoutine(plan); saveSettings();
+      recordToday(); store.set(state); renderRoutine(); renderStats();
+    }
+  };
+  if (window.FluteProgress) window.FluteProgress.refresh();
 
   // Install as an app + offline support
   let installEvent = null;
