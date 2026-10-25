@@ -310,7 +310,7 @@ footer a { color: var(--accent-ink); }
 .tuner-swar { font-size: clamp(3rem, 12vw, 5rem); font-weight: 800; line-height: 1; color: var(--accent-ink); }
 .tuner-sub { color: var(--muted); min-height: 1.5em; }
 .gauge { position: relative; height: 2.6rem; margin: 1rem .5rem .25rem; border-radius: 999px; background: var(--bg); }
-.gauge .zone { position: absolute; left: 40%; width: 20%; top: 0; bottom: 0; background: color-mix(in srgb, var(--ok) 35%, transparent); border-radius: 6px; }
+.gauge .zone { position: absolute; left: 40%; width: 20%; top: 0; bottom: 0; background: rgba(40, 170, 110, .35); background: color-mix(in srgb, var(--ok) 35%, transparent); border-radius: 6px; }
 .gauge .mid { position: absolute; left: 50%; top: 4px; bottom: 4px; width: 2px; background: var(--muted); opacity: .6; }
 .gauge .needle { position: absolute; top: 3px; bottom: 3px; width: 8px; margin-left: -4px; left: 50%; border-radius: 4px; background: var(--accent2); transition: left .08s linear, background .15s; }
 .gauge .needle.ok { background: var(--ok); }
