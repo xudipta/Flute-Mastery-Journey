@@ -402,4 +402,18 @@
     if (confirm('Clear all saved practice progress?')) { state = { days: {}, checks: {}, checkDate: todayKey() }; store.set(state); location.reload(); }
   });
   renderStats();
+
+  // Install as an app + offline support
+  let installEvent = null;
+  window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); installEvent = e; $('#install').hidden = false; });
+  $('#install').addEventListener('click', async () => {
+    if (!installEvent) return;
+    installEvent.prompt(); await installEvent.userChoice; installEvent = null; $('#install').hidden = true;
+  });
+  window.addEventListener('appinstalled', () => { $('#install').hidden = true; });
+  const standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+  if (/iphone|ipad/i.test(navigator.userAgent) && !standalone) $('#ios-hint').hidden = false;
+  if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+    navigator.serviceWorker.register('sw.js').then(() => navigator.serviceWorker.ready).then(() => { $('#offline-ok').hidden = false; }).catch(() => {});
+  }
 })();
