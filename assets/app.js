@@ -141,7 +141,18 @@
   saSelect.value = 2;
   let ctx = null, droneTimer = null, droneOn = false;
   const saFreq = () => 130.81 * Math.pow(2, Number(saSelect.value) / 12);
+  let tablaOut = null;
   const getCtx = () => (ctx = ctx || new (window.AudioContext || window.webkitAudioContext)());
+  // Tabla goes through a gain stage (user volume) and a compressor so it stays loud without clipping.
+  function tablaBus() {
+    if (!tablaOut) {
+      const c = getCtx(), comp = c.createDynamicsCompressor(), vol = c.createGain();
+      vol.gain.value = Number($('#tabla-vol').value) / 100;
+      comp.connect(vol); vol.connect(c.destination);
+      tablaOut = { input: comp, vol };
+    }
+    return tablaOut;
+  }
   function pluck(freq, when) {
     const o = ctx.createOscillator(), f = ctx.createBiquadFilter(), g = ctx.createGain();
     o.type = 'sawtooth'; o.frequency.value = freq;
@@ -192,18 +203,18 @@
       o.type = 'sine'; o.frequency.setValueAtTime(saFreq() * 2.5, when);
       o.frequency.exponentialRampToValueAtTime(saFreq() * 2, when + 0.25);
       g.gain.setValueAtTime(0.0001, when);
-      g.gain.exponentialRampToValueAtTime(0.35, when + 0.005);
+      g.gain.exponentialRampToValueAtTime(1, when + 0.005);
       g.gain.exponentialRampToValueAtTime(0.0001, when + 0.35);
-      o.connect(g); g.connect(ctx.destination); o.start(when); o.stop(when + 0.4);
+      o.connect(g); g.connect(tablaBus().input); o.start(when); o.stop(when + 0.4);
     }
     if (bayan) {
       const o = ctx.createOscillator(), g = ctx.createGain();
       o.type = 'sine'; o.frequency.setValueAtTime(140, when);
       o.frequency.exponentialRampToValueAtTime(70, when + 0.3);
       g.gain.setValueAtTime(0.0001, when);
-      g.gain.exponentialRampToValueAtTime(0.5, when + 0.01);
+      g.gain.exponentialRampToValueAtTime(1.6, when + 0.01);
       g.gain.exponentialRampToValueAtTime(0.0001, when + 0.45);
-      o.connect(g); g.connect(ctx.destination); o.start(when); o.stop(when + 0.5);
+      o.connect(g); g.connect(tablaBus().input); o.start(when); o.stop(when + 0.5);
     }
   }
   const taalSelect = $('#taal-select'), grid = $('#taal-grid'), bpm = $('#bpm');
@@ -239,6 +250,7 @@
     } else { clearInterval(taalTimer); beatEls.forEach((e) => e.classList.remove('on')); }
   }
   $('#taal-toggle').addEventListener('click', toggleTaal);
+  $('#tabla-vol').addEventListener('input', () => { if (tablaOut) tablaOut.vol.gain.value = Number($('#tabla-vol').value) / 100; });
   bpm.addEventListener('input', () => { $('#bpm-out').textContent = bpm.value; });
   taalSelect.addEventListener('change', () => { buildGrid(); nextBeat = 0; });
   buildGrid();
