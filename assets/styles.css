@@ -114,6 +114,10 @@ body { padding-bottom: 5.5rem; }
 .dock-btn.on { background: var(--accent); border-color: var(--accent); color: #1b1840; }
 .dock input[type="range"] { width: 6rem; }
 .dock .bpm { display: flex; align-items: center; gap: .3rem; }
+.dock-timer { border-color: var(--accent2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.dock-timer[hidden] { display: none; }
+/* narrow phones: while a block timer shows, it takes the tempo control's place (tempo stays in the Tools section) */
+@media (max-width: 420px) { .dock.has-timer .bpm { display: none; } }
 .dock output { min-width: 2.2rem; text-align: center; font-variant-numeric: tabular-nums; font-weight: 700; }
 .dock .sep { width: 1px; height: 1.6rem; background: var(--muted); opacity: .5; }
 @media (max-width: 720px) { .dock .sep { display: none; } .site-header { padding: .5rem .75rem; } }

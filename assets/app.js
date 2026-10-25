@@ -187,13 +187,32 @@
   // the browser delays the interval (screen off, app in the background).
   let block = null, remaining = 0, handle = null, endAt = 0, runAll = false, bellAt = null;
   const fmt = (s) => String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+  // Shows the time in the timer card, and (once a block is under way) in the tools bar and the tab title,
+  // so the timer can be seen from any section.
+  const baseTitle = document.title, chip = $('#dock-timer');
+  function renderTimer() {
+    $('#timer').textContent = fmt(remaining);
+    const show = !!block && remaining > 0 && (!!handle || remaining < block.min * 60);
+    chip.hidden = !show; $('#dock').classList.toggle('has-timer', show);
+    const title = show ? `${handle ? '⏱' : '⏸'} ${fmt(remaining)} · ${block.title}` : baseTitle;
+    if (document.title !== title) document.title = title;
+    if (!show) return;
+    $('#dock-timer-icon').textContent = handle ? '⏱' : '⏸';
+    $('#dock-timer-time').textContent = fmt(remaining);
+    $('#dock-timer-name').textContent = block.title;
+    chip.setAttribute('aria-label', `${block.title}: ${fmt(remaining)} left${handle ? '' : ', paused'}. Go to the timer`);
+  }
+  chip.addEventListener('click', () => {
+    $('.timer-card').scrollIntoView({ block: 'center', behavior: 'smooth' });
+    $('#timer-toggle').focus({ preventScroll: true });
+  });
   function selectBlock(r, autostart) {
     markOnboarded(); stop();
     block = r; remaining = r.min * 60;
     document.querySelectorAll('.routine li').forEach((x) => x.classList.toggle('active', x === rows[r.id].li));
     rows[r.id].li.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     $('#timer-label').textContent = r.title;
-    $('#timer').textContent = fmt(remaining);
+    renderTimer();
     if (autostart) start();
   }
   function start() {
@@ -203,15 +222,15 @@
     $('#timer-toggle').textContent = 'Pause';
     handle = setInterval(() => {
       remaining = Math.max(0, Math.ceil((endAt - Date.now()) / 1000));
-      $('#timer').textContent = fmt(remaining);
+      renderTimer();
       if (remaining <= 0) blockDone();
     }, 250);
-    keepAwake();
+    renderTimer(); keepAwake();
   }
   function stop() {
     clearInterval(handle); handle = null; $('#timer-toggle').textContent = 'Start';
     if (bellAt) { bellAt.cancel(); bellAt = null; }
-    keepAwake();
+    renderTimer(); keepAwake();
   }
   function blockDone() {
     // Keep the scheduled bell unless the audio clock fell behind (it pauses while iOS suspends the page).
@@ -223,8 +242,8 @@
     const i = ROUTINE.indexOf(block), next = ROUTINE.slice(i + 1).find((x) => !state.checks[x.id]);
     if (runAll && next) selectBlock(next, true); else runAll = false;
   }
-  $('#timer-toggle').addEventListener('click', () => { if (!block) { selectBlock(ROUTINE.find((x) => !state.checks[x.id]) || ROUTINE[0], true); } else if (handle) { stop(); remaining = Math.max(0, Math.ceil((endAt - Date.now()) / 1000)); } else start(); });
-  $('#timer-reset').addEventListener('click', () => { if (block) { stop(); remaining = block.min * 60; $('#timer').textContent = fmt(remaining); } });
+  $('#timer-toggle').addEventListener('click', () => { if (!block) { selectBlock(ROUTINE.find((x) => !state.checks[x.id]) || ROUTINE[0], true); } else if (handle) { stop(); remaining = Math.max(0, Math.ceil((endAt - Date.now()) / 1000)); renderTimer(); } else start(); });
+  $('#timer-reset').addEventListener('click', () => { if (block) { stop(); remaining = block.min * 60; renderTimer(); } });
   function runRoutine() {
     markOnboarded();
     const first = ROUTINE.find((x) => !state.checks[x.id]);
@@ -539,7 +558,7 @@
     saveState: () => store.set(state),
     setPlan(plan) {
       if (handle) stop();
-      block = null; runAll = false; $('#timer-label').textContent = 'Pick a block to start its timer'; $('#timer').textContent = '00:00';
+      block = null; remaining = 0; runAll = false; $('#timer-label').textContent = 'Pick a block to start its timer'; renderTimer();
       settings.routine = plan; ROUTINE = planToRoutine(plan); saveSettings();
       recordToday(); store.set(state); renderRoutine(); renderStats();
     }
