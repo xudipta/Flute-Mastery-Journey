@@ -119,7 +119,16 @@
     <button id="dock-tabla" class="dock-btn" aria-pressed="false">🥁 <span id="dock-taal">Teentaal</span></button>
     <span class="bpm"><button id="bpm-down" class="dock-btn" aria-label="Slower">−</button><output id="dock-bpm">90</output><button id="bpm-up" class="dock-btn" aria-label="Faster">+</button></span>
   </div>
+  <dialog id="demo" aria-labelledby="demo-title">
+    <div class="demo-head">
+      <div><h2 id="demo-title"></h2><p id="demo-sub" class="lead"></p></div>
+      <button id="demo-close" class="dock-btn" aria-label="Close demo">✕</button>
+    </div>
+    <div id="demo-body"></div>
+  </dialog>
   <script src="assets/audio.js"></script>
+  <script src="assets/ragas.js"></script>
+  <script src="assets/demo.js"></script>
   <script src="assets/app.js"></script>
 </body>
 </html>
