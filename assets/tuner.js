@@ -87,7 +87,9 @@
   const westernName = (saIndex, cls) => NOTE[(saIndex + cls) % 12];
 
   // ---------- UI ----------
-  const state = { stream: null, src: null, an: null, raf: 0, buf: null, last: 0, filter: makeFilter(), voicedAt: 0, trace: [], current: null, bytes: null };
+  // refUntil: readings are ignored until then, while the site itself plays Sa. restore: switches the tanpura
+  // and tabla back on after listening.
+  const state = { stream: null, src: null, an: null, raf: 0, buf: null, last: 0, filter: makeFilter(), voicedAt: 0, trace: [], current: null, bytes: null, refUntil: 0, restore: null };
   const App = () => root.FluteApp, Sound = () => root.FluteAudio.Engine;
 
   function median(a) { const s = [...a].sort((x, y) => x - y); return s[s.length >> 1]; }
@@ -109,11 +111,17 @@
     state.bytes = state.an.getFloatTimeDomainData ? null : new Uint8Array(state.an.fftSize);
     state.voicedAt = performance.now();
     $('#tuner-toggle').textContent = '■ Stop listening'; $('#tuner-toggle').classList.add('on');
-    setMsg('Listening… play a long, steady note.');
+    // The tanpura and tabla would reach the microphone too, so pause them while listening.
+    const q = App() && App().quiet ? App().quiet() : { paused: [], restore: null };
+    state.restore = q.restore;
+    setMsg('Listening… play a long, steady note.' + (q.paused.length ? ` The ${q.paused.join(' and ')} will come back on when you stop.` : ''));
     state.raf = requestAnimationFrame(loop);
   }
-  function stop() {
+  // `resume`: switch the tanpura/tabla back on (not when the page was hidden, so no sound starts in the background).
+  function stop(resume = true) {
     cancelAnimationFrame(state.raf);
+    if (state.restore && resume) state.restore();
+    state.restore = null;
     if (state.stream) state.stream.getTracks().forEach((t) => t.stop());
     if (state.src) state.src.disconnect();
     state.stream = state.src = state.an = null; state.current = null;
@@ -128,8 +136,14 @@
     state.last = t;
     if (state.bytes) { state.an.getByteTimeDomainData(state.bytes); for (let i = 0; i < state.bytes.length; i++) state.buf[i] = (state.bytes[i] - 128) / 128; }
     else state.an.getFloatTimeDomainData(state.buf);
-    const r = detect(state.buf, Sound().ctx.sampleRate);
     const now = performance.now();
+    if (now < state.refUntil) {
+      // The site is playing Sa through the speaker: don't mistake it for the flute.
+      state.filter.reset(); state.current = null; state.voicedAt = now;
+      render(null); $('#tuner-sub').textContent = 'Paused while Sa plays…';
+      return;
+    }
+    const r = detect(state.buf, Sound().ctx.sampleRate);
     if (r && r.clarity > 0.85) {
       state.voicedAt = now;
       const f = state.filter.push(r.freq), tgt = $('#tuner-target').value;
@@ -205,6 +219,7 @@
   function hearSa() {
     const F = root.FluteDemo; if (!F) return;
     F.player.play([{ tok: 'S', beats: 4 }], 60, { onStep() {}, onEnd() {} });
+    state.refUntil = performance.now() + 4600; // 4 beats at 60 BPM, plus the fade-out
   }
   function setSaFromNote() {
     if (!state.current || !App() || !App().setSa) return;
@@ -217,9 +232,11 @@
     const tgt = $('#tuner-target');
     LETTERS.split('').forEach((l, i) => { const o = document.createElement('option'); o.value = i; o.textContent = SHOW[l]; tgt.appendChild(o); });
     $('#tuner-toggle').addEventListener('click', () => (state.stream ? stop() : start()));
+    // Any stop of the player (end of the note, or another sound taking over) ends the pause.
+    if (root.FluteDemo) root.FluteDemo.player.hooks.push(() => { state.refUntil = 0; });
     $('#tuner-ref').addEventListener('click', hearSa);
     $('#tuner-setsa').addEventListener('click', setSaFromNote);
-    document.addEventListener('visibilitychange', () => { if (document.hidden && state.stream) stop(); });
+    document.addEventListener('visibilitychange', () => { if (document.hidden && state.stream) stop(false); });
     render(null);
   }
   root.FluteTuner = { detect, toSwar, makeFilter };
