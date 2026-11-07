@@ -1,98 +1,87 @@
-/* Styles for the swipeable practice cards in the Practice view. Owned by the practice-cards issue (#27).
-   The old list rules (.routine li ...) in styles.css still match these cards, so everything below is written to
-   win over them. */
+/* Practice view (#view-practice): the swipeable practice cards. Built on the tokens and card styles in styles.css:
+   the card look and its states (active, running, done) come from there. The cards come first on the screen: a slim
+   Today strip sits above them, and the stats and the long hint sit below. */
+
+#practice { padding-top: var(--s-5); }
+#practice .pc-title { font-size: var(--fs-xl); margin: 0 0 var(--s-2); }
+
+/* ----- today strip ----- */
+.practice-top { margin: 0 0 var(--s-3); }
+#practice .today { max-width: none; margin: 0; }
+#practice .t-line { margin: 0; font-size: var(--fs-sm); line-height: 1.4; }
+#practice .t-bar { margin: var(--s-2) 0; max-width: none; }
+#practice .t-actions { justify-content: flex-start; gap: var(--s-2); }
 
 /* ----- carousel: a horizontal scroll-snap track; the cards peek in from the sides ----- */
 .pc-carousel { margin-inline: -1.25rem; }
 .pc-track {
   position: relative; /* so card.offsetLeft is measured from the track */
-  display: flex; gap: .75rem; margin: 0; list-style: none;
-  padding: .25rem max(1.25rem, calc((100% - 34rem) / 2)) 1rem;
+  display: flex; gap: var(--s-3); margin: 0; list-style: none;
+  padding: .35rem max(1.25rem, calc((100% - 34rem) / 2)) 1.1rem;
   overflow-x: auto; overflow-y: hidden;
   scroll-snap-type: x mandatory; overscroll-behavior-x: contain; scrollbar-width: none;
   touch-action: pan-x pan-y; /* swipe sideways for the track, scroll the page up and down */
   -webkit-overflow-scrolling: touch;
 }
 .pc-track::-webkit-scrollbar { display: none; }
-.routine.pc-track { display: flex; gap: .75rem; } /* beats .routine { display: grid } */
 
 /* ----- one card ----- */
 .pc-track > .pc-card {
   flex: 0 0 100%; max-width: 34rem; scroll-snap-align: center; scroll-snap-stop: always;
   display: flex; flex-direction: column; align-items: stretch; gap: .35rem;
-  padding: 1.1rem 1.25rem 1rem; border-radius: var(--r-card, 18px);
-  background: var(--panel); border: 2px solid transparent;
-  box-shadow: var(--shadow-card, 0 2px 12px rgba(0, 0, 0, .14));
-  opacity: .78; transition: opacity .2s, border-color .2s;
+  padding: 1.1rem 1.25rem 1rem;
+  opacity: .72; transform: scale(.975); transition: opacity .25s, transform .25s var(--ease), border-color .25s, box-shadow .25s;
 }
-.pc-track > .pc-card.is-current { opacity: 1; }
-.pc-track > .pc-card.active { border-color: var(--accent2); }
-.pc-track > .pc-card.done { opacity: .72; }
-.pc-track > .pc-card.done.is-current { opacity: .9; }
-.pc-card h3 { margin: .1rem 0 0; font-size: 1.3rem; line-height: 1.25; text-decoration: none !important; }
+.pc-track > .pc-card.is-current { opacity: 1; transform: none; }
+.pc-track > .pc-card.done.is-current { opacity: .92; }
+.pc-card h3 { margin: .1rem 0 0; font-size: var(--fs-xl); line-height: 1.25; text-decoration: none !important; }
 .pc-card p { margin: 0; }
-.pc-top { display: flex; align-items: center; gap: .6rem; min-height: 2rem; }
-.pc-icon { font-size: 1.8rem; line-height: 1; }
-.pc-step { color: var(--muted); font-size: .85rem; font-weight: 600; }
-.pc-badge { margin-left: auto; padding: .15rem .65rem; border-radius: 999px; background: var(--accent2); color: #fff; font-size: .8rem; font-weight: 700; white-space: nowrap; }
-.pc-card.done .pc-step::after { content: ' · done ✓'; color: var(--ok); }
+.pc-top { display: flex; align-items: center; gap: .6rem; min-height: 2.6rem; }
+.pc-icon { display: grid; place-items: center; width: 2.6rem; height: 2.6rem; border-radius: var(--r-md); background: color-mix(in srgb, var(--accent2) 22%, transparent); font-size: 1.5rem; line-height: 1; }
+.pc-step { color: var(--muted); font-size: var(--fs-sm); font-weight: 600; }
+.pc-badge { margin-left: auto; padding: .15rem .7rem; border-radius: var(--r-pill); background: var(--accent2); color: #fff; font-size: .8rem; font-weight: 700; white-space: nowrap; }
+.pc-card.running .pc-badge { background: var(--accent); color: var(--on-accent); }
+.pc-card.done .pc-step::after { content: ' · done ✓'; color: var(--ok-ink); }
 .pc-min { color: var(--accent-ink) !important; font-weight: 700; }
 .pc-text { color: var(--muted) !important; font-size: .95rem !important; }
 
-/* the timer */
-.pc-timer { text-align: center; margin: .5rem 0 .1rem; }
-.pc-time { font-size: clamp(3rem, 15vw, 4.5rem); font-weight: 800; line-height: 1.05; font-variant-numeric: tabular-nums; color: var(--accent-ink); }
+/* the timer: the biggest thing on the card */
+.pc-timer { text-align: center; margin: var(--s-2) 0 .1rem; }
+.pc-time { font-size: var(--fs-display); font-weight: 800; letter-spacing: -.02em; line-height: 1.05; font-variant-numeric: tabular-nums; color: var(--accent-ink); }
 .pc-card.active:not(.running) .pc-time { opacity: .75; }
 .pc-actions { display: flex; gap: .6rem; }
-.pc-card .btn.pc-toggle {
-  flex: 1 1 auto; min-height: 3.1rem; font-size: 1.1rem;
-  background: var(--accent); color: #1b1840; border: 0; padding: .6rem 1.2rem;
-}
-.pc-card .btn.pc-reset {
-  flex: 0 0 auto; min-height: 3.1rem; font-size: 1rem; padding: .6rem 1.2rem;
-  background: transparent; color: var(--ink); border: 1px solid var(--muted);
-}
-.pc-card .btn.pc-reset:disabled { opacity: .4; cursor: default; }
-.pc-card .btn.pc-how {
-  align-self: center; margin-top: .35rem; min-height: 2.6rem; font-size: .9rem; padding: .4rem 1rem;
-  background: transparent; color: var(--ink); border: 1px solid var(--muted);
-}
 .pc-card .btn { font-weight: 700; }
 .pc-card .btn:hover { transform: none; }
+.pc-card .btn.pc-toggle { flex: 1 1 auto; min-height: 3.5rem; font-size: var(--fs-lg); padding: .6rem 1.2rem; }
+.pc-toggle::before { content: ''; width: 1.15em; height: 1.15em; background: currentColor; -webkit-mask: var(--i-play) center / contain no-repeat; mask: var(--i-play) center / contain no-repeat; }
+.pc-card.running .pc-toggle::before { -webkit-mask-image: var(--i-pause); mask-image: var(--i-pause); }
+.pc-card .btn.pc-reset { flex: 0 0 auto; min-height: 3.5rem; font-size: var(--fs-md); padding: .6rem 1.2rem; background: transparent; color: var(--ink); border: 1px solid var(--line-strong); box-shadow: none; }
+.pc-card .btn.pc-reset:disabled { opacity: .4; cursor: default; }
+.pc-card .btn.pc-how { align-self: center; margin-top: .35rem; min-height: 2.6rem; font-size: var(--fs-sm); padding: .4rem 1rem; background: transparent; color: var(--ink); border: 1px solid var(--line-strong); box-shadow: none; }
 
 /* the done tick: a big, easy target */
-.pc-done { display: flex; align-items: center; justify-content: center; gap: .6rem; min-height: 2.9rem; margin-top: .25rem; border-top: 1px solid color-mix(in srgb, var(--muted) 25%, transparent); padding-top: .55rem; font-weight: 600; cursor: pointer; }
+.pc-done { display: flex; align-items: center; justify-content: center; gap: .6rem; min-height: 2.9rem; margin-top: .25rem; border-top: 1px solid var(--line); padding-top: .55rem; font-weight: 600; cursor: pointer; }
 .pc-done input { width: 1.6rem; height: 1.6rem; margin: 0; flex: none; accent-color: var(--ok); }
 
 /* ----- position indicator and arrows ----- */
-.pc-nav { display: flex; align-items: center; justify-content: center; gap: .5rem; margin-top: .1rem; }
-.pc-nav .dock-btn { min-width: 2.75rem; min-height: 2.75rem; }
-.pc-nav .dock-btn:disabled { opacity: .35; cursor: default; }
+.pc-nav { display: flex; align-items: center; justify-content: center; gap: var(--s-2); margin-top: .1rem; }
+.pc-nav .dock-btn { min-width: var(--tap); min-height: var(--tap); padding: 0; }
 .pc-dots { display: flex; align-items: center; }
-.pc-dot { width: 1.7rem; height: 2.75rem; padding: 0; border: 0; background: none; cursor: pointer; position: relative; }
+.pc-dot { width: 1.7rem; height: var(--tap); padding: 0; border: 0; background: none; cursor: pointer; position: relative; }
 .pc-dot::before { content: ''; position: absolute; left: 50%; top: 50%; width: .6rem; height: .6rem; margin: -.3rem 0 0 -.3rem; border-radius: 50%; background: color-mix(in srgb, var(--muted) 55%, transparent); transition: transform .2s, background .2s; }
 .pc-dot.is-done::before { background: var(--ok); }
-.pc-dot.is-running::before { background: var(--accent2); }
-.pc-dot.is-current::before { transform: scale(1.6); box-shadow: 0 0 0 2px var(--panel), 0 0 0 4px var(--accent2); }
-.pc-count { margin: 0; text-align: center; color: var(--muted); font-size: .85rem; font-weight: 600; }
+.pc-dot.is-running::before { background: var(--accent); }
+.pc-dot.is-current::before { transform: scale(1.6); box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent2); }
+.pc-count { margin: 0; text-align: center; color: var(--muted); font-size: var(--fs-sm); font-weight: 600; }
 .pc-status { margin: .35rem 0 0; text-align: center; font-weight: 600; min-height: 1.5em; }
 .pc-hint { text-align: center; margin: .25rem 0 0; }
+#practice .routine-head { margin: var(--s-3) 0 .25rem; }
+
+/* ----- stats below the cards ----- */
+#practice .stats { margin: var(--s-5) 0 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 var(--s-2); }
+#practice .stats > div { min-width: 0; padding: var(--s-3) var(--s-2); }
+#practice .stats strong { font-size: var(--fs-2xl); }
+#practice .stats span { font-size: .8rem; display: block; }
 
 @media (min-width: 721px) { .pc-hint { display: none; } }
 @media (prefers-reduced-motion: reduce) { .pc-track { scroll-behavior: auto; } .pc-dot::before, .pc-track > .pc-card { transition: none; } }
-
-/* ----- Practice view layout: the cards come first. A slim Today strip sits above them, so on a phone the
-   first card is on screen when the tab opens; the stats and the long hint sit below. ----- */
-#practice { padding-top: 1.25rem; }
-#practice .pc-title { font-size: 1.3rem; margin: 0 0 .5rem; }
-#practice .practice-top { margin: 0 0 .5rem; text-align: left; }
-#practice .today { max-width: none; margin: 0; }
-#practice .t-line { margin: 0; font-size: .9rem; line-height: 1.4; }
-#practice .t-bar { height: 8px; margin: .5rem 0; max-width: none; }
-#practice .t-actions { justify-content: flex-start; gap: .5rem; }
-#practice .routine-head { margin: .75rem 0 .25rem; }
-#practice .pc-hint { margin-top: .5rem; }
-#practice .stats { margin: 1.5rem 0 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 .5rem; }
-#practice .stats strong { font-size: 1.6rem; }
-#practice .stats span { font-size: .8rem; text-align: center; display: block; }
-#practice .stats > div { text-align: center; }
