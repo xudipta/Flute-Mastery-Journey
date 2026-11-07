@@ -150,6 +150,7 @@
     $('#t-go').textContent = next ? (done ? `Continue: ${next.title}` : 'Start today\'s riyaaz') : 'Practise a block again';
     $('#t-go').dataset.state = next ? 'go' : 'again';
     $('#t-ragas').textContent = `${nowGroup()} ragas`;
+    $('#t-ragas').setAttribute('aria-label', `${nowGroup()} ragas`);
   }
   const nowGroup = () => { const h = new Date().getHours(); return h >= 4 && h < 12 ? 'Morning' : h < 17 ? 'Afternoon' : h < 21 ? 'Evening' : 'Night'; };
 

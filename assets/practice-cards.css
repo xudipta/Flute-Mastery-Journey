@@ -85,3 +85,12 @@
 
 @media (min-width: 721px) { .pc-hint { display: none; } }
 @media (prefers-reduced-motion: reduce) { .pc-track { scroll-behavior: auto; } .pc-dot::before, .pc-track > .pc-card { transition: none; } }
+
+/* Narrow phones: the "ragas for now" button keeps only its icon, so the Today strip stays on one row and the
+   first card's Start button is not pushed under the tools bar. */
+@media (max-width: 420px) {
+  #practice .t-actions { flex-wrap: nowrap; }
+  #practice .t-actions #t-go { flex: 1 1 auto; min-width: 0; }
+  #practice #t-ragas { font-size: 0; gap: 0; flex: 0 0 auto; padding-inline: var(--s-3, .75rem); }
+  #practice #t-ragas::before { font-size: 1.1rem; }
+}
