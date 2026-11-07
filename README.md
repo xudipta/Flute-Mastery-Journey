@@ -6,6 +6,7 @@ An interactive, animated guide to the **Indian classical bansuri** — daily riy
 
 ## Features
 - App-style navigation: five tabs (Home, Practice, Alankar, Ragas, Learn) in a bottom tab bar on phones and a top bar on desktop. The tanpura, tabla and timer keep playing when you change tab, and Back/Forward and links such as `#practice` or `#tuner` work
+- Alankar tab: 18 practice patterns (straight run, groups of three to five, skips, criss-cross, arches ...) in 10 scales (Shuddha, Kalyan, Kafi, Asavari, Khamaj, Bhairav and four pentatonic ragas), played ascending then descending on the Sa you chose. Play them with the tanpura and a tabla taal (or a click), at 1, 2 or 4 notes a beat, with a tempo slider, a speed trainer that raises the tempo every few rounds, the finger chart lighting up note by note, and a Stop bar that stays on screen
 - Daily riyaaz routine with per-block timers (a running block survives a reload and shows in the tools bar), a breathing animation and a streak tracker (saved in your browser)
 - Keeps the screen on while a timer, the tanpura or the tabla is running, and keeps the sound and the end-of-block bell steady when the phone locks or another app is in front
 - "Today" card for returning visitors, a first-run Sa picker, and a raga finder (search, time of day, starter ragas, favourites, one-tap aroha preview)
@@ -50,6 +51,7 @@ assets/audio.js     tabla, tanpura, bell and flute-line synthesis, audio engine
 assets/transport.js shared beat grid: tabla and melody on one clock, gapless loops (see header for the API)
 assets/demo.js      finger chart, swar fingering model, demo dialog and player
 assets/ragas.js     raga notation data
+assets/alankar-data.js  alankar patterns and scales (add a line to add one; `node tools/check-alankar.js` checks them all)
 assets/tuner.js     microphone pitch tuner (YIN detector)
 assets/progress.js  calendar, day notes, routine editor, backup/restore
 assets/practice-demos.js  demos for the daily practice blocks

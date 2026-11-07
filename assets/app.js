@@ -389,11 +389,13 @@
     }
     keepAwake();
   }
+  const bpmListeners = [];
   function setBpm(v) {
     v = Math.min(240, Math.max(40, Math.round(v)));
     bpm.value = v; settings.bpm = v; saveSettings();
     $('#bpm-out').textContent = v; $('#dock-bpm').textContent = v;
     if (FluteTransport.running) FluteTransport.setBpm(v);
+    bpmListeners.forEach((f) => f(v));
   }
   bpm.value = settings.bpm; setBpm(settings.bpm);
   $('#taal-toggle').addEventListener('click', () => setTaalRunning(!taalRun));
@@ -641,6 +643,21 @@
     }
   };
   if (window.FluteProgress) window.FluteProgress.refresh();
+
+  // Hooks for the Alankar tab (assets/alankar.js): the shared tempo, tabla, tanpura, volumes and settings.
+  Object.assign(window.FluteApp, {
+    saveSettings,
+    bpm: () => Number(bpm.value), setBpm, onBpm: (fn) => bpmListeners.push(fn),
+    taalName: () => taalSelect.value,
+    setTaal(name) { if (TAALS[name] && taalSelect.value !== name) { taalSelect.value = name; taalSelect.dispatchEvent(new Event('change')); } },
+    tabla: { on: () => taalRun, set: setTaalRunning },
+    drone: { on: () => Sound.droneOn, set(on) { if (!!on !== Sound.droneOn) droneBtn.click(); } },
+    volume: (which) => (which === 'drone' ? settings.droneVol : settings.tablaVol),
+    setVolume(which, v) { const el = which === 'drone' ? droneVol : tablaVol; el.value = v; el.dispatchEvent(new Event('input')); },
+    // 'off' (not in today's routine), 'todo' or 'done'; markBlock ticks a block off like the checkbox does.
+    blockState: (id) => { const r = ROUTINE.find((x) => x.id === id); return !r ? 'off' : state.checks[id] ? 'done' : 'todo'; },
+    markBlock(id) { if (!ROUTINE.some((x) => x.id === id) || state.checks[id]) return false; setChecked(id, true); return true; }
+  });
 
   // Install as an app + offline support
   let installEvent = null;

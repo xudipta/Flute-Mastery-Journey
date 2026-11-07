@@ -1,1 +1,77 @@
-/* Styles for the Alankar view (#view-alankar). Owned by the Alankar issue (#29). */
+/* Styles for the Alankar view (#view-alankar). Owned by the Alankar issue (#29).
+   Built on the shared components in styles.css (.panel, .btn, .dock-btn, .hint) and on the finger-chart styles (.demo-chart). */
+#alankar { padding-top: 2rem; }
+.al { display: grid; gap: var(--gap); }
+/* The global `section` rule centres sections and caps their width; inside this grid that would shrink each panel to its content. */
+.al > .panel { margin: 0; max-width: none; }
+.al h3 { margin: 0; font-size: 1.25rem; }
+.al select, .al input[type="number"] { font: inherit; background: var(--bg); color: var(--ink); border: 1px solid var(--muted); border-radius: 8px; padding: .3rem .5rem; min-height: 2.6rem; max-width: 100%; }
+.al input[type="number"] { width: 4.5rem; }
+
+/* sticky "now playing" bar: stays under the site header while a pattern plays, so Stop is always in reach */
+.al-bar { position: sticky; top: var(--al-top, 3.75rem); z-index: 4; display: flex; align-items: center; gap: .6rem; padding: .45rem .75rem; border-radius: var(--r-card); background: var(--accent2); color: #fff; box-shadow: var(--shadow-card); }
+.al-bar[hidden] { display: none; }
+.al-bar .btn { background: #fff; color: #1b1840; flex: none; }
+.al-bar-name { flex: 1; min-width: 0; font-weight: 600; font-size: .9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.al-bar-tempo { display: flex; align-items: center; gap: .25rem; flex: none; }
+.al-bar-tempo output { min-width: 2.2rem; text-align: center; font-weight: 700; font-variant-numeric: tabular-nums; }
+.al-bar .dock-btn { color: #fff; border-color: rgba(255, 255, 255, .7); min-width: 2.4rem; }
+
+/* the pattern being practised */
+.al-sub { margin: .15rem 0 .75rem; color: var(--muted); font-size: .9rem; }
+.al-notation { display: grid; gap: .6rem; }
+.al-row { display: flex; flex-wrap: wrap; gap: .3rem .4rem; align-items: baseline; }
+.al-label { flex: 0 0 100%; color: var(--muted); font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; }
+.al-g { display: inline-flex; gap: .1rem; padding: .15rem .25rem; border-radius: 10px; background: var(--bg); }
+.al-n { padding: .1rem .3rem; border-radius: 7px; font-weight: 600; font-size: .95rem; transition: background .08s, color .08s; }
+.al-n.now { background: var(--accent); color: #1b1840; }
+.al-chart { display: block; width: 100%; max-width: 640px; margin: .75rem auto 0; }
+.al-cap { min-height: 3.2em; margin: .25rem 0 .5rem; font-size: .92rem; }
+.al-play-row { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1rem; }
+.al-play { min-width: 8.5rem; font-size: 1.1rem; padding: .8rem 1.6rem; }
+.al-play.on { background: var(--accent2); color: #fff; }
+.al-tempo { display: flex; align-items: center; gap: .4rem; flex: 1 1 14rem; min-width: 0; }
+.al-tempo input[type="range"] { flex: 1; min-width: 0; }
+.al-bpm { white-space: nowrap; font-size: .9rem; color: var(--muted); }
+.al-bpm output { color: var(--ink); font-weight: 700; font-size: 1.1rem; font-variant-numeric: tabular-nums; }
+.al-status { margin: .75rem 0 0; color: var(--muted); font-size: .88rem; min-height: 1.4em; }
+
+/* controls */
+.al-field { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .75rem; margin-top: .75rem; }
+.al-flabel { flex: 0 0 8.5rem; font-weight: 600; font-size: .9rem; }
+.al-seg { display: inline-flex; flex-wrap: wrap; gap: .35rem; }
+.al-seg button, .al-toggle { font: inherit; font-weight: 600; min-height: 2.6rem; min-width: 3.2rem; padding: .3rem .9rem; border-radius: var(--r-pill); border: 1px solid var(--muted); background: transparent; color: var(--ink); cursor: pointer; }
+.al-seg button[aria-pressed="true"], .al-toggle[aria-pressed="true"] { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+.al-row2 { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1rem; margin-top: .75rem; }
+.al-slider { display: grid; gap: .1rem; flex: 1 1 11rem; margin-top: .75rem; font-weight: 600; font-size: .9rem; }
+.al-row2 .al-slider { margin-top: 0; }
+.al-slider output { color: var(--muted); font-weight: 500; font-variant-numeric: tabular-nums; }
+.al-slider input { width: 100%; }
+.al-check { display: flex; align-items: center; gap: .5rem; min-height: 2.6rem; margin-top: .5rem; font-weight: 600; }
+.al-check input { width: 1.3rem; height: 1.3rem; accent-color: var(--accent2); }
+.al-trainer summary { cursor: pointer; font-weight: 700; font-size: 1.1rem; min-height: 2.6rem; display: flex; align-items: center; }
+.al-trainer summary { justify-content: space-between; list-style: none; }
+.al-trainer summary::-webkit-details-marker { display: none; }
+.al-trainer summary::after { content: '+'; font-size: 1.4rem; color: var(--muted); }
+.al-trainer[open] summary::after { content: '−'; }
+.al-tr { display: flex; flex-wrap: wrap; gap: .5rem 1rem; align-items: center; }
+.al-tr label { display: inline-flex; align-items: center; gap: .4rem; }
+
+/* pattern list */
+.al-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr)); gap: .6rem; margin-top: .6rem; }
+.al-card { display: flex; flex-direction: column; gap: .15rem; text-align: left; font: inherit; padding: .65rem .8rem; border-radius: 14px; border: 1px solid color-mix(in srgb, var(--muted) 50%, transparent); background: var(--bg); color: var(--ink); cursor: pointer; min-height: 5.2rem; }
+.al-card b { font-size: .98rem; }
+.al-prev { font-size: .8rem; color: var(--muted); line-height: 1.35; }
+.al-card small { margin-top: auto; font-size: .75rem; color: var(--muted); }
+.al-card:hover { border-color: var(--accent2); }
+.al-card[aria-pressed="true"] { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+.al-card[aria-pressed="true"] .al-prev, .al-card[aria-pressed="true"] small { color: rgba(255, 255, 255, .85); }
+.al-log p { margin: 0 0 .5rem; }
+
+@media (max-width: 420px) {
+  .al-flabel { flex-basis: 100%; }
+  .al-play { flex: 1 1 100%; }
+  .al-bar-name { display: none; }
+  .al-bar { justify-content: space-between; }
+}
+@media (prefers-reduced-motion: reduce) { .al-n { transition: none; } }
