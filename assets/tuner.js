@@ -84,7 +84,7 @@
     const cls = ((nearest % 12) + 12) % 12, oct = Math.floor(nearest / 12);
     return { n, nearest, cls, oct, cents, letter: LETTERS[cls], name: SHOW[LETTERS[cls]] };
   }
-  const westernName = (saIndex, cls) => NOTE[(saIndex + cls) % 12];
+  const westernName = (saIndex, cls) => NOTE[(((saIndex + cls) % 12) + 12) % 12];   // saIndex is negative for a low Sa
 
   // ---------- UI ----------
   // refUntil: readings are ignored until then, while the site itself plays Sa. restore: switches the tanpura

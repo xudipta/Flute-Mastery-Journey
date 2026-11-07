@@ -112,6 +112,9 @@ body { padding-bottom: 5.5rem; }
 .dock select { font: inherit; background: var(--bg); color: var(--ink); border: 1px solid var(--muted); border-radius: 8px; padding: .35rem .4rem; min-height: 2.4rem; }
 .dock-btn { font: inherit; font-weight: 600; min-height: 2.4rem; min-width: 2.4rem; padding: .3rem .8rem; border-radius: 999px; border: 1px solid var(--muted); background: transparent; color: var(--ink); cursor: pointer; }
 .dock-btn.on { background: var(--accent); border-color: var(--accent); color: #1b1840; }
+.dock-btn.tuning { border-style: dashed; animation: tuning 1s ease-in-out infinite; }
+@keyframes tuning { 50% { opacity: .45; } }
+#tp-status { grid-column: 1 / -1; margin: 0; min-height: 1.2em; }
 .dock input[type="range"] { width: 6rem; }
 .dock .bpm { display: flex; align-items: center; gap: .3rem; }
 .dock-timer { border-color: var(--accent2); font-variant-numeric: tabular-nums; white-space: nowrap; }
@@ -217,7 +220,7 @@ output.vol { font-weight: 600; font-variant-numeric: tabular-nums; min-width: 3.
 
 /* tools bar */
 .dock-bar { display: flex; flex-wrap: nowrap; gap: .5rem; align-items: center; justify-content: center; }
-.dock-panel { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: .75rem 1rem; max-width: 46rem; margin: .6rem auto 0; padding-top: .6rem; border-top: 1px solid color-mix(in srgb, var(--muted) 35%, transparent); }
+.dock-panel { display: grid; grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr)); gap: .75rem 1rem; max-width: 46rem; margin: .6rem auto 0; padding-top: .6rem; border-top: 1px solid color-mix(in srgb, var(--muted) 35%, transparent); max-height: min(60vh, 32rem); overflow-y: auto; overscroll-behavior: contain; }
 .dock-panel[hidden] { display: none; }
 .dock-panel label { display: flex; flex-direction: column; gap: .25rem; font-weight: 600; font-size: .9rem; }
 .dock-panel select { font: inherit; background: var(--bg); color: var(--ink); border: 1px solid var(--muted); border-radius: 8px; padding: .35rem .4rem; min-height: 2.4rem; }

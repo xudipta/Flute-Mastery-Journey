@@ -224,6 +224,10 @@
       <label>Taal <select id="dock-taal-select"></select></label>
       <label><span>Tanpura volume <output id="drone-vol-out" class="vol">100%</output></span><input type="range" id="drone-vol" min="0" max="200" value="100" title="Double-click to reset to 100%"></label>
       <label><span>Tabla volume <output id="dock-tabla-vol-out" class="vol">100%</output></span><input type="range" id="dock-tabla-vol" min="0" max="200" value="100" title="Double-click to reset to 100%"></label>
+      <label>Tanpura first string <select id="tp-first"><option value="Pa">Pa (usual)</option><option value="Ma">Ma (ragas without Pa)</option><option value="Ni">Ni (Marwa, Puriya)</option></select></label>
+      <label>Tanpura pluck speed <select id="tp-speed"><option value="slow">Slow</option><option value="medium">Medium</option><option value="fast">Fast</option></select></label>
+      <label><span>Tanpura fine tune <output id="tp-fine-out" class="vol">0¢</output></span><input type="range" id="tp-fine" min="-50" max="50" step="1" value="0" title="Double-click to reset to 0"></label>
+      <p id="tp-status" class="hint" role="status"></p>
       <p class="shortcuts">Shortcuts: <kbd>T</kbd> tanpura · <kbd>B</kbd> tabla · <kbd>[</kbd> <kbd>]</kbd> tempo · <kbd>/</kbd> search ragas</p>
     </div>
   </div>
