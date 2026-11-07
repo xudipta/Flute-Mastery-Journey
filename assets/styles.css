@@ -111,11 +111,11 @@ footer a { color: var(--accent-ink); }
 :is(#taal-toggle, #al-play, #al-bar-stop, #t-go, #run-all, #tuner-toggle, #tuner-ref, #home-hear-sa, #t-ragas, #raga-now, #edit-routine, #chart-scale, #data-export, #data-import, #install, #al-mark, .pc-how, [data-hear], [data-play], [data-stop], #al-drone) { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; }
 :is(#taal-toggle, #al-play, #al-bar-stop, #t-go, #run-all, #tuner-toggle, #tuner-ref, #home-hear-sa, #t-ragas, #raga-now, #edit-routine, #chart-scale, #data-export, #data-import, #install, #al-mark, .pc-how, [data-hear], [data-play], [data-stop], #al-drone)::before { content: ''; display: inline-block; width: 1.15em; height: 1.15em; flex: none; background: currentColor; -webkit-mask: var(--i) center / contain no-repeat; mask: var(--i) center / contain no-repeat; }
 #taal-toggle, #al-play, #t-go, #run-all, #chart-scale, .pc-how, [data-hear], [data-play] { --i: var(--i-play); }
-#taal-toggle.on, #al-play.on, #chart-scale.on, [data-hear].on, [data-play].on, #al-bar-stop, [data-stop], #tuner-toggle.on, #home-hear-sa.on { --i: var(--i-stop); }
+#taal-toggle.on, #al-play.on, #chart-scale.on, [data-hear].on, #al-bar-stop, [data-stop], #tuner-toggle.on, #home-hear-sa.on { --i: var(--i-stop); } /* buttons that stop when pressed again */
 #t-go[data-state="again"] { --i: var(--i-replay); }
 #tuner-toggle { --i: var(--i-mic); } #tuner-ref, #home-hear-sa { --i: var(--i-bell); } #t-ragas, #raga-now { --i: var(--i-clock); }
 #edit-routine { --i: var(--i-pencil); } #data-export, #install { --i: var(--i-download); } #data-import { --i: var(--i-upload); } #al-mark { --i: var(--i-check); } #al-drone { --i: var(--i-tanpura); }
-#run-all { gap: 0; } #run-all::before { margin-right: .5rem; } /* its label is several text pieces, so the icon gets a margin instead of a flex gap */
+#run-all { display: inline-block; } #run-all::before { margin-right: .5rem; vertical-align: -.2em; } /* its label is several text pieces (the minutes are a span), so it stays inline: flex would trim the spaces */
 
 /* ===== 4. controls ===== */
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; min-height: var(--tap); padding: .7rem 1.5rem; border: 0; border-radius: var(--r-pill); background: var(--accent); color: var(--on-accent); font: inherit; font-weight: 700; text-decoration: none; cursor: pointer; box-shadow: 0 6px 16px color-mix(in srgb, var(--accent) 26%, transparent); transition: transform .12s var(--ease), box-shadow .2s, background .2s, color .2s; }
@@ -127,6 +127,7 @@ footer a { color: var(--accent-ink); }
 .btn:disabled { opacity: .45; cursor: default; transform: none; }
 /* the main control of a screen: bigger than everything around it */
 .btn.big { min-height: var(--tap-big); padding: 0 2.2rem; font-size: var(--fs-lg); }
+#run-all, #t-go { min-height: 3rem; } /* the main actions of the Practice tab */
 .link { background: none; border: 0; color: var(--accent-ink); cursor: pointer; font: inherit; text-decoration: underline; min-height: var(--tap); padding: 0 .5rem; }
 /* round icon-sized buttons: previous/next, tempo −/+, close, tools bar */
 .dock-btn { display: inline-flex; align-items: center; justify-content: center; gap: .35rem; font: inherit; font-weight: 700; min-height: 2.5rem; min-width: 2.5rem; padding: .3rem .8rem; border-radius: var(--r-pill); border: 1px solid var(--line-strong); background: transparent; color: var(--ink); cursor: pointer; transition: transform .12s var(--ease), background .2s, color .2s; }

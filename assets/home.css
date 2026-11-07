@@ -56,7 +56,7 @@
   .tp-main { gap: 1rem; }
   .scale-row { display: grid; grid-template-columns: 1fr 1fr; gap: .4rem; }
   .scale-row .scale-btn { order: -1; grid-column: 1 / -1; font-size: var(--fs-lg); }
-  .scale-row .dock-btn { min-width: 0; width: 100%; min-height: 2.75rem; }
+  .scale-row .dock-btn { min-width: 0; width: 100%; min-height: 3rem; }
 }
 .sa-grid { margin-top: var(--s-4); padding: var(--s-3); border-radius: var(--r-md); background: var(--bg); border: 1px solid var(--line); display: grid; gap: .6rem; }
 .sa-grid[hidden] { display: none; }
