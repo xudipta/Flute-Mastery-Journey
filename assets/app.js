@@ -68,6 +68,12 @@
   ];
 
   const SA_NAMES = ['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
+  // Sa is counted in semitones above C (C3 = 0): 0 to 11 as before, plus -5 to -1 for a low G, G♯, A, A♯ and B
+  // (for the bigger bass bansuris). The note name only needs the position within the octave.
+  const SA_CHOICES = [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+  const saClass = (i) => ((i % 12) + 12) % 12;
+  const saName = (i) => SA_NAMES[saClass(i)] + (i < 0 ? ' (low)' : '');
+  const saShort = (i) => SA_NAMES[saClass(i)] + (i < 0 ? '↓' : '');
 
   const $ = (s) => document.querySelector(s);
   const dateKey = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -116,26 +122,22 @@
     if (window.FluteProgress) window.FluteProgress.refresh();
   }
 
-  const settings = Object.assign({ sa: 2, bpm: 90, taal: 'Teentaal · 16', tablaVol: 100, droneVol: 100, onboarded: false, favs: [], routine: null }, state.settings);
+  const settings = Object.assign({ sa: 2, bpm: 90, taal: 'Teentaal · 16', tablaVol: 100, droneVol: 100, tanpuraFirst: 'Pa', tanpuraSpeed: 'medium', tanpuraFine: 0, onboarded: false, favs: [], routine: null }, state.settings);
+  if (!Number.isInteger(settings.sa) || settings.sa < -5 || settings.sa > 11) settings.sa = 2;
   const saveSettings = () => { state.settings = settings; store.set(state); };
   ROUTINE = planToRoutine(settings.routine);
   const Sound = FluteAudio.Engine;
   const saFreq = (i) => 130.81 * Math.pow(2, i / 12);
+  Sound.setTanpura({ first: settings.tanpuraFirst, speed: settings.tanpuraSpeed, fine: settings.tanpuraFine });
   Sound.setSa(saFreq(settings.sa));
   // Create the audio context on first use (needs a user gesture) and apply saved volumes.
   Sound.onCreate = () => { Sound.setVolume('tabla', settings.tablaVol / 100); Sound.setVolume('drone', 0.8 * settings.droneVol / 100); };
   function audio() { Sound.ensure(); return Sound; }
 
-  // Returning visitors see "Today" instead of the intro.
-  let showIntro = false;
+  // The Today card sits at the top of the Practice view.
   function markOnboarded() { if (!settings.onboarded) { settings.onboarded = true; saveSettings(); } }
   function renderToday() {
-    const returning = settings.onboarded || practisedDays().length > 0;
-    const today = $('#today'), intro = $('#hero-intro');
-    if (!today) return;
-    today.hidden = !returning || showIntro; intro.hidden = returning && !showIntro;
-    $('#page-title').innerHTML = today.hidden ? 'From first <em>sur</em> to concert-stage raga.' : 'Today\'s riyaaz';
-    if (today.hidden) return;
+    if (!$('#today')) return;
     const total = ROUTINE.reduce((s, r) => s + r.min, 0);
     const done = ROUTINE.filter((r) => state.checks[r.id]).reduce((s, r) => s + r.min, 0);
     const next = ROUTINE.find((r) => !state.checks[r.id]);
@@ -145,13 +147,16 @@
     $('#t-line').textContent = next
       ? `${done} of ${total} minutes done${sn ? ` · ${sn}-day streak` : ''}. Next up: ${next.title} (${next.min} min).`
       : `All ${total} minutes done. Today's riyaaz is complete${sn ? ` · ${sn}-day streak` : ''}.`;
-    $('#t-go').textContent = next ? (done ? `▶ Continue: ${next.title}` : '▶ Start today\'s riyaaz') : '↺ Practise a block again';
-    $('#t-ragas').textContent = `🕒 ${nowGroup()} ragas`;
+    $('#t-go').textContent = next ? (done ? `Continue: ${next.title}` : 'Start today\'s riyaaz') : 'Practise a block again';
+    $('#t-go').dataset.state = next ? 'go' : 'again';
+    $('#t-ragas').textContent = `${nowGroup()} ragas`;
+    $('#t-ragas').setAttribute('aria-label', `${nowGroup()} ragas`);
   }
   const nowGroup = () => { const h = new Date().getHours(); return h >= 4 && h < 12 ? 'Morning' : h < 17 ? 'Afternoon' : h < 21 ? 'Evening' : 'Night'; };
 
   // Routine
   const rows = {};
+  const fmt0 = (s) => String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
   function setChecked(id, val) {
     if (val) markOnboarded();
     state.checks[id] = val;
@@ -161,24 +166,40 @@
     rows[id].li.classList.toggle('done', val);
     recordToday();
     store.set(state); renderStats();
+    if (window.PracticeCards) PracticeCards.sync();
   }
   const list = $('#routine');
+  const BLOCK_ICON = { breath: '🌬️', sa: '🎵', alankar: '🔁', raga: '🎼', taal: '🥁', cool: '🌙' };
+  // Each block is one slide of the swipeable practice cards (carousel behaviour is in practice-cards.js). The
+  // card shows live time only for the block the shared timer is on; the others show their full length.
   function renderRoutine() {
     list.innerHTML = ''; Object.keys(rows).forEach((k) => delete rows[k]);
-    ROUTINE.forEach((r) => {
+    ROUTINE.forEach((r, i) => {
       const li = document.createElement('li');
-      li.dataset.id = r.id;
-      li.innerHTML = `<input type="checkbox" aria-label="Done: ${r.title}"><div><h3>${r.title} · ${r.min} min</h3><p>${r.text}</p><button type="button" data-timer>Start timer</button> <button type="button" data-how>▶ Show me how</button></div>`;
+      li.className = 'pc-card'; li.dataset.id = r.id;
+      li.setAttribute('role', 'group'); li.setAttribute('aria-roledescription', 'slide');
+      li.setAttribute('aria-label', `${r.title}, ${i + 1} of ${ROUTINE.length}`);
+      li.innerHTML = `<div class="pc-top"><span class="pc-icon" aria-hidden="true">${BLOCK_ICON[r.id] || '🪈'}</span><span class="pc-step">${i + 1} of ${ROUTINE.length}</span><span class="pc-badge" hidden></span></div>
+        <h3>${r.title}</h3><p class="pc-min">${r.min} min</p><p class="pc-text">${r.text}</p>
+        <div class="pc-timer" role="timer"><span class="pc-time">${fmt0(r.min * 60)}</span></div>
+        <div class="pc-actions"><button type="button" class="btn pc-toggle" data-timer>Start</button><button type="button" class="btn ghost pc-reset" disabled>Reset</button></div>
+        <button type="button" class="btn small ghost pc-how" data-how>Show me how</button>
+        <label class="pc-done"><input type="checkbox" aria-label="Done: ${r.title}"> <span>Done</span></label>`;
       const box = li.querySelector('input');
-      rows[r.id] = { li, box };
+      rows[r.id] = { li, box, time: li.querySelector('.pc-time'), toggle: li.querySelector('.pc-toggle'), reset: li.querySelector('.pc-reset'), badge: li.querySelector('.pc-badge') };
       box.checked = !!state.checks[r.id];
       li.classList.toggle('done', box.checked);
       box.addEventListener('change', () => { setChecked(r.id, box.checked); if (!box.checked) offerUndo(r); });
-      li.querySelector('[data-timer]').addEventListener('click', () => { runAll = false; selectBlock(r, true); });
+      rows[r.id].toggle.addEventListener('click', () => {
+        if (block && block.id === r.id) { if (handle) { stop(); remaining = Math.max(0, Math.ceil((endAt - Date.now()) / 1000)); renderTimer(); } else start(); }
+        else { runAll = false; selectBlock(r, true); }
+      });
+      rows[r.id].reset.addEventListener('click', () => { if (block && block.id === r.id) { stop(); remaining = block.min * 60; renderTimer(); } });
       li.querySelector('[data-how]').addEventListener('click', () => PracticeDemos.open(r.id));
       list.appendChild(li);
     });
     $('#routine-total').textContent = ROUTINE.reduce((a, r) => a + r.min, 0);
+    if (window.PracticeCards) PracticeCards.sync();
   }
   renderRoutine();
 
@@ -199,19 +220,34 @@
   // The end-of-block bell is scheduled on the audio clock when a block starts, so it rings on time even when
   // the browser delays the interval (screen off, app in the background).
   let block = null, remaining = 0, handle = null, endAt = 0, runAll = false, bellAt = null;
-  const fmt = (s) => String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+  const fmt = fmt0;
+  const goCard = (id, o) => { if (window.PracticeCards) PracticeCards.goTo(id, o); };
   // Shows the time in the timer card, and (once a block is under way) in the tools bar and the tab title,
   // so the timer can be seen from any section.
   const baseTitle = document.title, chip = $('#dock-timer');
+  let cardKey = '';
   function renderTimer() {
-    $('#timer').textContent = fmt(remaining);
     const show = !!block && remaining > 0 && (!!handle || remaining < block.min * 60);
+    // Cards: the block the timer is on shows live time, Pause/Start and a badge; the others show their full length.
+    ROUTINE.forEach((r) => {
+      const row = rows[r.id]; if (!row) return;
+      const mine = !!block && block.id === r.id;
+      row.time.textContent = fmt(mine ? remaining : r.min * 60);
+      row.toggle.textContent = mine && handle ? 'Pause' : 'Start';
+      row.reset.disabled = !(mine && (!!handle || remaining < r.min * 60));
+      row.li.classList.toggle('active', mine);
+      row.li.classList.toggle('running', mine && !!handle);
+      row.badge.hidden = !(mine && show);
+      if (mine && show) row.badge.textContent = handle ? '● Running' : '⏸ Paused';
+    });
+    const key = (block ? block.id : '') + (handle ? 'r' : '') + (show ? 's' : '');
+    if (key !== cardKey) { cardKey = key; if (window.PracticeCards) PracticeCards.sync(); }
     chip.hidden = !show; $('#dock').classList.toggle('has-timer', show);
     saveTimer(show);
     const title = show ? `${handle ? '⏱' : '⏸'} ${fmt(remaining)} · ${block.title}` : baseTitle;
     if (document.title !== title) document.title = title;
     if (!show) return;
-    $('#dock-timer-icon').textContent = handle ? '⏱' : '⏸';
+    $('#dock-timer-icon').textContent = handle ? '⏱' : '⏸'; chip.dataset.state = handle ? 'run' : 'pause';
     $('#dock-timer-time').textContent = fmt(remaining);
     $('#dock-timer-name').textContent = block.title;
     chip.setAttribute('aria-label', `${block.title}: ${fmt(remaining)} left${handle ? '' : ', paused'}. Go to the timer`);
@@ -225,14 +261,15 @@
     store.set(state);
   }
   chip.addEventListener('click', () => {
-    $('.timer-card').scrollIntoView({ block: 'center', behavior: 'smooth' });
-    $('#timer-toggle').focus({ preventScroll: true });
+    FluteNav.go('practice', { focus: false });
+    if (!block || !rows[block.id]) return;
+    goCard(block.id, { vertical: 'center' });
+    rows[block.id].toggle.focus({ preventScroll: true });
   });
   function selectBlock(r, autostart, noScroll) {
     markOnboarded(); stop();
     block = r; remaining = r.min * 60;
-    document.querySelectorAll('.routine li').forEach((x) => x.classList.toggle('active', x === rows[r.id].li));
-    if (!noScroll) rows[r.id].li.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    if (!noScroll) goCard(r.id, { vertical: 'nearest' });
     $('#timer-label').textContent = r.title;
     renderTimer();
     if (autostart) start();
@@ -244,7 +281,6 @@
     endAt = Date.now() + remaining * 1000;
     if (!restored) audio();
     bellAt = Sound.ctx && Sound.ctx.state === 'running' ? Sound.ring(Sound.ctx.currentTime + remaining) : null;
-    $('#timer-toggle').textContent = 'Pause';
     handle = setInterval(() => {
       remaining = Math.max(0, Math.ceil((endAt - Date.now()) / 1000));
       renderTimer();
@@ -253,7 +289,7 @@
     renderTimer(); keepAwake();
   }
   function stop() {
-    clearInterval(handle); handle = null; $('#timer-toggle').textContent = 'Start';
+    clearInterval(handle); handle = null;
     if (bellAt) { bellAt.cancel(); bellAt = null; }
     renderTimer(); keepAwake();
   }
@@ -267,8 +303,6 @@
     const i = ROUTINE.indexOf(block), next = ROUTINE.slice(i + 1).find((x) => !state.checks[x.id]);
     if (runAll && next) selectBlock(next, true); else runAll = false;
   }
-  $('#timer-toggle').addEventListener('click', () => { if (!block) { selectBlock(ROUTINE.find((x) => !state.checks[x.id]) || ROUTINE[0], true); } else if (handle) { stop(); remaining = Math.max(0, Math.ceil((endAt - Date.now()) / 1000)); renderTimer(); } else start(); });
-  $('#timer-reset').addEventListener('click', () => { if (block) { stop(); remaining = block.min * 60; renderTimer(); } });
   function runRoutine() {
     markOnboarded();
     const first = ROUTINE.find((x) => !state.checks[x.id]);
@@ -278,18 +312,17 @@
   $('#run-all').addEventListener('click', runRoutine);
   // Today card: continue the routine, or (when it is all done) pick the first block to practise again.
   $('#t-go').addEventListener('click', () => {
+    FluteNav.go('practice', { focus: false });
     if (ROUTINE.some((x) => !state.checks[x.id])) runRoutine();
     else { runAll = false; selectBlock(ROUTINE[0], false); }
   });
-  $('#show-intro').addEventListener('click', () => { showIntro = true; renderToday(); $('#hero-sa').focus(); });
-  $('#hero-start').addEventListener('click', () => { if (showIntro) { showIntro = false; renderToday(); } });
 
   // Sa selector (several synced selects) + tanpura drone
   const saSelects = [...document.querySelectorAll('.sa-sync')];
-  saSelects.forEach((sel) => SA_NAMES.forEach((n, i) => { const o = document.createElement('option'); o.value = i; o.textContent = n; sel.appendChild(o); }));
+  saSelects.forEach((sel) => SA_CHOICES.forEach((i) => { const o = document.createElement('option'); o.value = i; o.textContent = saName(i); sel.appendChild(o); }));
   function showSa() {
     saSelects.forEach((s) => { s.value = settings.sa; });
-    $('#pill-sa-name').textContent = SA_NAMES[settings.sa];
+    $('#pill-sa-name').textContent = saShort(settings.sa);
   }
   function setSa(i) {
     settings.sa = i; settings.onboarded = true; saveSettings(); showSa();
@@ -312,6 +345,24 @@
     settings.droneVol = Number(droneVol.value); saveSettings();
     if (Sound.ctx) Sound.setVolume('drone', 0.8 * settings.droneVol / 100);
   });
+  // The strings are built in the background; until they are ready the button says so.
+  Sound.onTuning = (on) => {
+    droneBtn.classList.toggle('tuning', on); droneBtn.setAttribute('aria-busy', on);
+    droneBtn.querySelector('.lbl').textContent = on ? 'Tuning…' : 'Tanpura';
+    $('#tp-status').textContent = on ? 'Tuning the tanpura…' : '';
+  };
+  // First string (Pa, or Ma / Ni for ragas without Pa), pluck speed and a fine tune in cents for the tanpura alone.
+  const tpFirst = $('#tp-first'), tpSpeed = $('#tp-speed'), tpFine = $('#tp-fine');
+  tpFirst.value = settings.tanpuraFirst; tpSpeed.value = settings.tanpuraSpeed; tpFine.value = settings.tanpuraFine;
+  const showFine = () => { $('#tp-fine-out').textContent = (tpFine.value > 0 ? '+' : '') + tpFine.value + '¢'; };
+  function applyTanpura() {
+    Object.assign(settings, { tanpuraFirst: tpFirst.value, tanpuraSpeed: tpSpeed.value, tanpuraFine: Number(tpFine.value) });
+    saveSettings(); showFine();
+    Sound.setTanpura({ first: settings.tanpuraFirst, speed: settings.tanpuraSpeed, fine: settings.tanpuraFine });
+  }
+  [tpFirst, tpSpeed, tpFine].forEach((el) => el.addEventListener('input', applyTanpura));
+  tpFine.addEventListener('dblclick', () => { tpFine.value = 0; applyTanpura(); });
+  showFine();
 
   // Tabla taal player (sounds are synthesised in audio.js).
   // vib = beats per vibhag; marks: 'X' sam, number tali, 'O' khali.
@@ -328,7 +379,7 @@
   Object.keys(TAALS).forEach((k) => { const o = document.createElement('option'); o.textContent = k; taalSelect.appendChild(o); });
   if (!TAALS[settings.taal]) settings.taal = 'Teentaal · 16';
   taalSelect.value = settings.taal; tablaVol.value = settings.tablaVol;
-  let beatEls = [], taalRun = false, taalTimer = null, nextBeat = 0, nextTime = 0, tablaBus = null, queued = [], taalGen = 0;
+  let beatEls = [], taalRun = false;
   function buildGrid() {
     const t = TAALS[taalSelect.value]; grid.innerHTML = ''; beatEls = []; let i = 0;
     $('#dock-taal').textContent = taalSelect.value.split(' · ')[0];
@@ -342,48 +393,32 @@
       grid.appendChild(box);
     });
   }
-  function schedule() {
-    const t = TAALS[taalSelect.value], spb = 60 / Number(bpm.value), c = Sound.ctx, gen = taalGen;
-    queued = queued.filter((q) => q.when > c.currentTime);
-    while (nextTime < c.currentTime + FluteAudio.lookahead(0.15)) {
-      const idx = nextBeat % t.bols.length, when = nextTime;
-      Sound.hit(t.bols[idx], when, spb, tablaBus);
-      queued.push({ beat: nextBeat, when });
-      setTimeout(() => { if (taalRun && gen === taalGen) beatEls.forEach((e, j) => e.classList.toggle('on', j === idx)); }, Math.max(0, (when - c.currentTime) * 1000));
-      nextBeat++; nextTime += spb;
-    }
-  }
-  // Beats queued seconds ahead (while the page was hidden) would ignore a change of tempo or taal, or keep
-  // playing after Stop. Cut them and carry on from the next beat (from beat 0 when `restart`).
-  function dropQueued(restart) {
-    const c = Sound.ctx, ahead = queued.some((q) => q.when > c.currentTime + 0.3);
-    if (!ahead && !restart) return;
-    taalGen++;
-    if (ahead) { tablaBus.stop(); tablaBus = Sound.bus('tabla'); }
-    const next = queued.find((q) => q.when > c.currentTime + 0.05);
-    nextBeat = restart ? 0 : next ? next.beat : nextBeat;
-    nextTime = restart || !next ? c.currentTime + 0.1 : next.when;
-    queued = [];
-  }
+  // The beats come from the shared transport (transport.js), which keeps the tabla and any melody pattern
+  // on one clock. This page only starts it, stops it and shows the beat that is sounding.
+  const onBeat = (n, idx) => { if (taalRun) beatEls.forEach((e, j) => e.classList.toggle('on', j === idx)); };
   function setTaalRunning(on) {
     taalRun = on;
-    $('#taal-toggle').textContent = on ? '■ Stop' : '▶ Play';
+    $('#taal-toggle').textContent = on ? 'Stop' : 'Play'; $('#taal-toggle').classList.toggle('on', on);
     $('#dock-tabla').classList.toggle('on', on); $('#dock-tabla').setAttribute('aria-pressed', on);
-    clearInterval(taalTimer); taalGen++;
-    if (on) { audio(); tablaBus = Sound.bus('tabla'); queued = []; nextBeat = 0; nextTime = Sound.ctx.currentTime + 0.1; taalTimer = setInterval(schedule, 25); }
-    else {
+    const T = FluteTransport;
+    if (on) {
+      audio();
+      const taal = TAALS[taalSelect.value];
+      if (T.running) { T.setBpm(Number(bpm.value)); T.setTaal(taal); T.setTabla(true); T.setOnBeat(onBeat); }
+      else T.start({ bpm: Number(bpm.value), taal, tabla: true, onBeat });
+    } else {
       beatEls.forEach((e) => e.classList.remove('on'));
-      // Let the last hit ring out, but silence anything queued beyond it.
-      if (tablaBus && queued.some((q) => q.when > Sound.ctx.currentTime + 0.3)) tablaBus.stop();
-      tablaBus = null; queued = [];
+      if (T.patternActive) { T.setTabla(false); T.setOnBeat(null); } else T.stop(); // a melody keeps the beat grid
     }
     keepAwake();
   }
+  const bpmListeners = [];
   function setBpm(v) {
     v = Math.min(240, Math.max(40, Math.round(v)));
     bpm.value = v; settings.bpm = v; saveSettings();
     $('#bpm-out').textContent = v; $('#dock-bpm').textContent = v;
-    if (taalRun) dropQueued(false);
+    if (FluteTransport.running) FluteTransport.setBpm(v);
+    bpmListeners.forEach((f) => f(v));
   }
   bpm.value = settings.bpm; setBpm(settings.bpm);
   $('#taal-toggle').addEventListener('click', () => setTaalRunning(!taalRun));
@@ -397,16 +432,17 @@
   });
   taalSelect.addEventListener('change', () => {
     settings.taal = taalSelect.value; saveSettings(); buildGrid();
-    if (taalRun) dropQueued(true);
+    if (taalRun) FluteTransport.setTaal(TAALS[taalSelect.value]);
   });
   buildGrid();
 
   // Keep the screen on while a block timer, the tabla or the tanpura runs, so a phone on a stand does not
   // lock mid-practice. The browser drops the lock when the page is hidden; it is asked for again on return.
   let wakeLock = null, wakeBusy = false;
+  FluteTransport.on(() => keepAwake());
   async function keepAwake() {
     if (!('wakeLock' in navigator) || wakeBusy) return;
-    const want = !!handle || taalRun || Sound.droneOn;
+    const want = !!handle || taalRun || Sound.droneOn || FluteTransport.running;
     if (want) $('#dock').classList.remove('tuck'); // something is playing: keep its controls in view
     wakeBusy = true;
     try {
@@ -416,12 +452,12 @@
       } else if (!want && wakeLock) { await wakeLock.release(); wakeLock = null; }
     } catch (e) { /* not allowed here (e.g. low battery); practice works without it */ }
     wakeBusy = false;
-    if (want !== (!!handle || taalRun || Sound.droneOn)) keepAwake();
+    if (want !== (!!handle || taalRun || Sound.droneOn || FluteTransport.running)) keepAwake();
   }
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
       // Top up the audio queue now, before the browser starts delaying timers.
-      if (taalRun) schedule();
+      if (FluteTransport.running) FluteTransport.pump();
       if (Sound.droneOn) Sound.droneTick();
     } else keepAwake();
   });
@@ -435,27 +471,16 @@
       // It finished while the page was closed: tick it off, and line up the next block without starting it.
       setChecked(r.id, true);
       const next = ROUTINE.slice(ROUTINE.indexOf(r) + 1).find((x) => !state.checks[x.id]);
-      if (next && runAll) selectBlock(next, false, true); else { runAll = false; delete state.timer; store.set(state); }
+      if (next && runAll) { selectBlock(next, false, true); goCard(next.id, { smooth: false }); } else { runAll = false; delete state.timer; store.set(state); }
       $('#timer-label').textContent = `${r.title} finished while you were away ✓` + (next && runAll ? ` Next: ${next.title}` : '');
       return;
     }
     block = r;
     remaining = saved.endAt ? Math.ceil((saved.endAt - Date.now()) / 1000) : Math.min(r.min * 60, Math.max(1, saved.remaining | 0));
-    rows[r.id].li.classList.add('active');
+    goCard(r.id, { smooth: false });
     $('#timer-label').textContent = r.title + (saved.endAt ? ' · still running' : ' · paused');
     if (saved.endAt) start(true); else renderTimer();
   })();
-
-  // Highlight the current section in the nav.
-  const links = [...document.querySelectorAll('a[data-spy]')];
-  if ('IntersectionObserver' in window) {
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((en) => {
-        if (en.isIntersecting) links.forEach((a) => a.classList.toggle('active', a.dataset.spy.split(' ').includes(en.target.id)));
-      });
-    }, { rootMargin: '-40% 0px -55% 0px' });
-    new Set(links.flatMap((a) => a.dataset.spy.split(' '))).forEach((id) => { const s = document.getElementById(id); if (s) io.observe(s); });
-  }
 
   // Finger-hole chart: tap a swar to see the fingering and hear it at your Sa.
   const chart = FluteDemo.createChart($('#flute'));
@@ -478,8 +503,8 @@
       notes.forEach((n) => {
         const sw = FluteDemo.parseSwar(n.tok), b = document.createElement('button');
         b.type = 'button'; b.dataset.tok = n.tok; b.setAttribute('aria-pressed', n.tok === chartTok);
-        b.innerHTML = sw.label + (namesBox.checked ? `<small>${SA_NAMES[(settings.sa + n.semi) % 12]}</small>` : '');
-        b.addEventListener('click', () => { scaleOn = false; scaleBtn.textContent = '▶ Play the scale'; showNote(n.tok); playNote(n.tok); });
+        b.innerHTML = sw.label + (namesBox.checked ? `<small>${SA_NAMES[saClass(settings.sa + n.semi)]}</small>` : '');
+        b.addEventListener('click', () => { scaleOn = false; scaleBtn.textContent = 'Play the scale'; scaleBtn.classList.remove('on'); showNote(n.tok); playNote(n.tok); });
         wrap.appendChild(b);
       });
       picker.appendChild(wrap);
@@ -490,19 +515,19 @@
     chart.show(sw.closed, sw.half, sw.over);
     picker.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.tok === tok));
     const n = CHART.find((c) => c.tok === tok);
-    const name = namesBox.checked ? ` (${SA_NAMES[(settings.sa + n.semi) % 12]} at your Sa)` : '';
+    const name = namesBox.checked ? ` (${SA_NAMES[saClass(settings.sa + n.semi)]} at your Sa)` : '';
     $('#note-info').textContent = FluteDemo.describe(sw).replace(/\.$/, '') + name + '. A simplified chart; exact fingering varies with the bansuri and your guru\'s school.';
   }
   function playNote(tok) { FluteDemo.player.play([{ tok, beats: 2 }], 80, { onStep() {}, onEnd() {} }); }
   let scaleOn = false;
-  const resetScale = () => { scaleOn = false; scaleBtn.textContent = '▶ Play the scale'; };
+  const resetScale = () => { scaleOn = false; scaleBtn.textContent = 'Play the scale'; scaleBtn.classList.remove('on'); };
   FluteDemo.player.hooks.push(resetScale);
   scaleBtn.addEventListener('click', () => {
     if (scaleOn) { FluteDemo.player.stop(); return; }
     const items = "S R G m P D N S'".split(' ').map((tok) => ({ tok, beats: 1, ref: tok }));
     items[items.length - 1].beats = 2;
     FluteDemo.player.play(items, 80, { onStep(step) { if (step) showNote(step.ref); }, onEnd() { showNote('S'); } });
-    scaleOn = true; scaleBtn.textContent = '■ Stop';
+    scaleOn = true; scaleBtn.textContent = 'Stop'; scaleBtn.classList.add('on');
   });
   komalBox.addEventListener('change', () => { renderPicker(); });
   namesBox.addEventListener('change', () => { renderPicker(); showNote(chartTok); });
@@ -532,7 +557,7 @@
       return `<article class="card raga-card"><button type="button" class="star" data-fav="${t}" aria-pressed="${fav}" aria-label="${fav ? 'Remove' : 'Add'} ${t} ${fav ? 'from' : 'to'} favourites">${fav ? '★' : '☆'}</button>
         <div class="icon">${i}</div><h3>Raga ${t}</h3>${STARTER.includes(t) ? '<span class="badge">Starter</span>' : ''}
         <p><strong>${g}.</strong> ${esc(d)}</p>${n ? `<p class="aroha"><b>Aroha:</b> ${arohaText(t)}</p>
-        <div class="card-actions"><button type="button" class="btn small" data-hear="${t}">▶ Hear aroha</button><button type="button" class="btn small ghost" data-raga="${t}" data-group="${g}">How to play</button></div>` : '<p class="soon">Demo notation coming soon</p>'}</article>`;
+        <div class="card-actions"><button type="button" class="btn small" data-hear="${t}">Hear aroha</button><button type="button" class="btn small ghost" data-raga="${t}" data-group="${g}">How to play</button></div>` : '<p class="soon">Demo notation coming soon</p>'}</article>`;
     }).join('') || '<p class="empty">No ragas match. Try clearing a filter.</p>';
     $('#raga-count').textContent = `${shown.length} of ${RAGAS.length} ragas`;
     $('#raga-filter').querySelectorAll('button').forEach((b) => {
@@ -540,7 +565,7 @@
       b.setAttribute('aria-pressed', k === 'group' ? rf.group === b.dataset.v : rf[k]);
     });
   }
-  const chips = [...RAGA_GROUPS.map((g) => ['group', g, g]), ['starter', 'true', '🌱 Starter'], ['fav', 'true', '★ Favourites']];
+  const chips = [...RAGA_GROUPS.map((g) => ['group', g, g]), ['starter', 'true', 'Starter'], ['fav', 'true', '★ Favourites']];
   chips.forEach(([kind, v, label]) => {
     const b = document.createElement('button');
     b.type = 'button'; b.textContent = label; b.dataset.kind = kind; b.dataset.v = v; b.style.width = 'auto'; b.style.padding = '.45rem .9rem';
@@ -548,10 +573,10 @@
     $('#raga-filter').appendChild(b);
   });
   $('#raga-search').addEventListener('input', (e) => { rf.q = e.target.value; showRagas(); });
-  $('#raga-now').textContent = `🕒 Ragas for now (${nowGroup()})`;
+  $('#raga-now').textContent = `Ragas for now (${nowGroup()})`;
   function ragasForNow() {
     Object.assign(rf, { group: nowGroup(), q: '', starter: false, fav: false }); $('#raga-search').value = ''; showRagas();
-    document.getElementById('ragas').scrollIntoView({ behavior: 'smooth' });
+    FluteNav.go('ragas', { top: true });
   }
   $('#raga-now').addEventListener('click', ragasForNow);
   $('#t-ragas').addEventListener('click', (e) => { e.preventDefault(); ragasForNow(); });
@@ -613,7 +638,7 @@
     else if (k === 'b') $('#dock-tabla').click();
     else if (k === '[') $('#bpm-down').click();
     else if (k === ']') $('#bpm-up').click();
-    else if (k === '/') { e.preventDefault(); document.getElementById('ragas').scrollIntoView({ behavior: 'smooth' }); $('#raga-search').focus(); }
+    else if (k === '/') { e.preventDefault(); FluteNav.go('ragas', { focus: false }); $('#raga-search').focus(); }
     else if (k === 'escape') togglePanel(false);
     else return;
   });
@@ -624,6 +649,7 @@
   window.FluteApp = {
     BLOCKS, state: () => state, settings, dateKey, setSa, todayKey, streak, practised, practisedDays, defaultPlan,
     routine: () => ROUTINE,
+    timerBlockId: () => (block ? block.id : null), // the block the shared timer is on (for the practice cards)
     saveState: () => store.set(state),
     // Pauses the tanpura and tabla (for the tuner, so the microphone hears only the flute). Returns the names
     // of what was paused and a restore() that switches them back on.
@@ -641,6 +667,21 @@
     }
   };
   if (window.FluteProgress) window.FluteProgress.refresh();
+
+  // Hooks for the Alankar tab (assets/alankar.js): the shared tempo, tabla, tanpura, volumes and settings.
+  Object.assign(window.FluteApp, {
+    saveSettings,
+    bpm: () => Number(bpm.value), setBpm, onBpm: (fn) => bpmListeners.push(fn),
+    taalName: () => taalSelect.value,
+    setTaal(name) { if (TAALS[name] && taalSelect.value !== name) { taalSelect.value = name; taalSelect.dispatchEvent(new Event('change')); } },
+    tabla: { on: () => taalRun, set: setTaalRunning },
+    drone: { on: () => Sound.droneOn, set(on) { if (!!on !== Sound.droneOn) droneBtn.click(); } },
+    volume: (which) => (which === 'drone' ? settings.droneVol : settings.tablaVol),
+    setVolume(which, v) { const el = which === 'drone' ? droneVol : tablaVol; el.value = v; el.dispatchEvent(new Event('input')); },
+    // 'off' (not in today's routine), 'todo' or 'done'; markBlock ticks a block off like the checkbox does.
+    blockState: (id) => { const r = ROUTINE.find((x) => x.id === id); return !r ? 'off' : state.checks[id] ? 'done' : 'todo'; },
+    markBlock(id) { if (!ROUTINE.some((x) => x.id === id) || state.checks[id]) return false; setChecked(id, true); return true; }
+  });
 
   // Install as an app + offline support
   let installEvent = null;

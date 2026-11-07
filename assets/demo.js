@@ -117,7 +117,7 @@
 
   // One-tap preview of a raga's aroha from its card.
   let previewBtn = null;
-  function resetPreview() { if (previewBtn) { previewBtn.textContent = '▶ Hear aroha'; previewBtn.classList.remove('on'); previewBtn = null; } }
+  function resetPreview() { if (previewBtn) { previewBtn.textContent = 'Hear aroha'; previewBtn.classList.remove('on'); previewBtn = null; } }
   function preview(name, btn) {
     const info = root.RAGA_NOTATION[name];
     if (!info) return;
@@ -125,7 +125,7 @@
     const items = info.aroha.split(/\s+/).map((tok) => ({ tok, beats: 1 }));
     items[items.length - 1].beats = 2;
     player.play(items, 80, { onStep() {}, onEnd() {} });
-    previewBtn = btn; btn.textContent = '■ Stop'; btn.classList.add('on');
+    previewBtn = btn; btn.textContent = 'Stop'; btn.classList.add('on');
   }
 
   // ---------- dialog ----------
@@ -164,11 +164,11 @@
         <svg class="demo-chart" viewBox="0 0 640 150" role="img" aria-label="Bansuri finger-hole chart for the swar being played"></svg>
         <p class="demo-cap" aria-live="polite">Press a play button to hear and see the raga.</p>
         <div class="demo-controls">
-          <button class="btn small" data-play="aroha">▶ Aroha</button>
-          <button class="btn small" data-play="avaroha">▶ Avaroha</button>
-          ${info.pakad ? '<button class="btn small" data-play="pakad">▶ Pakad</button>' : ''}
-          <button class="btn small" data-play="both">▶ Aroha + avaroha</button>
-          <button class="btn small ghost" data-stop>■ Stop</button>
+          <button class="btn small" data-play="aroha">Aroha</button>
+          <button class="btn small" data-play="avaroha">Avaroha</button>
+          ${info.pakad ? '<button class="btn small" data-play="pakad">Pakad</button>' : ''}
+          <button class="btn small" data-play="both">Aroha + avaroha</button>
+          <button class="btn small ghost" data-stop>Stop</button>
           <label>Speed <select data-speed>${Object.keys(SPEEDS).map((s) => `<option${s === 'Normal' ? ' selected' : ''}>${s}</option>`).join('')}</select></label>
           <label><input type="checkbox" data-loop> Loop</label>
         </div>

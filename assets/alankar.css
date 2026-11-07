@@ -1,0 +1,79 @@
+/* Alankar view (#view-alankar). Built on the tokens, buttons and card styles in styles.css (.panel, .btn, .dock-btn, .hint)
+   and on the finger-chart styles (.demo-chart). */
+#alankar { padding-top: var(--s-5); }
+#alankar h2 { margin-bottom: .35rem; }
+.al { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--gap); }
+/* The global `section` rule centres sections and caps their width; inside this grid that would shrink each panel to its content. */
+.al > .panel { margin: 0; max-width: none; }
+.al h3 { margin: 0; font-size: var(--fs-xl); }
+.al select, .al input[type="number"] { max-width: 100%; }
+.al input[type="number"] { font: inherit; background: var(--bg); color: var(--ink); border: 1px solid var(--line-strong); border-radius: var(--r-sm); padding: .3rem .5rem; min-height: 2.6rem; width: 4.5rem; }
+
+/* sticky "now playing" bar: stays under the site header while a pattern plays, so Stop is always in reach */
+.al-bar { position: sticky; top: var(--al-top, 3.75rem); z-index: 4; display: flex; align-items: center; gap: .6rem; padding: .45rem .75rem; border-radius: var(--r-card); background: var(--accent2); color: #fff; box-shadow: var(--shadow-2); animation: bar-in .25s var(--ease); }
+.al-bar[hidden] { display: none; }
+@keyframes bar-in { from { opacity: 0; transform: translateY(-6px); } }
+.al-bar .btn { background: #fff; color: #1b1840; flex: none; }
+.al-bar-name { flex: 1; min-width: 0; font-weight: 600; font-size: .9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.al-bar-tempo { display: flex; align-items: center; gap: .25rem; flex: none; }
+.al-bar-tempo output { min-width: 2.2rem; text-align: center; font-weight: 700; font-variant-numeric: tabular-nums; }
+.al-bar .dock-btn { color: #fff; border-color: rgba(255, 255, 255, .7); min-width: 2.4rem; }
+
+/* the pattern being practised */
+.al-sub { margin: .15rem 0 var(--s-3); color: var(--muted); font-size: .9rem; }
+.al-notation { display: grid; gap: .6rem; }
+.al-row { display: flex; flex-wrap: wrap; gap: .3rem .4rem; align-items: baseline; }
+.al-label { flex: 0 0 100%; color: var(--muted); font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; }
+.al-g { display: inline-flex; gap: .1rem; padding: .15rem .25rem; border-radius: var(--r-sm); background: var(--bg); }
+.al-n { padding: .1rem .3rem; border-radius: 7px; font-weight: 600; font-size: .95rem; transition: background .08s, color .08s; }
+.al-n.now { background: var(--accent); color: var(--on-accent); }
+.al-chart { display: block; width: 100%; max-width: 640px; margin: var(--s-3) auto 0; }
+.al-cap { min-height: 3.2em; margin: .25rem 0 var(--s-2); font-size: .92rem; }
+.al-play-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-3) var(--s-4); }
+.al-play { min-width: 9rem; min-height: var(--tap-big); font-size: var(--fs-lg); padding: .8rem 1.8rem; }
+.al-play.on { background: var(--accent2); color: #fff; }
+.al-tempo { display: flex; align-items: center; gap: .4rem; flex: 1 1 14rem; min-width: 0; }
+.al-tempo .dock-btn { min-width: 2.75rem; min-height: 2.75rem; padding: 0; font-size: 1.2rem; }
+.al-tempo input[type="range"] { flex: 1; min-width: 0; }
+.al-bpm { white-space: nowrap; font-size: .9rem; color: var(--muted); }
+.al-bpm output { color: var(--accent-ink); font-weight: 800; font-size: var(--fs-xl); font-variant-numeric: tabular-nums; }
+.al-status { margin: var(--s-3) 0 0; color: var(--muted); font-size: .88rem; min-height: 1.4em; }
+
+/* controls */
+.al-field { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem var(--s-3); margin-top: var(--s-3); }
+.al-flabel { flex: 0 0 8.5rem; font-weight: 600; font-size: .9rem; }
+.al-seg { display: inline-flex; flex-wrap: wrap; gap: .35rem; }
+.al-seg button, .al-toggle { font: inherit; font-weight: 600; min-height: 2.6rem; min-width: 3.2rem; padding: .3rem .95rem; border-radius: var(--r-pill); border: 1px solid var(--line-strong); background: transparent; color: var(--ink); cursor: pointer; transition: background .15s, color .15s, border-color .15s; }
+.al-seg button[aria-pressed="true"], .al-toggle[aria-pressed="true"] { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+.al-row2 { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2) var(--s-4); margin-top: var(--s-3); }
+.al-slider { display: grid; gap: .1rem; flex: 1 1 11rem; margin-top: var(--s-3); font-weight: 600; font-size: .9rem; }
+.al-row2 .al-slider { margin-top: 0; }
+.al-slider output { color: var(--muted); font-weight: 500; font-variant-numeric: tabular-nums; }
+.al-slider input { width: 100%; }
+.al-check { display: flex; align-items: center; gap: var(--s-2); min-height: 2.6rem; margin-top: var(--s-2); font-weight: 600; }
+.al-check input { width: 1.3rem; height: 1.3rem; }
+.al-trainer summary { cursor: pointer; font-weight: 700; font-size: var(--fs-lg); min-height: 2.6rem; display: flex; align-items: center; justify-content: space-between; list-style: none; }
+.al-trainer summary::-webkit-details-marker { display: none; }
+.al-trainer summary::after { content: '+'; font-size: 1.4rem; color: var(--muted); }
+.al-trainer[open] summary::after { content: '−'; }
+.al-tr { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-4); align-items: center; }
+.al-tr label { display: inline-flex; align-items: center; gap: .4rem; }
+
+/* pattern list */
+.al-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr)); gap: .6rem; margin-top: .6rem; }
+.al-card { display: flex; flex-direction: column; gap: .15rem; text-align: left; font: inherit; padding: .7rem .85rem; border-radius: var(--r-md); border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; min-height: 5.2rem; transition: transform .2s var(--ease), border-color .2s, background .2s; }
+.al-card b { font-size: .98rem; }
+.al-prev { font-size: .8rem; color: var(--muted); line-height: 1.35; }
+.al-card small { margin-top: auto; font-size: var(--fs-xs); color: var(--muted); }
+.al-card:hover { border-color: var(--accent2); transform: translateY(-1px); }
+.al-card[aria-pressed="true"] { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+.al-card[aria-pressed="true"] .al-prev, .al-card[aria-pressed="true"] small { color: rgba(255, 255, 255, .88); }
+.al-log p { margin: 0 0 var(--s-2); }
+
+@media (max-width: 420px) {
+  .al-flabel { flex-basis: 100%; }
+  .al-play { flex: 1 1 100%; }
+  .al-bar-name { display: none; }
+  .al-bar { justify-content: space-between; }
+}
+@media (prefers-reduced-motion: reduce) { .al-n { transition: none; } }

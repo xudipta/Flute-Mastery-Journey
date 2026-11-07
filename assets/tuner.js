@@ -84,7 +84,7 @@
     const cls = ((nearest % 12) + 12) % 12, oct = Math.floor(nearest / 12);
     return { n, nearest, cls, oct, cents, letter: LETTERS[cls], name: SHOW[LETTERS[cls]] };
   }
-  const westernName = (saIndex, cls) => NOTE[(saIndex + cls) % 12];
+  const westernName = (saIndex, cls) => NOTE[(((saIndex + cls) % 12) + 12) % 12];   // saIndex is negative for a low Sa
 
   // ---------- UI ----------
   // refUntil: readings are ignored until then, while the site itself plays Sa. restore: switches the tanpura
@@ -110,7 +110,7 @@
     state.buf = new Float32Array(state.an.fftSize); state.filter.reset(); state.trace = [];
     state.bytes = state.an.getFloatTimeDomainData ? null : new Uint8Array(state.an.fftSize);
     state.voicedAt = performance.now();
-    $('#tuner-toggle').textContent = '■ Stop listening'; $('#tuner-toggle').classList.add('on');
+    $('#tuner-toggle').textContent = 'Stop listening'; $('#tuner-toggle').classList.add('on');
     // The tanpura and tabla would reach the microphone too, so pause them while listening.
     const q = App() && App().quiet ? App().quiet() : { paused: [], restore: null };
     state.restore = q.restore;
@@ -125,7 +125,7 @@
     if (state.stream) state.stream.getTracks().forEach((t) => t.stop());
     if (state.src) state.src.disconnect();
     state.stream = state.src = state.an = null; state.current = null;
-    $('#tuner-toggle').textContent = '🎤 Start listening'; $('#tuner-toggle').classList.remove('on');
+    $('#tuner-toggle').textContent = 'Start listening'; $('#tuner-toggle').classList.remove('on');
     $('#tuner-setsa').disabled = true;
     render(null); setMsg('');
   }
@@ -237,6 +237,12 @@
     $('#tuner-ref').addEventListener('click', hearSa);
     $('#tuner-setsa').addEventListener('click', setSaFromNote);
     document.addEventListener('visibilitychange', () => { if (document.hidden && state.stream) stop(false); });
+    // Leaving the Learn tab ends listening, so the microphone is never on out of sight; the trace needs
+    // its size again when the tab is shown (it cannot be measured while hidden).
+    if (root.FluteNav) {
+      root.FluteNav.onHide('learn', () => { if (state.stream) stop(); });
+      root.FluteNav.onShow('learn', () => drawTrace());
+    }
     render(null);
   }
   root.FluteTuner = { detect, toSwar, makeFilter };

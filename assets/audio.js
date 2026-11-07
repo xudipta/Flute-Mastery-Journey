@@ -79,45 +79,72 @@
   }
 
   // ---------- tanpura ----------
-  // Karplus-Strong string with a long sustain, then a rising soft-clip that brings out the
-  // upper harmonics over time -- the "jivari" shimmer of a tanpura.
-  function tanpuraString(sr, f, seconds) {
-    const len = Math.floor(sr * seconds), out = new Float32Array(len);
-    const N = Math.max(2, Math.round(sr / f - 0.5)), line = new Float32Array(N);
-    const decay = Math.pow(0.01, 1 / (f * 6));
-    let seed = Math.round(f * 1000) % 2147483647 || 1;
-    const rnd = () => ((seed = (seed * 48271) % 2147483647) / 2147483647) * 2 - 1;
-    for (let i = 0; i < N; i++) line[i] = rnd();
-    for (let k = 0; k < 6; k++) for (let i = 1; i < N; i++) line[i] = (line[i] + line[i - 1]) / 2;
-    let idx = 0;
-    for (let n = 0; n < len; n++) {
-      const cur = line[idx], nxt = line[(idx + 1) % N];
-      line[idx] = decay * 0.5 * (cur + nxt);
-      out[n] = cur;
-      idx = (idx + 1) % N;
+  // Each string is a sum of exact harmonics (k times the string's frequency), so its pitch is right whatever
+  // the sample rate or Sa, and the strings sit in tune with each other. The "jivari" of a tanpura (the buzz of
+  // the string over the flat bridge) is modelled as upper harmonics that swell for a second or two after the
+  // pluck and then fade slowly, while the plain pluck brightness dies away quickly.
+  // Everything lives in one self-contained function so it can also be run inside a Web Worker (see Engine).
+  function tanpuraKit() {
+    const TAU = Math.PI * 2, BLOCK = 128;
+    // String ratios to Sa for the first (lower) string, in just intonation: Pa 3:2, Ma 4:3, shuddha Ni 15:8, an octave down.
+    const FIRST = { Pa: 0.75, Ma: 2 / 3, Ni: 15 / 16 };
+    function rng(seed) { let s = (Math.floor(seed) % 2147483646) + 1; return () => ((s = (s * 48271) % 2147483647) / 2147483647); }
+    // opts: seed (makes each string's phases and shimmer different), jivari (0 to 1.3), sustain (1 = default).
+    function tanpuraString(sr, f, seconds, opts) {
+      const o = Object.assign({ seed: 1, jivari: 1, sustain: 1 }, opts);
+      const len = Math.floor(sr * seconds), out = new Float32Array(len), rnd = rng(Math.round(f * 100) + o.seed * 7919);
+      const K = Math.max(6, Math.min(24, Math.floor(6000 / f)));
+      const T0 = 8 * o.sustain, TALL = 22 * o.sustain;
+      for (let k = 1; k <= K; k++) {
+        const w = TAU * k * f / sr, cr = Math.cos(w), si = Math.sin(w), ph = rnd() * TAU;
+        let c = Math.cos(ph), s = Math.sin(ph);
+        const a0 = Math.pow(k, -0.95) * (k >= 2 && k <= 4 ? 1.2 : 1);
+        const tau = T0 / (1 + 0.45 * Math.pow(k - 1, 0.9));              // plain decay: upper harmonics die faster
+        const m = k >= 3 ? Math.min(0.92, o.jivari * 0.16 * (k - 2)) : 0;  // share of this harmonic that blooms
+        const tp = 0.5 + 0.22 * k;                                         // when the bloom peaks (s)
+        const fl = TAU * (0.12 + rnd() * 0.35), fd = 0.05 + rnd() * 0.1, fp = rnd() * TAU; // slow shimmer
+        const env = (t) => {
+          const plain = Math.exp(-t / tau), bloom = (t / tp) * Math.exp(1 - t / tp - t / 9);
+          return a0 * ((1 - 0.55 * m) * plain + m * 1.8 * bloom) * Math.exp(-t / TALL) * (1 + fd * Math.sin(fl * t + fp));
+        };
+        let a = env(0);
+        for (let j = 0, nb = Math.ceil(len / BLOCK); j < nb; j++) {
+          const n0 = j * BLOCK, n1 = Math.min(len, n0 + BLOCK), next = env(n1 / sr), da = (next - a) / (n1 - n0);
+          for (let n = n0; n < n1; n++) { out[n] += a * c; a += da; const t = c * cr - s * si; s = c * si + s * cr; c = t; }
+          a = next;
+        }
+      }
+      // A short soft pluck at the start, then fades and a level that leaves headroom when strings overlap.
+      let peak = 0, noise = 0;
+      const fadeIn = Math.floor(sr * 0.004), fadeOut = Math.floor(sr * 1.2), click = Math.floor(sr * 0.03);
+      for (let n = 0; n < len; n++) {
+        if (n < click) { noise += 0.35 * ((rnd() * 2 - 1) - noise); out[n] += 0.05 * noise * (1 - n / click) * K; }
+        const v = Math.abs(out[n]); if (v > peak) peak = v;
+      }
+      const g0 = 0.9 / (peak || 1);
+      for (let n = 0; n < len; n++) {
+        let g = g0;
+        if (n < fadeIn) g *= n / fadeIn;
+        if (n > len - fadeOut) { const x = (len - n) / fadeOut; g *= x * x * (3 - 2 * x); }
+        out[n] *= g;
+      }
+      return out;
     }
-    // Drive relative to the local amplitude so the harmonics keep blooming as the string decays.
-    let peak = 0, follow = 0;
-    const rel = Math.exp(-1 / (sr * 0.05));
-    for (let n = 0; n < len; n++) {
-      const t = n / sr, k = 0.3 + 3 * (1 - Math.exp(-t / 1.5));
-      follow = Math.max(Math.abs(out[n]), follow * rel, 1e-5);
-      out[n] = Math.tanh(k * out[n] / follow) * follow;
-      if (Math.abs(out[n]) > peak) peak = Math.abs(out[n]);
+    // The four strings of one tanpura: first string (Pa, Ma or Ni), Sa, Sa, and Sa an octave down.
+    // opts: first ('Pa' | 'Ma' | 'Ni'), seconds, jivari.
+    function tanpuraStrings(sr, saHz, opts) {
+      const o = Object.assign({ first: 'Pa', seconds: 12, jivari: 1 }, opts);
+      const ratio = FIRST[o.first] || FIRST.Pa;
+      return [ratio, 1, 1, 0.5].map((r, i) => tanpuraString(sr, saHz * r, o.seconds, { seed: i + 1, jivari: o.jivari * (i === 3 ? 0.85 : 1) }));
     }
-    const fadeIn = Math.floor(sr * 0.004), fadeOut = Math.floor(sr * 0.5);
-    for (let n = 0; n < len; n++) {
-      let g = 0.9 / (peak || 1);
-      if (n < fadeIn) g *= n / fadeIn;
-      if (n > len - fadeOut) g *= (len - n) / fadeOut;
-      out[n] *= g;
-    }
-    return out;
+    return { tanpuraString, tanpuraStrings, FIRST };
   }
-  // Tuning used by most male/mid-range tanpuras: Pa (lower), Sa, Sa, Sa (lower octave).
-  function tanpuraStrings(sr, saHz) {
-    return [0.75, 1, 1, 0.5].map((r) => tanpuraString(sr, saHz * r, 8));
-  }
+  const Tanpura = tanpuraKit();
+  const { tanpuraString, tanpuraStrings } = Tanpura;
+  // Settings shared with the app and the measuring script. rate: the strings are always built at this sample rate and
+  // the browser resamples them to the device's rate (the pitch stays exact), so they can be built before the audio
+  // context exists. gaps: seconds between plucks.
+  const TANPURA = { seconds: 12, rate: 48000, ratios: Tanpura.FIRST, gaps: { slow: 1.5, medium: 1.15, fast: 0.9 }, gains: [0.7, 0.9, 0.9, 0.9] };
 
   // ---------- bell (timer end) ----------
   function bell(c, dest, when) {
@@ -167,12 +194,47 @@
     };
   }
 
+  // ---------- building the tanpura off the main thread ----------
+  // Building four strings takes a couple of hundred milliseconds on a computer and several times that on a phone,
+  // which would freeze the page, so it runs in a Web Worker made from the same code (tanpuraKit). One job runs at a
+  // time; a newer request replaces jobs still waiting, so stepping quickly through scales builds only the last one.
+  // Without Workers it falls back to the main thread (in a timeout, so the tap that asked is not blocked).
+  const TanpuraBuilder = (function () {
+    let worker = null, off = typeof root.Worker === 'undefined' || typeof root.Blob === 'undefined', inflight = null, queue = [], nextId = 1;
+    function finish(job, bufs) { inflight = null; job.done(bufs); pump(); }
+    function viaMainThread(job) { setTimeout(() => finish(job, tanpuraStrings(job.sr, job.saHz, job.opts)), 0); }
+    function start() {
+      try {
+        const src = '(function(){var Kit=(' + tanpuraKit.toString() + ')();self.onmessage=function(e){var d=e.data,r=Kit.tanpuraStrings(d.sr,d.saHz,d.opts);self.postMessage({id:d.id,bufs:r},r.map(function(a){return a.buffer;}));};})();';
+        const url = root.URL.createObjectURL(new root.Blob([src], { type: 'application/javascript' }));
+        worker = new root.Worker(url);
+        worker.onmessage = (e) => { root.URL.revokeObjectURL(url); if (inflight && inflight.id === e.data.id) finish(inflight, e.data.bufs); };
+        worker.onerror = () => { off = true; worker = null; if (inflight) viaMainThread(inflight); };
+      } catch (err) { off = true; worker = null; }
+    }
+    function pump() {
+      if (inflight || !queue.length) return;
+      const job = (inflight = queue.shift());
+      if (!worker && !off) start();
+      if (off) viaMainThread(job); else worker.postMessage({ id: job.id, sr: job.sr, saHz: job.saHz, opts: job.opts });
+    }
+    return {
+      // urgent: someone is waiting for it (replaces everything queued); otherwise only replaces other waiting warm-ups.
+      request(sr, saHz, opts, urgent, done, dropped) {
+        queue = queue.filter((j) => { const drop = urgent || !j.urgent; if (drop) j.dropped(); return !drop; });
+        queue.push({ id: nextId++, sr, saHz, opts, urgent, done, dropped });
+        pump();
+      }
+    };
+  })();
+
   // ---------- engine (browser runtime) ----------
   // While the page is hidden (screen off, another app in front) browsers may run timers only about once a
   // second, so the drone and tabla schedule a few seconds ahead instead of a fraction of a second.
   const lookahead = (visible) => (typeof document !== 'undefined' && document.hidden ? 3 : visible);
   const Engine = {
-    ctx: null, saHz: 146.83, tabla: null, drone: null, tanpuraBufs: null, droneOn: false, droneTimer: null, droneNext: 0, droneStep: 0, droneSrc: [],
+    ctx: null, saHz: 146.83, tabla: null, drone: null, droneOn: false, droneTimer: null, droneNext: 0, droneStep: 0, droneSrc: [],
+    tanpura: { first: 'Pa', speed: 'medium', fine: 0 }, tanpuraCache: new Map(), droneBufs: null, droneGen: 0, tuning: false, warmTimer: null,
     ensure() {
       if (!this.ctx) {
         const c = (this.ctx = new (root.AudioContext || root.webkitAudioContext)());
@@ -188,7 +250,19 @@
       if (this.ctx.state === 'suspended') this.ctx.resume();
       return this.ctx;
     },
-    setSa(hz) { this.saHz = hz; this.tanpuraBufs = null; },
+    setSa(hz) { this.saHz = hz; this.warmTanpura(); },
+    // o: { first: 'Pa' | 'Ma' | 'Ni' (the lower first string), speed: 'slow' | 'medium' | 'fast' (pluck speed),
+    // fine: cents (moves the tanpura only; the tabla and the reference note stay on Sa) }.
+    setTanpura(o) {
+      const was = this.tanpura.first, t = Object.assign(this.tanpura, o);
+      if (!TANPURA.ratios[t.first]) t.first = 'Pa';
+      if (!TANPURA.gaps[t.speed]) t.speed = 'medium';
+      t.fine = Math.max(-100, Math.min(100, Number(t.fine) || 0));
+      const rate = Math.pow(2, t.fine / 1200);
+      this.droneSrc.forEach(({ s }) => { s.playbackRate.value = rate; });   // strings already ringing follow the fine tune
+      if (t.first !== was) { if (this.droneOn) this.restartDrone(); else this.warmTanpura(); }
+    },
+    setTuning(on) { if (this.tuning !== on) { this.tuning = on; if (this.onTuning) this.onTuning(on); } },
     setVolume(which, v) { if (this[which]) this[which].vol.value = v; },
     hit(bol, when, spb, bus) { tablaHit(this.ctx, bus ? bus.input : this.tabla.input, bol, when, spb, this.saHz); },
     // A separate output for one demo (or one tabla run); stop() fades it out and cuts everything scheduled on it.
@@ -204,36 +278,63 @@
       g.connect(c.destination); bell(c, g, when);
       return { at: when, cancel() { g.disconnect(); } };
     },
-    buffers() {
-      if (!this.tanpuraBufs) {
-        const c = this.ctx;
-        this.tanpuraBufs = tanpuraStrings(c.sampleRate, this.saHz).map((d) => {
-          const b = c.createBuffer(1, d.length, c.sampleRate);
-          b.getChannelData(0).set(d);
-          return b;
-        });
-      }
-      return this.tanpuraBufs;
+    // The four strings for the current Sa and first string are built once and kept (the last three are cached).
+    tanpuraEntry(urgent) {
+      const sr = TANPURA.rate, key = `${this.saHz.toFixed(3)}|${this.tanpura.first}`, cache = this.tanpuraCache;
+      let e = cache.get(key);
+      if (e) { cache.delete(key); cache.set(key, e); return e; }
+      e = { raw: null, bufs: null, ready: null };
+      e.ready = new Promise((resolve) => TanpuraBuilder.request(sr, this.saHz, { first: this.tanpura.first, seconds: TANPURA.seconds }, urgent,
+        (raw) => { e.raw = raw; resolve(e); }, () => cache.delete(key)));
+      cache.set(key, e);
+      while (cache.size > 3) cache.delete(cache.keys().next().value);
+      return e;
+    },
+    // Builds the current tuning ahead of time (shortly after Sa or the first string changes), so pressing play is instant.
+    warmTanpura() {
+      clearTimeout(this.warmTimer);
+      this.warmTimer = setTimeout(() => this.tanpuraEntry(false), 250);
+    },
+    // Calls done(buffers) with the four strings as AudioBuffers: at once when they are cached (returns true), else
+    // when they have been built (returns false).
+    withTanpura(done) {
+      const c = this.ensure(), e = this.tanpuraEntry(true);
+      const use = () => {
+        if (!e.bufs) { e.bufs = e.raw.map((d) => { const b = c.createBuffer(1, d.length, TANPURA.rate); b.getChannelData(0).set(d); return b; }); e.raw = null; }
+        done(e.bufs);
+      };
+      if (e.bufs || e.raw) { use(); return true; }
+      e.ready.then(use);
+      return false;
     },
     droneTick() {
-      const c = this.ctx, bufs = this.buffers(), gap = 1.15;
+      const c = this.ctx, bufs = this.droneBufs;
+      if (!bufs) return;
+      const gap = TANPURA.gaps[this.tanpura.speed], rate = Math.pow(2, this.tanpura.fine / 1200);
       while (this.droneNext < c.currentTime + lookahead(0.4)) {
         const s = c.createBufferSource(), g = c.createGain();
-        s.buffer = bufs[this.droneStep % 4];
-        g.gain.value = this.droneStep % 4 === 0 ? 0.7 : 0.9;
+        s.buffer = bufs[this.droneStep % 4]; s.playbackRate.value = rate;
+        g.gain.value = TANPURA.gains[this.droneStep % 4] * (0.94 + Math.random() * 0.12);   // no two plucks exactly alike
         s.connect(g); g.connect(this.drone.input);
         s.start(Math.max(this.droneNext, c.currentTime));
         this.droneSrc.push({ s, g });
         s.onended = () => { this.droneSrc = this.droneSrc.filter((x) => x.s !== s); };
-        this.droneStep++; this.droneNext += gap;
+        this.droneStep++; this.droneNext += gap * (0.97 + Math.random() * 0.06);
       }
     },
     startDrone() {
-      this.ensure(); this.droneOn = true; this.droneStep = 0; this.droneNext = this.ctx.currentTime + 0.05;
-      this.droneTick(); this.droneTimer = setInterval(() => this.droneTick(), 100);
+      this.ensure(); this.droneOn = true; this.droneStep = 0; this.droneBufs = null;
+      const gen = ++this.droneGen;
+      const begin = (bufs) => {
+        if (gen !== this.droneGen || !this.droneOn) return;
+        this.setTuning(false);
+        this.droneBufs = bufs; this.droneNext = this.ctx.currentTime + 0.05;
+        this.droneTick(); this.droneTimer = setInterval(() => this.droneTick(), 100);
+      };
+      if (!this.withTanpura(begin)) this.setTuning(true);   // not built yet: "tuning…" until it is
     },
     stopDrone() {
-      this.droneOn = false; clearInterval(this.droneTimer);
+      this.droneOn = false; this.droneGen++; clearInterval(this.droneTimer); this.setTuning(false);
       const t = this.ctx.currentTime;
       this.droneSrc.forEach(({ s, g }) => { g.gain.setTargetAtTime(0, t, 0.08); s.stop(t + 0.5); });
       this.droneSrc = [];
@@ -241,5 +342,5 @@
     restartDrone() { if (this.droneOn) { this.stopDrone(); this.startDrone(); } }
   };
 
-  root.FluteAudio = { Engine, lookahead, tablaHit, buildTablaChain, tanpuraString, tanpuraStrings, bell, fluteLine };
+  root.FluteAudio = { Engine, lookahead, tablaHit, buildTablaChain, tanpuraString, tanpuraStrings, TANPURA, bell, fluteLine };
 })(typeof window !== 'undefined' ? window : globalThis);
