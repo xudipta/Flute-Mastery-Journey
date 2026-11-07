@@ -134,16 +134,10 @@
   Sound.onCreate = () => { Sound.setVolume('tabla', settings.tablaVol / 100); Sound.setVolume('drone', 0.8 * settings.droneVol / 100); };
   function audio() { Sound.ensure(); return Sound; }
 
-  // Returning visitors see "Today" instead of the intro.
-  let showIntro = false;
+  // The Today card sits at the top of the Practice view.
   function markOnboarded() { if (!settings.onboarded) { settings.onboarded = true; saveSettings(); } }
   function renderToday() {
-    const returning = settings.onboarded || practisedDays().length > 0;
-    const today = $('#today'), intro = $('#hero-intro');
-    if (!today) return;
-    today.hidden = !returning || showIntro; intro.hidden = returning && !showIntro;
-    $('#page-title').innerHTML = today.hidden ? 'From first <em>sur</em> to concert-stage raga.' : 'Today\'s riyaaz';
-    if (today.hidden) return;
+    if (!$('#today')) return;
     const total = ROUTINE.reduce((s, r) => s + r.min, 0);
     const done = ROUTINE.filter((r) => state.checks[r.id]).reduce((s, r) => s + r.min, 0);
     const next = ROUTINE.find((r) => !state.checks[r.id]);
@@ -291,8 +285,6 @@
     if (ROUTINE.some((x) => !state.checks[x.id])) runRoutine();
     else { runAll = false; selectBlock(ROUTINE[0], false); }
   });
-  $('#show-intro').addEventListener('click', () => { showIntro = true; renderToday(); $('#hero-sa').focus(); });
-  $('#hero-start').addEventListener('click', () => { if (showIntro) { showIntro = false; renderToday(); } });
 
   // Sa selector (several synced selects) + tanpura drone
   const saSelects = [...document.querySelectorAll('.sa-sync')];

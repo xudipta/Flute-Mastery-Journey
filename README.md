@@ -8,7 +8,8 @@ An interactive, animated guide to the **Indian classical bansuri** — daily riy
 - App-style navigation: five tabs (Home, Practice, Alankar, Ragas, Learn) in a bottom tab bar on phones and a top bar on desktop. The tanpura, tabla and timer keep playing when you change tab, and Back/Forward and links such as `#practice` or `#tuner` work
 - Daily riyaaz routine with per-block timers (a running block survives a reload and shows in the tools bar), a breathing animation and a streak tracker (saved in your browser)
 - Keeps the screen on while a timer, the tanpura or the tabla is running, and keeps the sound and the end-of-block bell steady when the phone locks or another app is in front
-- "Today" card for returning visitors, a first-run Sa picker, and a raga finder (search, time of day, starter ragas, favourites, one-tap aroha preview)
+- Home is a Tanpura and Taal player: one big button starts the tanpura, a large scale (Sa) button opens all scales (with ◀ ▶ semitone steps), "Hear Sa" lets you check the tanpura against a clean note, and a taal card with tempo (−/+, slider, tap tempo) plays alongside. The Today card and your streak sit at the top of Practice
+- Raga finder (search, time of day, starter ragas, favourites, one-tap aroha preview)
 - Pitch tuner: pauses the tanpura and tabla while it listens through the microphone, shows the swar and cents sharp/flat against your Sa, with a pitch trace and a steadiness score (analysed on the device)
 - Synthesised tanpura and tabla, controlled from a tools bar that stays on screen. The tanpura is tuned exactly (each string is built from exact harmonics), has a jivari shimmer, a choice of first string (Pa, Ma or Ni), pluck speed and a fine tune, and a Sa range that goes down to a low G; it is built in the background, so changing the scale never freezes the page
 - Tabla taal player (Teentaal, Dadra, Keherwa, Jhaptaal, Ektaal, Rupak) with adjustable tempo
@@ -56,7 +57,7 @@ assets/practice-demos.js  demos for the daily practice blocks
 assets/favicon.svg
 ```
 
-The page is five views, each `<section class="view" id="view-NAME" data-view="NAME">`: `home` (Today card and
-tabla taal player), `practice` (routine, timer, progress calendar), `alankar`, `ragas`, `learn` (tuner, finger-hole
+The page is five views, each `<section class="view" id="view-NAME" data-view="NAME">`: `home` (tanpura and
+taal player), `practice` (Today card, routine, timer, progress calendar), `alankar`, `ragas`, `learn` (tuner, finger-hole
 chart, roadmap, techniques). Add a view by adding its section, a tab link `<a href="#NAME" data-view="NAME">` in
 both navs, and its name to `VIEWS` in `assets/nav.js`.
