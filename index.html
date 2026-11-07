@@ -125,24 +125,23 @@
       </div>
       <h2>Daily riyaaz</h2>
       <p class="lead">Tick each block as you finish it. Complete the routine to log a session and grow your streak. Use the tools bar at the bottom of the screen for the tanpura and tabla while you play.</p>
-      <div class="practice-grid">
-        <div>
-          <div class="routine-head">
-            <button id="run-all" class="btn">▶ Start full routine · <span id="routine-total">0</span> min</button>
-            <button id="edit-routine" class="btn small ghost" type="button">✎ Edit routine</button>
-            <span class="hint">Timers run one after another; each block ticks itself off with a bell.</span>
-          </div>
-          <ol id="routine" class="routine"></ol>
+      <div class="pc">
+        <div class="routine-head">
+          <button id="run-all" class="btn">▶ Start full routine · <span id="routine-total">0</span> min</button>
+          <button id="edit-routine" class="btn small ghost" type="button">✎ Edit routine</button>
+          <span class="hint">Timers run one after another; each block ticks itself off with a bell.</span>
         </div>
-        <div class="timer-card" role="group" aria-label="Practice timer">
-          <div class="timer" id="timer">00:00</div>
-          <p id="timer-label">Pick a block to start its timer</p>
-          <div class="timer-actions">
-            <button id="timer-toggle" class="btn small">Start</button>
-            <button id="timer-reset" class="btn small ghost">Reset</button>
-          </div>
-          <div class="breath" aria-hidden="true"><div id="breath-circle"></div><span id="breath-text">Breathe</span></div>
+        <div class="pc-carousel" role="group" aria-roledescription="carousel" aria-label="Today's practice blocks">
+          <ol id="routine" class="routine pc-track" role="presentation"></ol>
         </div>
+        <div class="pc-nav">
+          <button id="pc-prev" class="dock-btn" type="button" aria-label="Previous block">◀</button>
+          <div id="pc-dots" class="pc-dots"></div>
+          <button id="pc-next" class="dock-btn" type="button" aria-label="Next block">▶</button>
+        </div>
+        <p id="pc-count" class="pc-count" aria-live="polite"></p>
+        <p id="timer-label" class="pc-status" role="status">Pick a block to start its timer</p>
+        <p class="hint pc-hint">Swipe, or use the arrow buttons or keys, to move between blocks.</p>
       </div>
       <p id="done-msg" class="done" hidden>🎉 Routine complete — session logged. See you tomorrow! <a href="#progress" id="add-note">Add a note about today</a>
         <span class="next">Want to keep playing? <a href="#ragas" id="done-ragas">Ragas for this time of day</a> · <a href="#tuner">Check your tone with the tuner</a></span></p>
