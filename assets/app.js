@@ -68,6 +68,12 @@
   ];
 
   const SA_NAMES = ['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
+  // Sa is counted in semitones above C (C3 = 0): 0 to 11 as before, plus -5 to -1 for a low G, G♯, A, A♯ and B
+  // (for the bigger bass bansuris). The note name only needs the position within the octave.
+  const SA_CHOICES = [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+  const saClass = (i) => ((i % 12) + 12) % 12;
+  const saName = (i) => SA_NAMES[saClass(i)] + (i < 0 ? ' (low)' : '');
+  const saShort = (i) => SA_NAMES[saClass(i)] + (i < 0 ? '↓' : '');
 
   const $ = (s) => document.querySelector(s);
   const dateKey = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -116,11 +122,13 @@
     if (window.FluteProgress) window.FluteProgress.refresh();
   }
 
-  const settings = Object.assign({ sa: 2, bpm: 90, taal: 'Teentaal · 16', tablaVol: 100, droneVol: 100, onboarded: false, favs: [], routine: null }, state.settings);
+  const settings = Object.assign({ sa: 2, bpm: 90, taal: 'Teentaal · 16', tablaVol: 100, droneVol: 100, tanpuraFirst: 'Pa', tanpuraSpeed: 'medium', tanpuraFine: 0, onboarded: false, favs: [], routine: null }, state.settings);
+  if (!Number.isInteger(settings.sa) || settings.sa < -5 || settings.sa > 11) settings.sa = 2;
   const saveSettings = () => { state.settings = settings; store.set(state); };
   ROUTINE = planToRoutine(settings.routine);
   const Sound = FluteAudio.Engine;
   const saFreq = (i) => 130.81 * Math.pow(2, i / 12);
+  Sound.setTanpura({ first: settings.tanpuraFirst, speed: settings.tanpuraSpeed, fine: settings.tanpuraFine });
   Sound.setSa(saFreq(settings.sa));
   // Create the audio context on first use (needs a user gesture) and apply saved volumes.
   Sound.onCreate = () => { Sound.setVolume('tabla', settings.tablaVol / 100); Sound.setVolume('drone', 0.8 * settings.droneVol / 100); };
@@ -286,10 +294,10 @@
 
   // Sa selector (several synced selects) + tanpura drone
   const saSelects = [...document.querySelectorAll('.sa-sync')];
-  saSelects.forEach((sel) => SA_NAMES.forEach((n, i) => { const o = document.createElement('option'); o.value = i; o.textContent = n; sel.appendChild(o); }));
+  saSelects.forEach((sel) => SA_CHOICES.forEach((i) => { const o = document.createElement('option'); o.value = i; o.textContent = saName(i); sel.appendChild(o); }));
   function showSa() {
     saSelects.forEach((s) => { s.value = settings.sa; });
-    $('#pill-sa-name').textContent = SA_NAMES[settings.sa];
+    $('#pill-sa-name').textContent = saShort(settings.sa);
   }
   function setSa(i) {
     settings.sa = i; settings.onboarded = true; saveSettings(); showSa();
@@ -312,6 +320,24 @@
     settings.droneVol = Number(droneVol.value); saveSettings();
     if (Sound.ctx) Sound.setVolume('drone', 0.8 * settings.droneVol / 100);
   });
+  // The strings are built in the background; until they are ready the button says so.
+  Sound.onTuning = (on) => {
+    droneBtn.classList.toggle('tuning', on); droneBtn.setAttribute('aria-busy', on);
+    droneBtn.querySelector('.lbl').textContent = on ? 'Tuning…' : 'Tanpura';
+    $('#tp-status').textContent = on ? 'Tuning the tanpura…' : '';
+  };
+  // First string (Pa, or Ma / Ni for ragas without Pa), pluck speed and a fine tune in cents for the tanpura alone.
+  const tpFirst = $('#tp-first'), tpSpeed = $('#tp-speed'), tpFine = $('#tp-fine');
+  tpFirst.value = settings.tanpuraFirst; tpSpeed.value = settings.tanpuraSpeed; tpFine.value = settings.tanpuraFine;
+  const showFine = () => { $('#tp-fine-out').textContent = (tpFine.value > 0 ? '+' : '') + tpFine.value + '¢'; };
+  function applyTanpura() {
+    Object.assign(settings, { tanpuraFirst: tpFirst.value, tanpuraSpeed: tpSpeed.value, tanpuraFine: Number(tpFine.value) });
+    saveSettings(); showFine();
+    Sound.setTanpura({ first: settings.tanpuraFirst, speed: settings.tanpuraSpeed, fine: settings.tanpuraFine });
+  }
+  [tpFirst, tpSpeed, tpFine].forEach((el) => el.addEventListener('input', applyTanpura));
+  tpFine.addEventListener('dblclick', () => { tpFine.value = 0; applyTanpura(); });
+  showFine();
 
   // Tabla taal player (sounds are synthesised in audio.js).
   // vib = beats per vibhag; marks: 'X' sam, number tali, 'O' khali.
@@ -478,7 +504,7 @@
       notes.forEach((n) => {
         const sw = FluteDemo.parseSwar(n.tok), b = document.createElement('button');
         b.type = 'button'; b.dataset.tok = n.tok; b.setAttribute('aria-pressed', n.tok === chartTok);
-        b.innerHTML = sw.label + (namesBox.checked ? `<small>${SA_NAMES[(settings.sa + n.semi) % 12]}</small>` : '');
+        b.innerHTML = sw.label + (namesBox.checked ? `<small>${SA_NAMES[saClass(settings.sa + n.semi)]}</small>` : '');
         b.addEventListener('click', () => { scaleOn = false; scaleBtn.textContent = '▶ Play the scale'; showNote(n.tok); playNote(n.tok); });
         wrap.appendChild(b);
       });
@@ -490,7 +516,7 @@
     chart.show(sw.closed, sw.half, sw.over);
     picker.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.tok === tok));
     const n = CHART.find((c) => c.tok === tok);
-    const name = namesBox.checked ? ` (${SA_NAMES[(settings.sa + n.semi) % 12]} at your Sa)` : '';
+    const name = namesBox.checked ? ` (${SA_NAMES[saClass(settings.sa + n.semi)]} at your Sa)` : '';
     $('#note-info').textContent = FluteDemo.describe(sw).replace(/\.$/, '') + name + '. A simplified chart; exact fingering varies with the bansuri and your guru\'s school.';
   }
   function playNote(tok) { FluteDemo.player.play([{ tok, beats: 2 }], 80, { onStep() {}, onEnd() {} }); }
