@@ -263,17 +263,6 @@ h1#page-title { margin: 0 0 1rem; }
 .note-group button small { display: block; font-weight: 500; font-size: .72rem; opacity: .85; }
 .note-group button[aria-pressed="true"] { background: var(--accent2); border-color: var(--accent2); color: #fff; }
 
-/* glossary */
-.term { font: inherit; color: inherit; background: none; border: 0; padding: 0; margin: 0; cursor: help; border-bottom: 1px dotted var(--accent-ink); display: inline; }
-.term-wrap { white-space: nowrap; }
-.term:hover, .term:focus-visible { background: color-mix(in srgb, var(--accent) 22%, transparent); }
-#tip { position: fixed; inset: auto; margin: 0; padding: .6rem .8rem; border: 1px solid var(--muted); border-radius: 10px; background: var(--panel); color: var(--ink); font-size: .88rem; line-height: 1.4; box-shadow: 0 8px 24px rgba(0, 0, 0, .25); z-index: 50; pointer-events: none; }
-#tip[hidden] { display: none; }
-#tip b { color: var(--accent-ink); text-transform: capitalize; margin-right: .25rem; }
-.gloss { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: .75rem; margin: 0; }
-.gloss div { background: var(--panel); border-radius: 12px; padding: .75rem 1rem; }
-.gloss dt { font-weight: 700; color: var(--accent-ink); }
-.gloss dd { margin: .15rem 0 0; color: var(--muted); font-size: .92rem; }
 .note-group button[aria-pressed="true"] small { opacity: 1; }
 
 /* progress */

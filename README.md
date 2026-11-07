@@ -12,7 +12,6 @@ An interactive, animated guide to the **Indian classical bansuri** — daily riy
 - Synthesised tanpura (Pa-Sa-Sa-low Sa, with harmonic shimmer) and tabla, controlled from a tools bar that stays on screen
 - Tabla taal player (Teentaal, Dadra, Keherwa, Jhaptaal, Ektaal, Rupak) with adjustable tempo
 - Tap-to-hear six-hole finger chart across three octaves (komal/tivra and note-name options, play the scale), with half-covered holes
-- Glossary: underlined terms show a tooltip, plus a full glossary section
 - Animated "How to play" demos for 16 ragas (aroha, avaroha, pakad on a finger-hole diagram with sound)
 - "Show me how" animated demos for each daily practice block (breathing, long tones, alankars, alaap, taan & taal, cool-down)
 - Your progress: practice calendar with day notes, streaks, and backup/restore (export and import)
@@ -47,7 +46,6 @@ assets/demo.js      finger chart, swar fingering model, demo dialog and player
 assets/ragas.js     raga notation data
 assets/tuner.js     microphone pitch tuner (YIN detector)
 assets/progress.js  calendar, day notes, routine editor, backup/restore
-assets/glossary.js, glossary-ui.js  glossary data, tooltips and glossary section
 assets/practice-demos.js  demos for the daily practice blocks
 assets/favicon.svg
 ```
