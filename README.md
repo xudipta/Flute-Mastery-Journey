@@ -42,6 +42,7 @@ index.html          page markup
 assets/styles.css   styling (light/dark aware)
 assets/app.js       routine, timer, tools bar, finger chart, content data
 assets/audio.js     tabla, tanpura, bell and flute-line synthesis, audio engine
+assets/transport.js shared beat grid: tabla and melody on one clock, gapless loops (see header for the API)
 assets/demo.js      finger chart, swar fingering model, demo dialog and player
 assets/ragas.js     raga notation data
 assets/tuner.js     microphone pitch tuner (YIN detector)

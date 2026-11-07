@@ -328,7 +328,7 @@
   Object.keys(TAALS).forEach((k) => { const o = document.createElement('option'); o.textContent = k; taalSelect.appendChild(o); });
   if (!TAALS[settings.taal]) settings.taal = 'Teentaal · 16';
   taalSelect.value = settings.taal; tablaVol.value = settings.tablaVol;
-  let beatEls = [], taalRun = false, taalTimer = null, nextBeat = 0, nextTime = 0, tablaBus = null, queued = [], taalGen = 0;
+  let beatEls = [], taalRun = false;
   function buildGrid() {
     const t = TAALS[taalSelect.value]; grid.innerHTML = ''; beatEls = []; let i = 0;
     $('#dock-taal').textContent = taalSelect.value.split(' · ')[0];
@@ -342,40 +342,22 @@
       grid.appendChild(box);
     });
   }
-  function schedule() {
-    const t = TAALS[taalSelect.value], spb = 60 / Number(bpm.value), c = Sound.ctx, gen = taalGen;
-    queued = queued.filter((q) => q.when > c.currentTime);
-    while (nextTime < c.currentTime + FluteAudio.lookahead(0.15)) {
-      const idx = nextBeat % t.bols.length, when = nextTime;
-      Sound.hit(t.bols[idx], when, spb, tablaBus);
-      queued.push({ beat: nextBeat, when });
-      setTimeout(() => { if (taalRun && gen === taalGen) beatEls.forEach((e, j) => e.classList.toggle('on', j === idx)); }, Math.max(0, (when - c.currentTime) * 1000));
-      nextBeat++; nextTime += spb;
-    }
-  }
-  // Beats queued seconds ahead (while the page was hidden) would ignore a change of tempo or taal, or keep
-  // playing after Stop. Cut them and carry on from the next beat (from beat 0 when `restart`).
-  function dropQueued(restart) {
-    const c = Sound.ctx, ahead = queued.some((q) => q.when > c.currentTime + 0.3);
-    if (!ahead && !restart) return;
-    taalGen++;
-    if (ahead) { tablaBus.stop(); tablaBus = Sound.bus('tabla'); }
-    const next = queued.find((q) => q.when > c.currentTime + 0.05);
-    nextBeat = restart ? 0 : next ? next.beat : nextBeat;
-    nextTime = restart || !next ? c.currentTime + 0.1 : next.when;
-    queued = [];
-  }
+  // The beats come from the shared transport (transport.js), which keeps the tabla and any melody pattern
+  // on one clock. This page only starts it, stops it and shows the beat that is sounding.
+  const onBeat = (n, idx) => { if (taalRun) beatEls.forEach((e, j) => e.classList.toggle('on', j === idx)); };
   function setTaalRunning(on) {
     taalRun = on;
     $('#taal-toggle').textContent = on ? '■ Stop' : '▶ Play';
     $('#dock-tabla').classList.toggle('on', on); $('#dock-tabla').setAttribute('aria-pressed', on);
-    clearInterval(taalTimer); taalGen++;
-    if (on) { audio(); tablaBus = Sound.bus('tabla'); queued = []; nextBeat = 0; nextTime = Sound.ctx.currentTime + 0.1; taalTimer = setInterval(schedule, 25); }
-    else {
+    const T = FluteTransport;
+    if (on) {
+      audio();
+      const taal = TAALS[taalSelect.value];
+      if (T.running) { T.setBpm(Number(bpm.value)); T.setTaal(taal); T.setTabla(true); T.setOnBeat(onBeat); }
+      else T.start({ bpm: Number(bpm.value), taal, tabla: true, onBeat });
+    } else {
       beatEls.forEach((e) => e.classList.remove('on'));
-      // Let the last hit ring out, but silence anything queued beyond it.
-      if (tablaBus && queued.some((q) => q.when > Sound.ctx.currentTime + 0.3)) tablaBus.stop();
-      tablaBus = null; queued = [];
+      if (T.patternActive) { T.setTabla(false); T.setOnBeat(null); } else T.stop(); // a melody keeps the beat grid
     }
     keepAwake();
   }
@@ -383,7 +365,7 @@
     v = Math.min(240, Math.max(40, Math.round(v)));
     bpm.value = v; settings.bpm = v; saveSettings();
     $('#bpm-out').textContent = v; $('#dock-bpm').textContent = v;
-    if (taalRun) dropQueued(false);
+    if (FluteTransport.running) FluteTransport.setBpm(v);
   }
   bpm.value = settings.bpm; setBpm(settings.bpm);
   $('#taal-toggle').addEventListener('click', () => setTaalRunning(!taalRun));
@@ -397,16 +379,17 @@
   });
   taalSelect.addEventListener('change', () => {
     settings.taal = taalSelect.value; saveSettings(); buildGrid();
-    if (taalRun) dropQueued(true);
+    if (taalRun) FluteTransport.setTaal(TAALS[taalSelect.value]);
   });
   buildGrid();
 
   // Keep the screen on while a block timer, the tabla or the tanpura runs, so a phone on a stand does not
   // lock mid-practice. The browser drops the lock when the page is hidden; it is asked for again on return.
   let wakeLock = null, wakeBusy = false;
+  FluteTransport.on(() => keepAwake());
   async function keepAwake() {
     if (!('wakeLock' in navigator) || wakeBusy) return;
-    const want = !!handle || taalRun || Sound.droneOn;
+    const want = !!handle || taalRun || Sound.droneOn || FluteTransport.running;
     if (want) $('#dock').classList.remove('tuck'); // something is playing: keep its controls in view
     wakeBusy = true;
     try {
@@ -416,12 +399,12 @@
       } else if (!want && wakeLock) { await wakeLock.release(); wakeLock = null; }
     } catch (e) { /* not allowed here (e.g. low battery); practice works without it */ }
     wakeBusy = false;
-    if (want !== (!!handle || taalRun || Sound.droneOn)) keepAwake();
+    if (want !== (!!handle || taalRun || Sound.droneOn || FluteTransport.running)) keepAwake();
   }
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
       // Top up the audio queue now, before the browser starts delaying timers.
-      if (taalRun) schedule();
+      if (FluteTransport.running) FluteTransport.pump();
       if (Sound.droneOn) Sound.droneTick();
     } else keepAwake();
   });
