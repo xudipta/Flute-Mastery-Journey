@@ -47,79 +47,99 @@
   </header>
 
   <main id="main">
-    <!-- Home: the hero/Today card and the tabla taal player (the landing-page issue reworks this view) -->
+    <!-- Home: the landing page. Play the tanpura, pick the scale, add a taal. -->
     <section class="view" id="view-home" data-view="home">
-    <section class="hero">
-      <div class="notes" aria-hidden="true"><span>♪</span><span>♫</span><span>♩</span><span>♬</span><span>♪</span></div>
-      <h1 id="page-title">From first <em>sur</em> to concert-stage raga.</h1>
-      <div class="hero-intro" id="hero-intro">
-        <p>A daily riyaaz guide for the Indian classical bansuri: finger-hole charts, ragas, taal and the techniques of meend, kan and taan — built on one idea: consistency makes music.</p>
-        <div class="sa-pick">
-          <label>My bansuri's Sa <select class="sa-sync" id="hero-sa"></select></label>
-          <span class="hint">Usually engraved on the flute, such as E or C♯. Not sure? Leave it on D for now.</span>
-        </div>
-        <a class="btn" id="hero-start" href="#practice">Start today's practice</a>
-        <ol class="quick">
-          <li>Choose your <b>Sa</b></li>
-          <li>Switch on the <b>tanpura</b> or a <b>tabla</b> taal from the tools bar</li>
-          <li>Press <b>Start full routine</b> and play</li>
-        </ol>
-      </div>
-      <div class="today" id="today" hidden>
-        <p id="t-line" class="t-line"></p>
-        <div class="t-bar" role="progressbar" aria-label="Minutes practised today" aria-valuemin="0" aria-valuemax="100"><div id="t-fill"></div></div>
-        <div class="t-actions">
-          <button class="btn" id="t-go">▶ Continue</button>
-          <a class="btn ghost" href="#ragas" id="t-ragas">🕒 Ragas for now</a>
-        </div>
-        <p class="today-sa">Sa <select class="sa-sync" aria-label="Sa"></select> · <button class="link" id="show-intro">New here? Show the intro</button></p>
-      </div>
-      <div class="stats">
-        <div><strong id="streak">0</strong><span>day streak</span></div>
-        <div><strong id="total">0</strong><span>sessions logged</span></div>
-        <div><strong id="minutes">0</strong><span>minutes today</span></div>
-      </div>
-    </section>
+    <div class="home">
+      <h1 class="home-title">Tanpura &amp; Taal</h1>
+      <p class="lead">Start the tanpura, choose the scale of your bansuri, and add a taal to play along.</p>
+      <div class="home-grid">
 
-    <section id="tabla">
-      <h2>Tabla taal player</h2>
-      <p class="lead">Practise with a synthesised tabla theka. The dayan is tuned to the Sa chosen in the tools bar. Sam is the first beat (✕), tali is a clap (number), khali is a wave (○).</p>
-      <div class="taal-card">
-        <div class="taal-controls">
-          <label>Taal <select id="taal-select"></select></label>
-          <label>Tempo <input type="range" id="bpm" min="40" max="240" value="90"> <output id="bpm-out">90</output> BPM</label>
-          <label>Volume <input type="range" id="tabla-vol" min="0" max="200" value="100" title="Double-click to reset to 100%"> <output id="tabla-vol-out" class="vol">100%</output></label>
-          <button id="taal-toggle" class="btn small">▶ Play</button>
+        <div class="panel tp-card" id="home-tanpura" role="group" aria-labelledby="home-tp-title">
+          <h2 id="home-tp-title" class="card-title">Tanpura</h2>
+          <div class="tp-main">
+            <button id="home-drone" class="play-big" type="button" aria-pressed="false" aria-label="Play tanpura"><span class="play-ico" aria-hidden="true">▶</span><span class="play-txt">Play</span></button>
+            <div class="tp-scale">
+              <span class="tp-label" id="home-sa-label">Scale (your Sa)</span>
+              <div class="scale-row">
+                <button id="home-sa-prev" class="dock-btn" type="button" aria-label="Scale one semitone lower">◀</button>
+                <button id="home-sa-btn" class="scale-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="home-sa-grid" aria-describedby="home-sa-label">Sa · <b id="home-sa-name">D</b></button>
+                <button id="home-sa-next" class="dock-btn" type="button" aria-label="Scale one semitone higher">▶</button>
+              </div>
+            </div>
+          </div>
+          <div id="home-sa-grid" class="sa-grid" role="group" aria-label="Choose the scale" hidden></div>
+          <p class="hint tp-sa-hint">The Sa is usually engraved on the flute, such as E or C♯. Not sure? Leave it on D for now.</p>
+          <p id="home-tp-status" class="hint" role="status"></p>
+          <div class="tp-check">
+            <button id="home-hear-sa" class="btn small ghost" type="button">🔔 Hear Sa</button>
+            <p class="hint">Check the sound: start the tanpura, then tap Hear Sa. The two should blend into one steady note. Fine tune is only needed to match another instrument.</p>
+          </div>
+          <div class="tp-opts">
+            <label>First string <select id="home-first"><option value="Pa">Pa (usual)</option><option value="Ma">Ma (ragas without Pa)</option><option value="Ni">Ni (Marwa, Puriya)</option></select></label>
+            <label>Pluck speed <select id="home-speed"><option value="slow">Slow</option><option value="medium">Medium</option><option value="fast">Fast</option></select></label>
+            <label class="wide"><span>Fine tune <output id="home-fine-out" class="vol">0¢</output></span><input type="range" id="home-fine" min="-50" max="50" step="1" value="0" title="Double-click to reset to 0"></label>
+            <label class="wide"><span>Volume <output id="home-dvol-out" class="vol">100%</output></span><input type="range" id="home-dvol" min="0" max="200" value="100" title="Double-click to reset to 100%"></label>
+          </div>
         </div>
-        <div id="taal-grid" class="taal-grid" aria-live="off"></div>
-      </div>
-    </section>
 
+        <div class="panel taal-card" id="tabla" role="group" aria-labelledby="home-taal-title">
+          <h2 id="home-taal-title" class="card-title">Taal</h2>
+          <p class="hint taal-intro">A synthesised tabla theka, tuned to your Sa. ✕ is sam (the first beat), a number is a tali (clap), ○ is khali (wave).</p>
+          <div class="taal-main">
+            <button id="taal-toggle" class="btn big" type="button">▶ Play</button>
+            <label class="taal-pick">Taal <select id="taal-select"></select></label>
+          </div>
+          <div class="tempo-row">
+            <span class="tp-label">Tempo</span>
+            <button id="home-bpm-down" class="dock-btn" type="button" aria-label="Slower by 1 BPM">−</button>
+            <span class="tempo-read"><output id="bpm-out">90</output> <small>BPM</small></span>
+            <button id="home-bpm-up" class="dock-btn" type="button" aria-label="Faster by 1 BPM">+</button>
+            <button id="home-tap" class="btn small ghost" type="button" title="Tap this to the beat you want">Tap tempo</button>
+          </div>
+          <input type="range" id="bpm" min="40" max="240" value="90" aria-label="Tempo in beats per minute">
+          <label class="taal-vol"><span>Volume <output id="tabla-vol-out" class="vol">100%</output></span><input type="range" id="tabla-vol" min="0" max="200" value="100" title="Double-click to reset to 100%"></label>
+          <div id="taal-grid" class="taal-grid" aria-live="off"></div>
+        </div>
+
+      </div>
+    </div>
     </section>
 
     <!-- Practice: today's blocks, the timer, the progress calendar -->
     <section class="view" id="view-practice" data-view="practice" hidden>
     <section id="practice">
-      <h2>Daily riyaaz</h2>
-      <p class="lead">Tick each block as you finish it. Complete the routine to log a session and grow your streak. Use the tools bar at the bottom of the screen for the tanpura and tabla while you play.</p>
-      <div class="practice-grid">
-        <div>
-          <div class="routine-head">
-            <button id="run-all" class="btn">▶ Start full routine · <span id="routine-total">0</span> min</button>
-            <button id="edit-routine" class="btn small ghost" type="button">✎ Edit routine</button>
-            <span class="hint">Timers run one after another; each block ticks itself off with a bell.</span>
+      <h2 class="pc-title">Daily riyaaz</h2>
+      <div class="practice-top">
+        <div class="today" id="today">
+          <p id="t-line" class="t-line"></p>
+          <div class="t-bar" role="progressbar" aria-label="Minutes practised today" aria-valuemin="0" aria-valuemax="100"><div id="t-fill"></div></div>
+          <div class="t-actions">
+            <button class="btn small" id="t-go">▶ Continue</button>
+            <a class="btn small ghost" href="#ragas" id="t-ragas">🕒 Ragas for now</a>
           </div>
-          <ol id="routine" class="routine"></ol>
         </div>
-        <div class="timer-card" role="group" aria-label="Practice timer">
-          <div class="timer" id="timer">00:00</div>
-          <p id="timer-label">Pick a block to start its timer</p>
-          <div class="timer-actions">
-            <button id="timer-toggle" class="btn small">Start</button>
-            <button id="timer-reset" class="btn small ghost">Reset</button>
-          </div>
-          <div class="breath" aria-hidden="true"><div id="breath-circle"></div><span id="breath-text">Breathe</span></div>
+      </div>
+      <div class="pc">
+        <div class="pc-carousel" role="group" aria-roledescription="carousel" aria-label="Today's practice blocks">
+          <ol id="routine" class="routine pc-track" role="presentation"></ol>
         </div>
+        <div class="pc-nav">
+          <button id="pc-prev" class="dock-btn" type="button" aria-label="Previous block">◀</button>
+          <div id="pc-dots" class="pc-dots"></div>
+          <button id="pc-next" class="dock-btn" type="button" aria-label="Next block">▶</button>
+        </div>
+        <p id="pc-count" class="pc-count" aria-live="polite"></p>
+        <p id="timer-label" class="pc-status" role="status">Pick a block to start its timer</p>
+        <div class="routine-head">
+          <button id="run-all" class="btn">▶ Start full routine · <span id="routine-total">0</span> min</button>
+          <button id="edit-routine" class="btn small ghost" type="button">✎ Edit routine</button>
+        </div>
+        <p class="hint pc-hint">Swipe, or use the arrow buttons or keys, to move between blocks. Tick each block as you finish it; a full routine logs a session and grows your streak. Timers run one after another, and each block ticks itself off with a bell.</p>
+      </div>
+      <div class="stats">
+        <div><strong id="streak">0</strong><span>day streak</span></div>
+        <div><strong id="total">0</strong><span>sessions logged</span></div>
+        <div><strong id="minutes">0</strong><span>minutes today</span></div>
       </div>
       <p id="done-msg" class="done" hidden>🎉 Routine complete — session logged. See you tomorrow! <a href="#progress" id="add-note">Add a note about today</a>
         <span class="next">Want to keep playing? <a href="#ragas" id="done-ragas">Ragas for this time of day</a> · <a href="#tuner">Check your tone with the tuner</a></span></p>

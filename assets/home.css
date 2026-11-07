@@ -1,1 +1,81 @@
-/* Styles for the Home view (#view-home). Owned by the landing-page issue (#26). */
+/* Styles for the Home view (#view-home): the Tanpura and Taal page. Owned by the landing-page issue (#26).
+   Also holds the rules for the Today card and stats now that they sit at the top of the Practice view. */
+
+/* ----- layout ----- */
+.home { max-width: 44rem; margin: 0 auto; padding: 1.5rem 1.25rem 2rem; }
+.home-title { font-size: clamp(1.7rem, 6vw, 2.3rem); line-height: 1.15; margin: 0 0 .35rem; }
+.home .lead { margin: 0 0 1.25rem; }
+.home-grid { display: grid; gap: var(--gap); align-items: start; }
+.home .panel + .panel { margin-top: 0; }
+.home .card-title { font-size: 1.15rem; margin: 0 0 .75rem; }
+@media (min-width: 900px) {
+  .home { max-width: 62rem; }
+  .home-grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* ----- tanpura card ----- */
+.tp-main { display: flex; align-items: center; gap: 1.1rem; }
+.play-big { flex: none; width: 6.25rem; height: 6.25rem; border-radius: 50%; border: 0; cursor: pointer; font: inherit; font-weight: 700;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.1; gap: .1rem;
+  background: var(--accent); color: #1b1840; box-shadow: 0 6px 18px rgba(0, 0, 0, .25); transition: transform .12s, background .2s, color .2s; touch-action: manipulation; }
+.play-big:hover { transform: scale(1.03); }
+.play-big:active { transform: scale(.97); }
+.play-big .play-ico { font-size: 2rem; }
+.play-big .play-txt { font-size: .85rem; text-transform: uppercase; letter-spacing: .06em; }
+.play-big.on { background: var(--accent2); color: #fff; }
+.play-big.tuning { animation: tp-pulse 1s ease-in-out infinite; }
+@keyframes tp-pulse { 50% { opacity: .65; } }
+.tp-scale { flex: 1; min-width: 0; }
+.tp-label { display: block; color: var(--muted); font-size: .85rem; margin-bottom: .3rem; }
+.scale-row { display: flex; align-items: center; gap: .4rem; }
+.scale-row .dock-btn { flex: none; min-width: 2.75rem; min-height: 2.75rem; }
+.scale-row .dock-btn:disabled { opacity: .35; cursor: default; }
+.scale-btn { flex: 1; min-width: 0; min-height: 3.25rem; padding: .3rem .6rem; border-radius: var(--r-pill); border: 2px solid var(--accent2); background: transparent; color: var(--ink);
+  font: inherit; font-size: 1.2rem; font-weight: 600; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.scale-btn b { color: var(--accent-ink); }
+.scale-btn[aria-expanded="true"] { background: var(--accent2); color: #fff; }
+.scale-btn[aria-expanded="true"] b { color: #fff; }
+
+.sa-grid { margin-top: .9rem; padding: .75rem; border-radius: 14px; background: var(--bg); display: grid; gap: .6rem; }
+.sa-grid[hidden] { display: none; }
+.sa-group { display: grid; grid-template-columns: repeat(auto-fill, minmax(3.3rem, 1fr)); gap: .4rem; align-items: center; }
+.sa-grp { grid-column: 1 / -1; color: var(--muted); font-size: .75rem; text-transform: uppercase; letter-spacing: .06em; }
+.sa-opt { font: inherit; font-weight: 600; min-height: 2.9rem; border-radius: 12px; border: 1px solid var(--muted); background: transparent; color: var(--ink); cursor: pointer; }
+.sa-opt[aria-pressed="true"] { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+
+.tp-sa-hint { margin: .75rem 0 0; }
+#home-tp-status { min-height: 1.3em; margin: .25rem 0 0; }
+.tp-check { display: flex; flex-wrap: wrap; align-items: flex-start; gap: .5rem .9rem; margin-top: .5rem; padding-top: .9rem; border-top: 1px solid color-mix(in srgb, var(--muted) 30%, transparent); }
+.tp-check .hint { flex: 1 1 14rem; margin: 0; }
+.tp-check .btn.on { background: var(--accent2); color: #fff; }
+.tp-opts { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem 1rem; margin-top: 1rem; }
+.tp-opts label { display: flex; flex-direction: column; gap: .25rem; font-weight: 600; font-size: .9rem; min-width: 0; }
+.tp-opts label.wide { grid-column: 1 / -1; }
+.tp-opts select { font: inherit; background: var(--bg); color: var(--ink); border: 1px solid var(--muted); border-radius: 8px; padding: .35rem .4rem; min-height: 2.6rem; width: 100%; }
+.tp-opts input[type="range"] { width: 100%; }
+.tp-opts output.vol { color: var(--muted); font-size: .85rem; }
+
+/* ----- taal card ----- */
+.home .taal-card { padding: 1rem 1.25rem; }
+.taal-intro { margin: 0 0 .9rem; }
+.taal-main { display: flex; align-items: center; gap: .9rem; flex-wrap: wrap; }
+.btn.big { min-height: 3.5rem; padding: 0 2.2rem; font-size: 1.15rem; }
+.taal-pick { display: flex; align-items: center; gap: .5rem; font-weight: 600; flex: 1 1 10rem; min-width: 0; }
+.taal-pick select { flex: 1; min-width: 0; font: inherit; background: var(--bg); color: var(--ink); border: 1px solid var(--muted); border-radius: 8px; padding: .35rem .4rem; min-height: 2.75rem; }
+.tempo-row { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem; margin-top: 1rem; }
+.tempo-row .tp-label { margin: 0; flex: 0 0 100%; }
+.tempo-row .dock-btn { min-width: 2.75rem; min-height: 2.75rem; font-size: 1.2rem; }
+.tempo-read { min-width: 5rem; text-align: center; }
+.tempo-read output { font-size: 1.7rem; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--accent-ink); }
+.tempo-read small { color: var(--muted); }
+.tempo-row .btn { margin-left: auto; }
+.home #bpm, .home #tabla-vol { width: 100%; }
+.taal-vol { display: flex; flex-direction: column; gap: .15rem; font-weight: 600; font-size: .9rem; margin-top: .25rem; }
+.taal-vol output.vol { color: var(--muted); font-size: .85rem; }
+.home .taal-grid { margin-top: .9rem; }
+
+/* ----- Today card and stats, at the top of the Practice view ----- */
+.practice-top { margin: 0 0 2.25rem; text-align: center; }
+.practice-top .t-line { margin: 0 auto; max-width: 36rem; }
+.practice-top .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 .5rem; margin-top: 1.5rem; }
+.practice-top .stats span { font-size: .8rem; }
