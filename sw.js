@@ -4,7 +4,7 @@
 const VERSION = 'bansuri-v4';
 const SHELL = [
   './', 'index.html', 'manifest.webmanifest',
-  'assets/styles.css', 'assets/app.js', 'assets/audio.js', 'assets/demo.js', 'assets/practice-demos.js', 'assets/ragas.js', 'assets/glossary.js', 'assets/glossary-ui.js', 'assets/progress.js', 'assets/tuner.js',
+  'assets/styles.css', 'assets/app.js', 'assets/audio.js', 'assets/transport.js', 'assets/demo.js', 'assets/practice-demos.js', 'assets/ragas.js', 'assets/glossary.js', 'assets/glossary-ui.js', 'assets/progress.js', 'assets/tuner.js',
   'assets/favicon.svg', 'assets/icons/icon-192.png', 'assets/icons/icon-512.png', 'assets/icons/apple-touch-icon.png'
 ];
 
