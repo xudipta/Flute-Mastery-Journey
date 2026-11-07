@@ -237,6 +237,12 @@
     $('#tuner-ref').addEventListener('click', hearSa);
     $('#tuner-setsa').addEventListener('click', setSaFromNote);
     document.addEventListener('visibilitychange', () => { if (document.hidden && state.stream) stop(false); });
+    // Leaving the Learn tab ends listening, so the microphone is never on out of sight; the trace needs
+    // its size again when the tab is shown (it cannot be measured while hidden).
+    if (root.FluteNav) {
+      root.FluteNav.onHide('learn', () => { if (state.stream) stop(); });
+      root.FluteNav.onShow('learn', () => drawTrace());
+    }
     render(null);
   }
   root.FluteTuner = { detect, toSwar, makeFilter };

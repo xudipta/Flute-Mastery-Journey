@@ -5,6 +5,7 @@ An interactive, animated guide to the **Indian classical bansuri** — daily riy
 **Live site:** https://xudipta.github.io/Flute-Mastery-Journey/
 
 ## Features
+- App-style navigation: five tabs (Home, Practice, Alankar, Ragas, Learn) in a bottom tab bar on phones and a top bar on desktop. The tanpura, tabla and timer keep playing when you change tab, and Back/Forward and links such as `#practice` or `#tuner` work
 - Daily riyaaz routine with per-block timers (a running block survives a reload and shows in the tools bar), a breathing animation and a streak tracker (saved in your browser)
 - Keeps the screen on while a timer, the tanpura or the tabla is running, and keeps the sound and the end-of-block bell steady when the phone locks or another app is in front
 - "Today" card for returning visitors, a first-run Sa picker, and a raga finder (search, time of day, starter ragas, favourites, one-tap aroha preview)
@@ -42,6 +43,9 @@ In the repository go to **Settings → Pages → Source: GitHub Actions** (one-t
 index.html          page markup
 assets/styles.css   styling (light/dark aware)
 assets/app.js       routine, timer, tools bar, finger chart, content data
+assets/nav.js       tab router: one view at a time (window.FluteNav: go, current, onShow, onHide)
+assets/home.js, home.css, practice-cards.js, practice-cards.css, alankar.js, alankar.css
+                    one script and stylesheet per view (Home, Practice, Alankar), loaded after the others
 assets/audio.js     tabla, tanpura, bell and flute-line synthesis, audio engine
 assets/transport.js shared beat grid: tabla and melody on one clock, gapless loops (see header for the API)
 assets/demo.js      finger chart, swar fingering model, demo dialog and player
@@ -51,3 +55,8 @@ assets/progress.js  calendar, day notes, routine editor, backup/restore
 assets/practice-demos.js  demos for the daily practice blocks
 assets/favicon.svg
 ```
+
+The page is five views, each `<section class="view" id="view-NAME" data-view="NAME">`: `home` (Today card and
+tabla taal player), `practice` (routine, timer, progress calendar), `alankar`, `ragas`, `learn` (tuner, finger-hole
+chart, roadmap, techniques). Add a view by adding its section, a tab link `<a href="#NAME" data-view="NAME">` in
+both navs, and its name to `VIEWS` in `assets/nav.js`.

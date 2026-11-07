@@ -330,3 +330,19 @@ footer a { color: var(--accent-ink); }
 .tuner-trace { width: 100%; height: 140px; background: var(--bg); border-radius: 12px; display: block; }
 .tuner-foot { display: flex; flex-wrap: wrap; gap: .5rem 1rem; justify-content: space-between; align-items: center; margin-top: .75rem; }
 @media (prefers-reduced-motion: reduce) { .gauge .needle { transition: none; } }
+
+/* ===== shared components =====
+   Used by every view. Per-view styles live in home.css, practice-cards.css and alankar.css. */
+:root { --r-card: 18px; --r-pill: 999px; --gap: 1rem; --tap: 2.75rem; --shadow-card: 0 2px 12px rgba(0, 0, 0, .14); }
+/* A view is one tab's content: the sections inside it keep their own padding and width. */
+.view { max-width: none; margin: 0; padding: 0; }
+.view[hidden] { display: none; }
+.view [tabindex="-1"]:focus { outline: none; } /* headings that receive focus when a tab opens */
+/* Surface for a group of controls or a card. */
+.panel { background: var(--panel); border-radius: var(--r-card); padding: 1rem 1.25rem; box-shadow: var(--shadow-card); }
+.panel + .panel { margin-top: var(--gap); }
+/* Tabs (top nav on desktop, bottom bar on phones): the open one is marked, and says so to screen readers. */
+.site-header nav a[aria-current="page"] { background: var(--accent2); color: #fff; }
+.tabbar a { position: relative; }
+.tabbar a[aria-current="page"] { color: var(--accent-ink); }
+.tabbar a[aria-current="page"]::before { content: ''; position: absolute; top: 0; left: 28%; right: 28%; height: 3px; border-radius: 0 0 3px 3px; background: var(--accent2); }

@@ -233,6 +233,7 @@
     store.set(state);
   }
   chip.addEventListener('click', () => {
+    FluteNav.go('practice', { focus: false });
     $('.timer-card').scrollIntoView({ block: 'center', behavior: 'smooth' });
     $('#timer-toggle').focus({ preventScroll: true });
   });
@@ -286,6 +287,7 @@
   $('#run-all').addEventListener('click', runRoutine);
   // Today card: continue the routine, or (when it is all done) pick the first block to practise again.
   $('#t-go').addEventListener('click', () => {
+    FluteNav.go('practice', { focus: false });
     if (ROUTINE.some((x) => !state.checks[x.id])) runRoutine();
     else { runAll = false; selectBlock(ROUTINE[0], false); }
   });
@@ -455,17 +457,6 @@
     if (saved.endAt) start(true); else renderTimer();
   })();
 
-  // Highlight the current section in the nav.
-  const links = [...document.querySelectorAll('a[data-spy]')];
-  if ('IntersectionObserver' in window) {
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((en) => {
-        if (en.isIntersecting) links.forEach((a) => a.classList.toggle('active', a.dataset.spy.split(' ').includes(en.target.id)));
-      });
-    }, { rootMargin: '-40% 0px -55% 0px' });
-    new Set(links.flatMap((a) => a.dataset.spy.split(' '))).forEach((id) => { const s = document.getElementById(id); if (s) io.observe(s); });
-  }
-
   // Finger-hole chart: tap a swar to see the fingering and hear it at your Sa.
   const chart = FluteDemo.createChart($('#flute'));
   const picker = $('#note-picker'), komalBox = $('#chart-komal'), namesBox = $('#chart-names'), scaleBtn = $('#chart-scale');
@@ -560,7 +551,7 @@
   $('#raga-now').textContent = `🕒 Ragas for now (${nowGroup()})`;
   function ragasForNow() {
     Object.assign(rf, { group: nowGroup(), q: '', starter: false, fav: false }); $('#raga-search').value = ''; showRagas();
-    document.getElementById('ragas').scrollIntoView({ behavior: 'smooth' });
+    FluteNav.go('ragas', { top: true });
   }
   $('#raga-now').addEventListener('click', ragasForNow);
   $('#t-ragas').addEventListener('click', (e) => { e.preventDefault(); ragasForNow(); });
@@ -622,7 +613,7 @@
     else if (k === 'b') $('#dock-tabla').click();
     else if (k === '[') $('#bpm-down').click();
     else if (k === ']') $('#bpm-up').click();
-    else if (k === '/') { e.preventDefault(); document.getElementById('ragas').scrollIntoView({ behavior: 'smooth' }); $('#raga-search').focus(); }
+    else if (k === '/') { e.preventDefault(); FluteNav.go('ragas', { focus: false }); $('#raga-search').focus(); }
     else if (k === 'escape') togglePanel(false);
     else return;
   });
