@@ -110,7 +110,7 @@
     state.buf = new Float32Array(state.an.fftSize); state.filter.reset(); state.trace = [];
     state.bytes = state.an.getFloatTimeDomainData ? null : new Uint8Array(state.an.fftSize);
     state.voicedAt = performance.now();
-    $('#tuner-toggle').textContent = '■ Stop listening'; $('#tuner-toggle').classList.add('on');
+    $('#tuner-toggle').textContent = 'Stop listening'; $('#tuner-toggle').classList.add('on');
     // The tanpura and tabla would reach the microphone too, so pause them while listening.
     const q = App() && App().quiet ? App().quiet() : { paused: [], restore: null };
     state.restore = q.restore;
@@ -125,7 +125,7 @@
     if (state.stream) state.stream.getTracks().forEach((t) => t.stop());
     if (state.src) state.src.disconnect();
     state.stream = state.src = state.an = null; state.current = null;
-    $('#tuner-toggle').textContent = '🎤 Start listening'; $('#tuner-toggle').classList.remove('on');
+    $('#tuner-toggle').textContent = 'Start listening'; $('#tuner-toggle').classList.remove('on');
     $('#tuner-setsa').disabled = true;
     render(null); setMsg('');
   }

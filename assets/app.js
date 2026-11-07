@@ -147,8 +147,9 @@
     $('#t-line').textContent = next
       ? `${done} of ${total} minutes done${sn ? ` · ${sn}-day streak` : ''}. Next up: ${next.title} (${next.min} min).`
       : `All ${total} minutes done. Today's riyaaz is complete${sn ? ` · ${sn}-day streak` : ''}.`;
-    $('#t-go').textContent = next ? (done ? `▶ Continue: ${next.title}` : '▶ Start today\'s riyaaz') : '↺ Practise a block again';
-    $('#t-ragas').textContent = `🕒 ${nowGroup()} ragas`;
+    $('#t-go').textContent = next ? (done ? `Continue: ${next.title}` : 'Start today\'s riyaaz') : 'Practise a block again';
+    $('#t-go').dataset.state = next ? 'go' : 'again';
+    $('#t-ragas').textContent = `${nowGroup()} ragas`;
   }
   const nowGroup = () => { const h = new Date().getHours(); return h >= 4 && h < 12 ? 'Morning' : h < 17 ? 'Afternoon' : h < 21 ? 'Evening' : 'Night'; };
 
@@ -181,7 +182,7 @@
         <h3>${r.title}</h3><p class="pc-min">${r.min} min</p><p class="pc-text">${r.text}</p>
         <div class="pc-timer" role="timer"><span class="pc-time">${fmt0(r.min * 60)}</span></div>
         <div class="pc-actions"><button type="button" class="btn pc-toggle" data-timer>Start</button><button type="button" class="btn ghost pc-reset" disabled>Reset</button></div>
-        <button type="button" class="btn small ghost pc-how" data-how>▶ Show me how</button>
+        <button type="button" class="btn small ghost pc-how" data-how>Show me how</button>
         <label class="pc-done"><input type="checkbox" aria-label="Done: ${r.title}"> <span>Done</span></label>`;
       const box = li.querySelector('input');
       rows[r.id] = { li, box, time: li.querySelector('.pc-time'), toggle: li.querySelector('.pc-toggle'), reset: li.querySelector('.pc-reset'), badge: li.querySelector('.pc-badge') };
@@ -245,7 +246,7 @@
     const title = show ? `${handle ? '⏱' : '⏸'} ${fmt(remaining)} · ${block.title}` : baseTitle;
     if (document.title !== title) document.title = title;
     if (!show) return;
-    $('#dock-timer-icon').textContent = handle ? '⏱' : '⏸';
+    $('#dock-timer-icon').textContent = handle ? '⏱' : '⏸'; chip.dataset.state = handle ? 'run' : 'pause';
     $('#dock-timer-time').textContent = fmt(remaining);
     $('#dock-timer-name').textContent = block.title;
     chip.setAttribute('aria-label', `${block.title}: ${fmt(remaining)} left${handle ? '' : ', paused'}. Go to the timer`);
@@ -396,7 +397,7 @@
   const onBeat = (n, idx) => { if (taalRun) beatEls.forEach((e, j) => e.classList.toggle('on', j === idx)); };
   function setTaalRunning(on) {
     taalRun = on;
-    $('#taal-toggle').textContent = on ? '■ Stop' : '▶ Play';
+    $('#taal-toggle').textContent = on ? 'Stop' : 'Play'; $('#taal-toggle').classList.toggle('on', on);
     $('#dock-tabla').classList.toggle('on', on); $('#dock-tabla').setAttribute('aria-pressed', on);
     const T = FluteTransport;
     if (on) {
@@ -502,7 +503,7 @@
         const sw = FluteDemo.parseSwar(n.tok), b = document.createElement('button');
         b.type = 'button'; b.dataset.tok = n.tok; b.setAttribute('aria-pressed', n.tok === chartTok);
         b.innerHTML = sw.label + (namesBox.checked ? `<small>${SA_NAMES[saClass(settings.sa + n.semi)]}</small>` : '');
-        b.addEventListener('click', () => { scaleOn = false; scaleBtn.textContent = '▶ Play the scale'; showNote(n.tok); playNote(n.tok); });
+        b.addEventListener('click', () => { scaleOn = false; scaleBtn.textContent = 'Play the scale'; scaleBtn.classList.remove('on'); showNote(n.tok); playNote(n.tok); });
         wrap.appendChild(b);
       });
       picker.appendChild(wrap);
@@ -518,14 +519,14 @@
   }
   function playNote(tok) { FluteDemo.player.play([{ tok, beats: 2 }], 80, { onStep() {}, onEnd() {} }); }
   let scaleOn = false;
-  const resetScale = () => { scaleOn = false; scaleBtn.textContent = '▶ Play the scale'; };
+  const resetScale = () => { scaleOn = false; scaleBtn.textContent = 'Play the scale'; scaleBtn.classList.remove('on'); };
   FluteDemo.player.hooks.push(resetScale);
   scaleBtn.addEventListener('click', () => {
     if (scaleOn) { FluteDemo.player.stop(); return; }
     const items = "S R G m P D N S'".split(' ').map((tok) => ({ tok, beats: 1, ref: tok }));
     items[items.length - 1].beats = 2;
     FluteDemo.player.play(items, 80, { onStep(step) { if (step) showNote(step.ref); }, onEnd() { showNote('S'); } });
-    scaleOn = true; scaleBtn.textContent = '■ Stop';
+    scaleOn = true; scaleBtn.textContent = 'Stop'; scaleBtn.classList.add('on');
   });
   komalBox.addEventListener('change', () => { renderPicker(); });
   namesBox.addEventListener('change', () => { renderPicker(); showNote(chartTok); });
@@ -555,7 +556,7 @@
       return `<article class="card raga-card"><button type="button" class="star" data-fav="${t}" aria-pressed="${fav}" aria-label="${fav ? 'Remove' : 'Add'} ${t} ${fav ? 'from' : 'to'} favourites">${fav ? '★' : '☆'}</button>
         <div class="icon">${i}</div><h3>Raga ${t}</h3>${STARTER.includes(t) ? '<span class="badge">Starter</span>' : ''}
         <p><strong>${g}.</strong> ${esc(d)}</p>${n ? `<p class="aroha"><b>Aroha:</b> ${arohaText(t)}</p>
-        <div class="card-actions"><button type="button" class="btn small" data-hear="${t}">▶ Hear aroha</button><button type="button" class="btn small ghost" data-raga="${t}" data-group="${g}">How to play</button></div>` : '<p class="soon">Demo notation coming soon</p>'}</article>`;
+        <div class="card-actions"><button type="button" class="btn small" data-hear="${t}">Hear aroha</button><button type="button" class="btn small ghost" data-raga="${t}" data-group="${g}">How to play</button></div>` : '<p class="soon">Demo notation coming soon</p>'}</article>`;
     }).join('') || '<p class="empty">No ragas match. Try clearing a filter.</p>';
     $('#raga-count').textContent = `${shown.length} of ${RAGAS.length} ragas`;
     $('#raga-filter').querySelectorAll('button').forEach((b) => {
@@ -563,7 +564,7 @@
       b.setAttribute('aria-pressed', k === 'group' ? rf.group === b.dataset.v : rf[k]);
     });
   }
-  const chips = [...RAGA_GROUPS.map((g) => ['group', g, g]), ['starter', 'true', '🌱 Starter'], ['fav', 'true', '★ Favourites']];
+  const chips = [...RAGA_GROUPS.map((g) => ['group', g, g]), ['starter', 'true', 'Starter'], ['fav', 'true', '★ Favourites']];
   chips.forEach(([kind, v, label]) => {
     const b = document.createElement('button');
     b.type = 'button'; b.textContent = label; b.dataset.kind = kind; b.dataset.v = v; b.style.width = 'auto'; b.style.padding = '.45rem .9rem';
@@ -571,7 +572,7 @@
     $('#raga-filter').appendChild(b);
   });
   $('#raga-search').addEventListener('input', (e) => { rf.q = e.target.value; showRagas(); });
-  $('#raga-now').textContent = `🕒 Ragas for now (${nowGroup()})`;
+  $('#raga-now').textContent = `Ragas for now (${nowGroup()})`;
   function ragasForNow() {
     Object.assign(rf, { group: nowGroup(), q: '', starter: false, fav: false }); $('#raga-search').value = ''; showRagas();
     FluteNav.go('ragas', { top: true });

@@ -47,7 +47,7 @@
   function markup() {
     return `<div class="al">
       <div class="al-bar" id="al-bar" hidden>
-        <button type="button" class="btn small" id="al-bar-stop">■ Stop</button>
+        <button type="button" class="btn small" id="al-bar-stop">Stop</button>
         <span class="al-bar-name" id="al-bar-name"></span>
         <span class="al-bar-tempo"><button type="button" class="dock-btn" id="al-bar-slower" aria-label="Slower">−</button><output id="al-bar-bpm"></output><button type="button" class="dock-btn" id="al-bar-faster" aria-label="Faster">+</button></span>
       </div>
@@ -58,7 +58,7 @@
         <svg class="demo-chart al-chart" id="al-chart" viewBox="0 0 640 150" role="img" aria-label="Bansuri finger-hole chart for the note being played"></svg>
         <p class="al-cap" id="al-cap"></p>
         <div class="al-play-row">
-          <button type="button" class="btn al-play" id="al-play">▶ Play</button>
+          <button type="button" class="btn al-play" id="al-play">Play</button>
           <div class="al-tempo" role="group" aria-label="Tempo">
             <button type="button" class="dock-btn" id="al-slower" aria-label="Slower">−</button>
             <input type="range" id="al-bpm" min="40" max="240" step="1" aria-label="Tempo in beats per minute">
@@ -104,7 +104,7 @@
 
       <section class="panel al-log" id="al-log">
         <p>Played this visit: <b id="al-played">0:00</b></p>
-        <button type="button" class="btn small ghost" id="al-mark" hidden>✓ Count towards today's Alankars block</button>
+        <button type="button" class="btn small ghost" id="al-mark" hidden>Count towards today's Alankars block</button>
         <p class="hint" id="al-marked" hidden>Today's Alankars block is ticked off ✓</p>
       </section>
     </div>`;
@@ -157,7 +157,7 @@
   function syncDrone() {
     const on = App().drone.on();
     ui.drone.setAttribute('aria-pressed', String(on));
-    ui.drone.textContent = on ? '🎵 Tanpura: on' : '🎵 Tanpura: off';
+    ui.drone.textContent = on ? 'Tanpura: on' : 'Tanpura: off';
   }
   function syncVolumes() {
     ui.volDrone.value = App().volume('drone'); ui.volTabla.value = App().volume('tabla'); ui.volFlute.value = cfg.vol;
@@ -170,7 +170,7 @@
     ui.mark.hidden = st !== 'todo'; ui.marked.hidden = st !== 'done';
   }
   function syncPlay() {
-    ui.play.textContent = playing ? '■ Stop' : '▶ Play';
+    ui.play.textContent = playing ? 'Stop' : 'Play';
     ui.play.classList.toggle('on', playing);
     ui.bar.hidden = !playing;
     status();

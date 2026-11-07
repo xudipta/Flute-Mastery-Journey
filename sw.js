@@ -1,7 +1,7 @@
 /* Service worker: makes the site work offline.
    Network-first, so a new deploy shows up as soon as you are online; the cache is the offline fallback.
    Bump VERSION to drop old caches after a big change. */
-const VERSION = 'bansuri-v6';
+const VERSION = 'bansuri-v7';
 const SHELL = [
   './', 'index.html', 'manifest.webmanifest',
   'assets/styles.css', 'assets/app.js', 'assets/nav.js', 'assets/audio.js', 'assets/transport.js', 'assets/demo.js', 'assets/practice-demos.js', 'assets/ragas.js', 'assets/progress.js', 'assets/tuner.js',

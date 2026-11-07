@@ -67,7 +67,7 @@
 
     // Hear Sa: a clean reference note, to compare with the tanpura.
     const hear = $('#home-hear-sa');
-    const showHear = (on) => { hear.textContent = on ? '■ Stop' : '🔔 Hear Sa'; hear.classList.toggle('on', on); };
+    const showHear = (on) => { hear.textContent = on ? 'Stop' : 'Hear Sa'; hear.classList.toggle('on', on); };
     if (root.FluteDemo) root.FluteDemo.player.hooks.push(() => showHear(false));
     hear.addEventListener('click', () => {
       const P = root.FluteDemo && root.FluteDemo.player; if (!P) return;
