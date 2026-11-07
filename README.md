@@ -6,7 +6,7 @@ An interactive, animated guide to the **Indian classical bansuri** — daily riy
 
 ## Features
 - App-style navigation: five tabs (Home, Practice, Alankar, Ragas, Learn) in a bottom tab bar on phones and a top bar on desktop. The tanpura, tabla and timer keep playing when you change tab, and Back/Forward and links such as `#practice` or `#tuner` work
-- Daily riyaaz routine with per-block timers (a running block survives a reload and shows in the tools bar), a breathing animation and a streak tracker (saved in your browser)
+- Daily riyaaz as swipeable cards, one per practice block, each with its own large timer (a running block keeps running when you swipe away, survives a reload and shows in the tools bar), plus a streak tracker (saved in your browser)
 - Keeps the screen on while a timer, the tanpura or the tabla is running, and keeps the sound and the end-of-block bell steady when the phone locks or another app is in front
 - Home is a Tanpura and Taal player: one big button starts the tanpura, a large scale (Sa) button opens all scales (with ◀ ▶ semitone steps), "Hear Sa" lets you check the tanpura against a clean note, and a taal card with tempo (−/+, slider, tap tempo) plays alongside. The Today card and your streak sit at the top of Practice
 - Raga finder (search, time of day, starter ragas, favourites, one-tap aroha preview)

@@ -80,3 +80,19 @@
 
 @media (min-width: 721px) { .pc-hint { display: none; } }
 @media (prefers-reduced-motion: reduce) { .pc-track { scroll-behavior: auto; } .pc-dot::before, .pc-track > .pc-card { transition: none; } }
+
+/* ----- Practice view layout: the cards come first. A slim Today strip sits above them, so on a phone the
+   first card is on screen when the tab opens; the stats and the long hint sit below. ----- */
+#practice { padding-top: 1.25rem; }
+#practice .pc-title { font-size: 1.3rem; margin: 0 0 .5rem; }
+#practice .practice-top { margin: 0 0 .5rem; text-align: left; }
+#practice .today { max-width: none; margin: 0; }
+#practice .t-line { margin: 0; font-size: .9rem; line-height: 1.4; }
+#practice .t-bar { height: 8px; margin: .5rem 0; max-width: none; }
+#practice .t-actions { justify-content: flex-start; gap: .5rem; }
+#practice .routine-head { margin: .75rem 0 .25rem; }
+#practice .pc-hint { margin-top: .5rem; }
+#practice .stats { margin: 1.5rem 0 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 .5rem; }
+#practice .stats strong { font-size: 1.6rem; }
+#practice .stats span { font-size: .8rem; text-align: center; display: block; }
+#practice .stats > div { text-align: center; }

@@ -108,29 +108,18 @@
     <!-- Practice: today's blocks, the timer, the progress calendar -->
     <section class="view" id="view-practice" data-view="practice" hidden>
     <section id="practice">
+      <h2 class="pc-title">Daily riyaaz</h2>
       <div class="practice-top">
         <div class="today" id="today">
           <p id="t-line" class="t-line"></p>
           <div class="t-bar" role="progressbar" aria-label="Minutes practised today" aria-valuemin="0" aria-valuemax="100"><div id="t-fill"></div></div>
           <div class="t-actions">
-            <button class="btn" id="t-go">▶ Continue</button>
-            <a class="btn ghost" href="#ragas" id="t-ragas">🕒 Ragas for now</a>
+            <button class="btn small" id="t-go">▶ Continue</button>
+            <a class="btn small ghost" href="#ragas" id="t-ragas">🕒 Ragas for now</a>
           </div>
         </div>
-        <div class="stats">
-          <div><strong id="streak">0</strong><span>day streak</span></div>
-          <div><strong id="total">0</strong><span>sessions logged</span></div>
-          <div><strong id="minutes">0</strong><span>minutes today</span></div>
-        </div>
       </div>
-      <h2>Daily riyaaz</h2>
-      <p class="lead">Tick each block as you finish it. Complete the routine to log a session and grow your streak. Use the tools bar at the bottom of the screen for the tanpura and tabla while you play.</p>
       <div class="pc">
-        <div class="routine-head">
-          <button id="run-all" class="btn">▶ Start full routine · <span id="routine-total">0</span> min</button>
-          <button id="edit-routine" class="btn small ghost" type="button">✎ Edit routine</button>
-          <span class="hint">Timers run one after another; each block ticks itself off with a bell.</span>
-        </div>
         <div class="pc-carousel" role="group" aria-roledescription="carousel" aria-label="Today's practice blocks">
           <ol id="routine" class="routine pc-track" role="presentation"></ol>
         </div>
@@ -141,7 +130,16 @@
         </div>
         <p id="pc-count" class="pc-count" aria-live="polite"></p>
         <p id="timer-label" class="pc-status" role="status">Pick a block to start its timer</p>
-        <p class="hint pc-hint">Swipe, or use the arrow buttons or keys, to move between blocks.</p>
+        <div class="routine-head">
+          <button id="run-all" class="btn">▶ Start full routine · <span id="routine-total">0</span> min</button>
+          <button id="edit-routine" class="btn small ghost" type="button">✎ Edit routine</button>
+        </div>
+        <p class="hint pc-hint">Swipe, or use the arrow buttons or keys, to move between blocks. Tick each block as you finish it; a full routine logs a session and grows your streak. Timers run one after another, and each block ticks itself off with a bell.</p>
+      </div>
+      <div class="stats">
+        <div><strong id="streak">0</strong><span>day streak</span></div>
+        <div><strong id="total">0</strong><span>sessions logged</span></div>
+        <div><strong id="minutes">0</strong><span>minutes today</span></div>
       </div>
       <p id="done-msg" class="done" hidden>🎉 Routine complete — session logged. See you tomorrow! <a href="#progress" id="add-note">Add a note about today</a>
         <span class="next">Want to keep playing? <a href="#ragas" id="done-ragas">Ragas for this time of day</a> · <a href="#tuner">Check your tone with the tuner</a></span></p>
