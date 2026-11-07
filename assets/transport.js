@@ -164,7 +164,9 @@
     tr.stopPattern = function () {
       if (!pat) return;
       pat = null;
-      if (tr.running && ahead()) cutFlute();
+      // Always cut the melody, even when nothing is queued far ahead: the notes of a beat already handed to the
+      // audio clock (up to a whole beat of them at 2 or 4 notes a beat) would otherwise keep sounding after Stop.
+      if (tr.running) cutFlute();
     };
     tr.pump = pump;
     tr.on = function (fn) { listeners.push(fn); };
