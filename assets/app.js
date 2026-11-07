@@ -160,6 +160,7 @@
 
   // Routine
   const rows = {};
+  const fmt0 = (s) => String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
   function setChecked(id, val) {
     if (val) markOnboarded();
     state.checks[id] = val;
@@ -169,24 +170,40 @@
     rows[id].li.classList.toggle('done', val);
     recordToday();
     store.set(state); renderStats();
+    if (window.PracticeCards) PracticeCards.sync();
   }
   const list = $('#routine');
+  const BLOCK_ICON = { breath: '🌬️', sa: '🎵', alankar: '🔁', raga: '🎼', taal: '🥁', cool: '🌙' };
+  // Each block is one slide of the swipeable practice cards (carousel behaviour is in practice-cards.js). The
+  // card shows live time only for the block the shared timer is on; the others show their full length.
   function renderRoutine() {
     list.innerHTML = ''; Object.keys(rows).forEach((k) => delete rows[k]);
-    ROUTINE.forEach((r) => {
+    ROUTINE.forEach((r, i) => {
       const li = document.createElement('li');
-      li.dataset.id = r.id;
-      li.innerHTML = `<input type="checkbox" aria-label="Done: ${r.title}"><div><h3>${r.title} · ${r.min} min</h3><p>${r.text}</p><button type="button" data-timer>Start timer</button> <button type="button" data-how>▶ Show me how</button></div>`;
+      li.className = 'pc-card'; li.dataset.id = r.id;
+      li.setAttribute('role', 'group'); li.setAttribute('aria-roledescription', 'slide');
+      li.setAttribute('aria-label', `${r.title}, ${i + 1} of ${ROUTINE.length}`);
+      li.innerHTML = `<div class="pc-top"><span class="pc-icon" aria-hidden="true">${BLOCK_ICON[r.id] || '🪈'}</span><span class="pc-step">${i + 1} of ${ROUTINE.length}</span><span class="pc-badge" hidden></span></div>
+        <h3>${r.title}</h3><p class="pc-min">${r.min} min</p><p class="pc-text">${r.text}</p>
+        <div class="pc-timer" role="timer"><span class="pc-time">${fmt0(r.min * 60)}</span></div>
+        <div class="pc-actions"><button type="button" class="btn pc-toggle" data-timer>Start</button><button type="button" class="btn ghost pc-reset" disabled>Reset</button></div>
+        <button type="button" class="btn small ghost pc-how" data-how>▶ Show me how</button>
+        <label class="pc-done"><input type="checkbox" aria-label="Done: ${r.title}"> <span>Done</span></label>`;
       const box = li.querySelector('input');
-      rows[r.id] = { li, box };
+      rows[r.id] = { li, box, time: li.querySelector('.pc-time'), toggle: li.querySelector('.pc-toggle'), reset: li.querySelector('.pc-reset'), badge: li.querySelector('.pc-badge') };
       box.checked = !!state.checks[r.id];
       li.classList.toggle('done', box.checked);
       box.addEventListener('change', () => { setChecked(r.id, box.checked); if (!box.checked) offerUndo(r); });
-      li.querySelector('[data-timer]').addEventListener('click', () => { runAll = false; selectBlock(r, true); });
+      rows[r.id].toggle.addEventListener('click', () => {
+        if (block && block.id === r.id) { if (handle) { stop(); remaining = Math.max(0, Math.ceil((endAt - Date.now()) / 1000)); renderTimer(); } else start(); }
+        else { runAll = false; selectBlock(r, true); }
+      });
+      rows[r.id].reset.addEventListener('click', () => { if (block && block.id === r.id) { stop(); remaining = block.min * 60; renderTimer(); } });
       li.querySelector('[data-how]').addEventListener('click', () => PracticeDemos.open(r.id));
       list.appendChild(li);
     });
     $('#routine-total').textContent = ROUTINE.reduce((a, r) => a + r.min, 0);
+    if (window.PracticeCards) PracticeCards.sync();
   }
   renderRoutine();
 
@@ -207,13 +224,28 @@
   // The end-of-block bell is scheduled on the audio clock when a block starts, so it rings on time even when
   // the browser delays the interval (screen off, app in the background).
   let block = null, remaining = 0, handle = null, endAt = 0, runAll = false, bellAt = null;
-  const fmt = (s) => String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+  const fmt = fmt0;
+  const goCard = (id, o) => { if (window.PracticeCards) PracticeCards.goTo(id, o); };
   // Shows the time in the timer card, and (once a block is under way) in the tools bar and the tab title,
   // so the timer can be seen from any section.
   const baseTitle = document.title, chip = $('#dock-timer');
+  let cardKey = '';
   function renderTimer() {
-    $('#timer').textContent = fmt(remaining);
     const show = !!block && remaining > 0 && (!!handle || remaining < block.min * 60);
+    // Cards: the block the timer is on shows live time, Pause/Start and a badge; the others show their full length.
+    ROUTINE.forEach((r) => {
+      const row = rows[r.id]; if (!row) return;
+      const mine = !!block && block.id === r.id;
+      row.time.textContent = fmt(mine ? remaining : r.min * 60);
+      row.toggle.textContent = mine && handle ? 'Pause' : 'Start';
+      row.reset.disabled = !(mine && (!!handle || remaining < r.min * 60));
+      row.li.classList.toggle('active', mine);
+      row.li.classList.toggle('running', mine && !!handle);
+      row.badge.hidden = !(mine && show);
+      if (mine && show) row.badge.textContent = handle ? '● Running' : '⏸ Paused';
+    });
+    const key = (block ? block.id : '') + (handle ? 'r' : '') + (show ? 's' : '');
+    if (key !== cardKey) { cardKey = key; if (window.PracticeCards) PracticeCards.sync(); }
     chip.hidden = !show; $('#dock').classList.toggle('has-timer', show);
     saveTimer(show);
     const title = show ? `${handle ? '⏱' : '⏸'} ${fmt(remaining)} · ${block.title}` : baseTitle;
@@ -234,14 +266,14 @@
   }
   chip.addEventListener('click', () => {
     FluteNav.go('practice', { focus: false });
-    $('.timer-card').scrollIntoView({ block: 'center', behavior: 'smooth' });
-    $('#timer-toggle').focus({ preventScroll: true });
+    if (!block || !rows[block.id]) return;
+    goCard(block.id, { vertical: 'center' });
+    rows[block.id].toggle.focus({ preventScroll: true });
   });
   function selectBlock(r, autostart, noScroll) {
     markOnboarded(); stop();
     block = r; remaining = r.min * 60;
-    document.querySelectorAll('.routine li').forEach((x) => x.classList.toggle('active', x === rows[r.id].li));
-    if (!noScroll) rows[r.id].li.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    if (!noScroll) goCard(r.id, { vertical: 'nearest' });
     $('#timer-label').textContent = r.title;
     renderTimer();
     if (autostart) start();
@@ -253,7 +285,6 @@
     endAt = Date.now() + remaining * 1000;
     if (!restored) audio();
     bellAt = Sound.ctx && Sound.ctx.state === 'running' ? Sound.ring(Sound.ctx.currentTime + remaining) : null;
-    $('#timer-toggle').textContent = 'Pause';
     handle = setInterval(() => {
       remaining = Math.max(0, Math.ceil((endAt - Date.now()) / 1000));
       renderTimer();
@@ -262,7 +293,7 @@
     renderTimer(); keepAwake();
   }
   function stop() {
-    clearInterval(handle); handle = null; $('#timer-toggle').textContent = 'Start';
+    clearInterval(handle); handle = null;
     if (bellAt) { bellAt.cancel(); bellAt = null; }
     renderTimer(); keepAwake();
   }
@@ -276,8 +307,6 @@
     const i = ROUTINE.indexOf(block), next = ROUTINE.slice(i + 1).find((x) => !state.checks[x.id]);
     if (runAll && next) selectBlock(next, true); else runAll = false;
   }
-  $('#timer-toggle').addEventListener('click', () => { if (!block) { selectBlock(ROUTINE.find((x) => !state.checks[x.id]) || ROUTINE[0], true); } else if (handle) { stop(); remaining = Math.max(0, Math.ceil((endAt - Date.now()) / 1000)); renderTimer(); } else start(); });
-  $('#timer-reset').addEventListener('click', () => { if (block) { stop(); remaining = block.min * 60; renderTimer(); } });
   function runRoutine() {
     markOnboarded();
     const first = ROUTINE.find((x) => !state.checks[x.id]);
@@ -446,13 +475,13 @@
       // It finished while the page was closed: tick it off, and line up the next block without starting it.
       setChecked(r.id, true);
       const next = ROUTINE.slice(ROUTINE.indexOf(r) + 1).find((x) => !state.checks[x.id]);
-      if (next && runAll) selectBlock(next, false, true); else { runAll = false; delete state.timer; store.set(state); }
+      if (next && runAll) { selectBlock(next, false, true); goCard(next.id, { smooth: false }); } else { runAll = false; delete state.timer; store.set(state); }
       $('#timer-label').textContent = `${r.title} finished while you were away ✓` + (next && runAll ? ` Next: ${next.title}` : '');
       return;
     }
     block = r;
     remaining = saved.endAt ? Math.ceil((saved.endAt - Date.now()) / 1000) : Math.min(r.min * 60, Math.max(1, saved.remaining | 0));
-    rows[r.id].li.classList.add('active');
+    goCard(r.id, { smooth: false });
     $('#timer-label').textContent = r.title + (saved.endAt ? ' · still running' : ' · paused');
     if (saved.endAt) start(true); else renderTimer();
   })();
@@ -624,6 +653,7 @@
   window.FluteApp = {
     BLOCKS, state: () => state, settings, dateKey, setSa, todayKey, streak, practised, practisedDays, defaultPlan,
     routine: () => ROUTINE,
+    timerBlockId: () => (block ? block.id : null), // the block the shared timer is on (for the practice cards)
     saveState: () => store.set(state),
     // Pauses the tanpura and tabla (for the tuner, so the microphone hears only the flute). Returns the names
     // of what was paused and a restore() that switches them back on.

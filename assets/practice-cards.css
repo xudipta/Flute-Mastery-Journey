@@ -1,1 +1,82 @@
-/* Styles for the swipeable practice cards in the Practice view. Owned by the practice-cards issue (#27). */
+/* Styles for the swipeable practice cards in the Practice view. Owned by the practice-cards issue (#27).
+   The old list rules (.routine li ...) in styles.css still match these cards, so everything below is written to
+   win over them. */
+
+/* ----- carousel: a horizontal scroll-snap track; the cards peek in from the sides ----- */
+.pc-carousel { margin-inline: -1.25rem; }
+.pc-track {
+  position: relative; /* so card.offsetLeft is measured from the track */
+  display: flex; gap: .75rem; margin: 0; list-style: none;
+  padding: .25rem max(1.25rem, calc((100% - 34rem) / 2)) 1rem;
+  overflow-x: auto; overflow-y: hidden;
+  scroll-snap-type: x mandatory; overscroll-behavior-x: contain; scrollbar-width: none;
+  touch-action: pan-x pan-y; /* swipe sideways for the track, scroll the page up and down */
+  -webkit-overflow-scrolling: touch;
+}
+.pc-track::-webkit-scrollbar { display: none; }
+.routine.pc-track { display: flex; gap: .75rem; } /* beats .routine { display: grid } */
+
+/* ----- one card ----- */
+.pc-track > .pc-card {
+  flex: 0 0 100%; max-width: 34rem; scroll-snap-align: center; scroll-snap-stop: always;
+  display: flex; flex-direction: column; align-items: stretch; gap: .35rem;
+  padding: 1.1rem 1.25rem 1rem; border-radius: var(--r-card, 18px);
+  background: var(--panel); border: 2px solid transparent;
+  box-shadow: var(--shadow-card, 0 2px 12px rgba(0, 0, 0, .14));
+  opacity: .78; transition: opacity .2s, border-color .2s;
+}
+.pc-track > .pc-card.is-current { opacity: 1; }
+.pc-track > .pc-card.active { border-color: var(--accent2); }
+.pc-track > .pc-card.done { opacity: .72; }
+.pc-track > .pc-card.done.is-current { opacity: .9; }
+.pc-card h3 { margin: .1rem 0 0; font-size: 1.3rem; line-height: 1.25; text-decoration: none !important; }
+.pc-card p { margin: 0; }
+.pc-top { display: flex; align-items: center; gap: .6rem; min-height: 2rem; }
+.pc-icon { font-size: 1.8rem; line-height: 1; }
+.pc-step { color: var(--muted); font-size: .85rem; font-weight: 600; }
+.pc-badge { margin-left: auto; padding: .15rem .65rem; border-radius: 999px; background: var(--accent2); color: #fff; font-size: .8rem; font-weight: 700; white-space: nowrap; }
+.pc-card.done .pc-step::after { content: ' · done ✓'; color: var(--ok); }
+.pc-min { color: var(--accent-ink) !important; font-weight: 700; }
+.pc-text { color: var(--muted) !important; font-size: .95rem !important; }
+
+/* the timer */
+.pc-timer { text-align: center; margin: .5rem 0 .1rem; }
+.pc-time { font-size: clamp(3rem, 15vw, 4.5rem); font-weight: 800; line-height: 1.05; font-variant-numeric: tabular-nums; color: var(--accent-ink); }
+.pc-card.active:not(.running) .pc-time { opacity: .75; }
+.pc-actions { display: flex; gap: .6rem; }
+.pc-card .btn.pc-toggle {
+  flex: 1 1 auto; min-height: 3.1rem; font-size: 1.1rem;
+  background: var(--accent); color: #1b1840; border: 0; padding: .6rem 1.2rem;
+}
+.pc-card .btn.pc-reset {
+  flex: 0 0 auto; min-height: 3.1rem; font-size: 1rem; padding: .6rem 1.2rem;
+  background: transparent; color: var(--ink); border: 1px solid var(--muted);
+}
+.pc-card .btn.pc-reset:disabled { opacity: .4; cursor: default; }
+.pc-card .btn.pc-how {
+  align-self: center; margin-top: .35rem; min-height: 2.6rem; font-size: .9rem; padding: .4rem 1rem;
+  background: transparent; color: var(--ink); border: 1px solid var(--muted);
+}
+.pc-card .btn { font-weight: 700; }
+.pc-card .btn:hover { transform: none; }
+
+/* the done tick: a big, easy target */
+.pc-done { display: flex; align-items: center; justify-content: center; gap: .6rem; min-height: 2.9rem; margin-top: .25rem; border-top: 1px solid color-mix(in srgb, var(--muted) 25%, transparent); padding-top: .55rem; font-weight: 600; cursor: pointer; }
+.pc-done input { width: 1.6rem; height: 1.6rem; margin: 0; flex: none; accent-color: var(--ok); }
+
+/* ----- position indicator and arrows ----- */
+.pc-nav { display: flex; align-items: center; justify-content: center; gap: .5rem; margin-top: .1rem; }
+.pc-nav .dock-btn { min-width: 2.75rem; min-height: 2.75rem; }
+.pc-nav .dock-btn:disabled { opacity: .35; cursor: default; }
+.pc-dots { display: flex; align-items: center; }
+.pc-dot { width: 1.7rem; height: 2.75rem; padding: 0; border: 0; background: none; cursor: pointer; position: relative; }
+.pc-dot::before { content: ''; position: absolute; left: 50%; top: 50%; width: .6rem; height: .6rem; margin: -.3rem 0 0 -.3rem; border-radius: 50%; background: color-mix(in srgb, var(--muted) 55%, transparent); transition: transform .2s, background .2s; }
+.pc-dot.is-done::before { background: var(--ok); }
+.pc-dot.is-running::before { background: var(--accent2); }
+.pc-dot.is-current::before { transform: scale(1.6); box-shadow: 0 0 0 2px var(--panel), 0 0 0 4px var(--accent2); }
+.pc-count { margin: 0; text-align: center; color: var(--muted); font-size: .85rem; font-weight: 600; }
+.pc-status { margin: .35rem 0 0; text-align: center; font-weight: 600; min-height: 1.5em; }
+.pc-hint { text-align: center; margin: .25rem 0 0; }
+
+@media (min-width: 721px) { .pc-hint { display: none; } }
+@media (prefers-reduced-motion: reduce) { .pc-track { scroll-behavior: auto; } .pc-dot::before, .pc-track > .pc-card { transition: none; } }
