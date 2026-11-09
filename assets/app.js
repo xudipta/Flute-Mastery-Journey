@@ -28,31 +28,31 @@
     ['Stage 5 · Concert level', 'Years 4+', ['Full raga exposition: alaap, jod, jhala and gat', 'Playing different-sized bansuris', 'Learning under a guru, performing and teaching']]
   ];
 
-  // [icon, name, time group, description]
+  // [name, time group, description]
   const RAGAS = [
-    ['🌅', 'Bhairav', 'Morning', 'Dawn raga with komal Re and Dha. Serious, devotional mood.'],
-    ['🌄', 'Ahir Bhairav', 'Morning', 'Komal Re and komal Ni, blending Bhairav and Kafi flavours. Calm and expansive.'],
-    ['🌤️', 'Lalit', 'Morning', 'Pre-dawn raga with both Ma and no Pa. Restless, searching mood.'],
-    ['☀️', 'Todi', 'Morning', 'Komal Re, Ga and Dha with tivra Ma. Deep, intense and rich in meend.'],
-    ['🌞', 'Asavari', 'Morning', 'Komal Ga, Dha and Ni. Pensive and tender.'],
-    ['🏞️', 'Jaunpuri', 'Morning', 'Close to Asavari, with natural Dha. Pathos and gravity.'],
-    ['🌻', 'Bhimpalasi', 'Afternoon', 'Komal Ga and Ni. Tender, longing character.'],
-    ['🌾', 'Shuddha Sarang', 'Afternoon', 'Both Ma with Ni komal. Bright and spacious.'],
-    ['🌇', 'Madhuvanti', 'Afternoon', 'Komal Ga with tivra Ma. Sweet and romantic.'],
-    ['🌆', 'Marwa', 'Evening', 'Sunset raga with komal Re, tivra Ma and a weak Pa. Restless, yearning tension.'],
-    ['🌅', 'Puriya', 'Evening', 'Komal Re and tivra Ma with a strong Ga. Stately and sober.'],
-    ['🌙', 'Yaman', 'Evening', 'Uses tivra Ma. Graceful and serene — a good first full raga.'],
-    ['🪔', 'Bhoopali', 'Evening', 'Pentatonic (Sa Re Ga Pa Dha). Sweet and easy to shape; ideal for beginners.'],
-    ['🦢', 'Hamsadhwani', 'Evening', 'Pentatonic (Sa Re Ga Pa Ni). Bright and joyful; popular for openings.'],
-    ['🎶', 'Khamaj', 'Evening', 'Both Ni. Light, playful, ideal for thumri-style phrases.'],
-    ['🌃', 'Bihag', 'Night', 'Both Ma and mostly shuddha swars. Romantic and flowing.'],
-    ['🌧️', 'Desh', 'Night', 'Both Ni. Associated with the monsoon; yearning mood.'],
-    ['🌌', 'Durga', 'Night', 'Pentatonic (Sa Re Ma Pa Dha). Calm and devotional; very beginner-friendly.'],
-    ['🌠', 'Kafi', 'Night', 'Komal Ga and Ni. Light-classical feel; great for expressive meend.'],
-    ['🌑', 'Bageshree', 'Night', 'Komal Ga and Ni. Tender and romantic.'],
-    ['🌒', 'Darbari Kanada', 'Night', 'Late-night raga with komal Ga, Dha, Ni and slow, deep andolan on Ga. Majestic.'],
-    ['🕯️', 'Malkauns', 'Night', 'Pentatonic (Sa komal-Ga Ma komal-Dha komal-Ni). Midnight raga; deep and meditative.'],
-    ['⛈️', 'Miyan Malhar', 'Monsoon', 'Rainy-season raga with both Ni. Grand and joyful.']
+    ['Bhairav', 'Morning', 'Dawn raga with komal Re and Dha. Serious, devotional mood.'],
+    ['Ahir Bhairav', 'Morning', 'Komal Re and komal Ni, blending Bhairav and Kafi flavours. Calm and expansive.'],
+    ['Lalit', 'Morning', 'Pre-dawn raga with both Ma and no Pa. Restless, searching mood.'],
+    ['Todi', 'Morning', 'Komal Re, Ga and Dha with tivra Ma. Deep, intense and rich in meend.'],
+    ['Asavari', 'Morning', 'Komal Ga, Dha and Ni. Pensive and tender.'],
+    ['Jaunpuri', 'Morning', 'Close to Asavari, with natural Dha. Pathos and gravity.'],
+    ['Bhimpalasi', 'Afternoon', 'Komal Ga and Ni. Tender, longing character.'],
+    ['Shuddha Sarang', 'Afternoon', 'Both Ma with Ni komal. Bright and spacious.'],
+    ['Madhuvanti', 'Afternoon', 'Komal Ga with tivra Ma. Sweet and romantic.'],
+    ['Marwa', 'Evening', 'Sunset raga with komal Re, tivra Ma and a weak Pa. Restless, yearning tension.'],
+    ['Puriya', 'Evening', 'Komal Re and tivra Ma with a strong Ga. Stately and sober.'],
+    ['Yaman', 'Evening', 'Uses tivra Ma. Graceful and serene — a good first full raga.'],
+    ['Bhoopali', 'Evening', 'Pentatonic (Sa Re Ga Pa Dha). Sweet and easy to shape; ideal for beginners.'],
+    ['Hamsadhwani', 'Evening', 'Pentatonic (Sa Re Ga Pa Ni). Bright and joyful; popular for openings.'],
+    ['Khamaj', 'Evening', 'Both Ni. Light, playful, ideal for thumri-style phrases.'],
+    ['Bihag', 'Night', 'Both Ma and mostly shuddha swars. Romantic and flowing.'],
+    ['Desh', 'Night', 'Both Ni. Associated with the monsoon; yearning mood.'],
+    ['Durga', 'Night', 'Pentatonic (Sa Re Ma Pa Dha). Calm and devotional; very beginner-friendly.'],
+    ['Kafi', 'Night', 'Komal Ga and Ni. Light-classical feel; great for expressive meend.'],
+    ['Bageshree', 'Night', 'Komal Ga and Ni. Tender and romantic.'],
+    ['Darbari Kanada', 'Night', 'Late-night raga with komal Ga, Dha, Ni and slow, deep andolan on Ga. Majestic.'],
+    ['Malkauns', 'Night', 'Pentatonic (Sa komal-Ga Ma komal-Dha komal-Ni). Midnight raga; deep and meditative.'],
+    ['Miyan Malhar', 'Monsoon', 'Rainy-season raga with both Ni. Grand and joyful.']
   ];
   const RAGA_GROUPS = ['All', 'Morning', 'Afternoon', 'Evening', 'Night', 'Monsoon'];
 
@@ -507,53 +507,86 @@
   $('#roadmap-list').innerHTML = STAGES.map(([t, when, items]) =>
     `<article class="stage"><h3>${t}</h3><small>${when}</small><ul>${items.map((i) => `<li>${i}</li>`).join('')}</ul></article>`).join('');
   const cards = (arr) => arr.map(([i, t, d]) => `<article class="card"><div class="icon">${i}</div><h3>${t}</h3><p>${d}</p></article>`).join('');
+  // Ragas: a time-of-day filter row, a search field, and one grouped list. A row opens the raga's demo sheet.
   const STARTER = ['Bhoopali', 'Durga', 'Hamsadhwani', 'Yaman', 'Kafi', 'Khamaj'];
+  const GROUP_ICON = { Morning: 'sunrise', Afternoon: 'sun', Evening: 'sunset', Night: 'moon', Monsoon: 'rain' };
   const rf = { group: 'All', q: '', starter: false, fav: false };
   const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-  const arohaText = (n) => window.RAGA_NOTATION[n].aroha.split(/\s+/).map((t) => FluteDemo.parseSwar(t).label).join(' ');
+  const summary = (d) => d.split(/(?<=\.)\s/)[0]; // the first sentence is the one-line summary; the sheet shows all of it
+  const ragaList = $('#raga-cards'), timeRow = $('#raga-filter');
+  const favLabel = (t, fav) => `${fav ? 'Remove' : 'Add'} ${t} ${fav ? 'from' : 'to'} favourites`;
+  function ragaRow([t, g, d]) {
+    const fav = settings.favs.includes(t), notated = !!window.RAGA_NOTATION[t];
+    return `<article class="row raga-row">
+      <button type="button" class="raga-open" data-raga="${t}" data-group="${g}" aria-label="${t}, ${g} raga: ${notated ? 'how to play' : 'details'}">
+        <span class="tile" aria-hidden="true">${FluteUI.icon(GROUP_ICON[g] || 'sunrise')}</span>
+        <span class="grow"><b>${t}${STARTER.includes(t) ? ' <span class="tag">Starter</span>' : ''}</b><small>${esc(summary(d))}</small></span>
+      </button>
+      ${notated ? `<button type="button" class="play" data-hear="${t}" aria-label="Hear aroha of ${t}">${FluteUI.icon('play')}</button>` : '<span class="tag soon">Demo soon</span>'}
+      <button type="button" class="star" data-fav="${t}" aria-pressed="${fav}" aria-label="${favLabel(t, fav)}">${FluteUI.icon('star')}</button>
+    </article>`;
+  }
+  // Keeps the selected time of day in view in the scrolling filter row, and fades its right edge while more follows.
+  function placeFilter() {
+    const on = timeRow.querySelector('[aria-pressed="true"]');
+    if (on && timeRow.clientWidth) timeRow.scrollLeft = on.offsetLeft - (timeRow.clientWidth - on.offsetWidth) / 2;
+    timeRow.classList.toggle('more', timeRow.scrollLeft + timeRow.clientWidth < timeRow.scrollWidth - 4);
+  }
   function showRagas() {
     const q = rf.q.trim().toLowerCase();
-    const shown = RAGAS.filter((r) => (rf.group === 'All' || r[2] === rf.group)
-      && (!rf.starter || STARTER.includes(r[1])) && (!rf.fav || settings.favs.includes(r[1]))
-      && (!q || (r[1] + ' ' + r[2] + ' ' + r[3]).toLowerCase().includes(q)));
-    $('#raga-cards').innerHTML = shown.map(([i, t, g, d]) => {
-      const fav = settings.favs.includes(t), n = window.RAGA_NOTATION[t];
-      return `<article class="card raga-card"><button type="button" class="star" data-fav="${t}" aria-pressed="${fav}" aria-label="${fav ? 'Remove' : 'Add'} ${t} ${fav ? 'from' : 'to'} favourites">${fav ? '★' : '☆'}</button>
-        <div class="icon">${i}</div><h3>Raga ${t}</h3>${STARTER.includes(t) ? '<span class="badge">Starter</span>' : ''}
-        <p><strong>${g}.</strong> ${esc(d)}</p>${n ? `<p class="aroha"><b>Aroha:</b> ${arohaText(t)}</p>
-        <div class="card-actions"><button type="button" class="btn small" data-hear="${t}">Hear aroha</button><button type="button" class="btn small ghost" data-raga="${t}" data-group="${g}">How to play</button></div>` : '<p class="soon">Demo notation coming soon</p>'}</article>`;
-    }).join('') || '<p class="empty">No ragas match. Try clearing a filter.</p>';
+    const shown = RAGAS.filter(([t, g, d]) => (rf.group === 'All' || g === rf.group)
+      && (!rf.starter || STARTER.includes(t)) && (!rf.fav || settings.favs.includes(t))
+      && (!q || (t + ' ' + g + ' ' + d).toLowerCase().includes(q)));
+    ragaList.classList.toggle('list', shown.length > 0);
+    ragaList.innerHTML = shown.length ? shown.map(ragaRow).join('')
+      : '<div class="raga-empty"><p>No ragas match.</p><button type="button" class="btn sm" data-clear>Clear filters</button></div>';
     $('#raga-count').textContent = `${shown.length} of ${RAGAS.length} ragas`;
-    $('#raga-filter').querySelectorAll('button').forEach((b) => {
-      const k = b.dataset.kind;
-      b.setAttribute('aria-pressed', k === 'group' ? rf.group === b.dataset.v : rf[k]);
-    });
+    timeRow.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', rf.group === b.dataset.v));
+    $('#raga-flags').querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', rf[b.dataset.kind]));
+    placeFilter();
   }
-  const chips = [...RAGA_GROUPS.map((g) => ['group', g, g]), ['starter', 'true', 'Starter'], ['fav', 'true', '★ Favourites']];
-  chips.forEach(([kind, v, label]) => {
+  // a change of filter or search also ends a running aroha preview, whose button is about to be replaced
+  const refilter = () => { FluteDemo.player.stop(); showRagas(); };
+  RAGA_GROUPS.forEach((g) => {
     const b = document.createElement('button');
-    b.type = 'button'; b.textContent = label; b.dataset.kind = kind; b.dataset.v = v; b.style.width = 'auto'; b.style.padding = '.45rem .9rem';
-    b.addEventListener('click', () => { if (kind === 'group') rf.group = v; else rf[kind] = !rf[kind]; showRagas(); });
-    $('#raga-filter').appendChild(b);
+    b.type = 'button'; b.textContent = g; b.dataset.v = g;
+    b.addEventListener('click', () => { rf.group = g; refilter(); });
+    timeRow.appendChild(b);
   });
-  $('#raga-search').addEventListener('input', (e) => { rf.q = e.target.value; showRagas(); });
-  $('#raga-now').textContent = `Ragas for now (${nowGroup()})`;
+  [['starter', 'Starter', ''], ['fav', 'Favourites', 'star']].forEach(([kind, label, icon]) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'chip'; b.dataset.kind = kind; b.innerHTML = (icon ? FluteUI.icon(icon) : '') + label;
+    b.addEventListener('click', () => { rf[kind] = !rf[kind]; refilter(); });
+    $('#raga-flags').appendChild(b);
+  });
+  timeRow.addEventListener('scroll', () => timeRow.classList.toggle('more', timeRow.scrollLeft + timeRow.clientWidth < timeRow.scrollWidth - 4), { passive: true });
+  // the header button shows the icon of the current time of day (sunrise, sun, sunset, moon)
+  const paintNow = () => FluteUI.setIcon($('#raga-now'), GROUP_ICON[nowGroup()]);
+  new ResizeObserver(() => { placeFilter(); paintNow(); }).observe(timeRow); // runs when the tab is shown, when the row can first be measured
+  $('#raga-search').addEventListener('input', (e) => { rf.q = e.target.value; refilter(); });
+  const nowLabel = () => `Ragas for ${nowGroup()}`;
+  $('#raga-now').setAttribute('aria-label', nowLabel()); $('#raga-now').title = nowLabel(); paintNow();
   function ragasForNow() {
-    Object.assign(rf, { group: nowGroup(), q: '', starter: false, fav: false }); $('#raga-search').value = ''; showRagas();
+    Object.assign(rf, { group: nowGroup(), q: '', starter: false, fav: false }); $('#raga-search').value = ''; refilter();
     FluteNav.go('ragas', { top: true });
   }
   $('#raga-now').addEventListener('click', ragasForNow);
   $('#t-ragas').addEventListener('click', (e) => { e.preventDefault(); ragasForNow(); });
   $('#done-ragas').addEventListener('click', (e) => { e.preventDefault(); ragasForNow(); });
   showRagas();
-  $('#raga-cards').addEventListener('click', (e) => {
-    const fav = e.target.closest('[data-fav]'), hear = e.target.closest('[data-hear]'), how = e.target.closest('[data-raga]');
-    if (fav) {
+  ragaList.parentNode.addEventListener('click', (e) => {
+    const fav = e.target.closest('[data-fav]'), hear = e.target.closest('[data-hear]'), open = e.target.closest('[data-raga]');
+    if (e.target.closest('[data-clear]')) {
+      Object.assign(rf, { group: 'All', q: '', starter: false, fav: false }); $('#raga-search').value = ''; refilter();
+      $('#raga-search').focus();
+    } else if (fav) {
       const n = fav.dataset.fav, i = settings.favs.indexOf(n);
       if (i >= 0) settings.favs.splice(i, 1); else settings.favs.push(n);
-      saveSettings(); showRagas();
+      saveSettings();
+      if (rf.fav) { showRagas(); } // the list itself changes
+      else { const on = i < 0; fav.setAttribute('aria-pressed', on); fav.setAttribute('aria-label', favLabel(n, on)); } // only the star changes
     } else if (hear) { audio(); FluteDemo.preview(hear.dataset.hear, hear); }
-    else if (how) FluteDemo.ragaDemo(how.dataset.raga, how.dataset.group);
+    else if (open) FluteDemo.ragaDemo(open.dataset.raga, open.dataset.group, (RAGAS.find((r) => r[0] === open.dataset.raga) || [])[2]);
   });
   $('#technique-cards').innerHTML = cards(TECHNIQUES);
 

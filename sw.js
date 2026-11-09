@@ -9,6 +9,7 @@ const SHELL = [
   'assets/home.js', 'assets/home.css',
   'assets/practice-cards.js', 'assets/practice-cards.css',
   'assets/alankar-data.js', 'assets/alankar.js', 'assets/alankar.css',
+  'assets/ragas.css', 'assets/learn.css',
   'assets/favicon.svg', 'assets/icons/icon-192.png', 'assets/icons/icon-512.png', 'assets/icons/apple-touch-icon.png'
 ];
 

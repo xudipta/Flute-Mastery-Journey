@@ -1,7 +1,7 @@
 /* Bansuri: design system and shared styles.
    Order: 1 tokens · 2 base · 3 icons · 4 form controls · 5 cards · 6 app shell · 7 shared content · 8 dialogs · 9 phones ·
           10 shared components (v2), which later views build on.
-   Per-view styles live in home.css, practice-cards.css and alankar.css and use only the tokens below.
+   Per-view styles live in home.css, practice-cards.css, alankar.css, ragas.css and learn.css and use only the tokens below.
    Direction: paper and ink with one terracotta accent; a serif for titles, the system sans for everything else; lists and
    1 px lines instead of cards and shadows; no gradients, glows or coloured shadows.
    Colour pairs are checked by `node tools/check-contrast.js`. */
@@ -98,11 +98,9 @@ input[type="range"]::-moz-range-progress { height: 4px; border-radius: 2px; back
 input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: var(--raised); border: 1px solid var(--line-2); box-shadow: 0 1px 3px rgba(0, 0, 0, .25); }
 input[type="range"]:focus-visible { outline-offset: 0; border-radius: 4px; }
 output.vol { font-weight: 600; font-variant-numeric: tabular-nums; min-width: 3.2rem; color: var(--ink-2); font-size: var(--fs-sm); }
-.badge { display: inline-block; font-size: var(--fs-xs); font-weight: 600; padding: .1rem .6rem; border-radius: var(--r-pill); background: color-mix(in srgb, var(--ok) 16%, transparent); color: var(--ok); }
 /* choice chips (filters, the finger chart's swar buttons) */
-.note-picker { display: flex; flex-wrap: wrap; gap: var(--s-2); margin-bottom: var(--s-4); }
-.note-picker button, .note-group button { font: inherit; font-weight: 600; font-size: var(--fs-sm); min-height: 2.25rem; padding: .25rem .85rem; border-radius: var(--r-pill); border: 1px solid var(--line); background: var(--surface); color: var(--ink-2); cursor: pointer; transition: background .15s, color .15s, border-color .15s; }
-.note-picker button[aria-pressed="true"], .note-group button[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+.note-group button { font: inherit; font-weight: 600; font-size: var(--fs-sm); min-height: 2.25rem; padding: .25rem .85rem; border-radius: var(--r-pill); border: 1px solid var(--line); background: var(--surface); color: var(--ink-2); cursor: pointer; transition: background .15s, color .15s, border-color .15s; }
+.note-group button[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--bg); }
 
 /* ===== 5. cards =====
    One flat card look everywhere (panels, raga and technique cards, roadmap stages, calendar, tuner, practice cards, stats):
@@ -124,8 +122,6 @@ output.vol { font-weight: 600; font-variant-numeric: tabular-nums; min-width: 3.
 .stage h3 { margin: 0 0 .25rem; }
 .stage small { color: var(--accent-ink); font-weight: 600; }
 .stage ul { margin: var(--s-2) 0 0; padding-left: 1.2rem; color: var(--ink-2); }
-.soon { color: var(--ink-3); font-size: var(--fs-sm); font-style: italic; }
-.empty { color: var(--ink-3); grid-column: 1 / -1; }
 .done { background: var(--surface); border: 1px solid color-mix(in srgb, var(--ok) 55%, var(--line)); border-left: 3px solid var(--ok); padding: var(--s-4); border-radius: var(--r-md); }
 
 /* ===== 6. app shell: header, tab bar, now-playing bar, toast ===== */
@@ -198,16 +194,6 @@ output.vol { font-weight: 600; font-variant-numeric: tabular-nums; min-width: 3.
 #flute text, .demo-chart text { fill: var(--ink-3); font-size: 11px; text-anchor: middle; }
 .demo-chart { margin-top: var(--s-2); }
 .demo-chart .over { fill: var(--accent); font-weight: 600; font-size: 13px; }
-/* ragas */
-.raga-tools { display: flex; flex-wrap: wrap; gap: var(--s-3); margin-bottom: var(--s-3); }
-.raga-tools input { flex: 1 1 14rem; font: inherit; padding: .5rem 1rem; border-radius: var(--r-md); border: 1px solid var(--line); background: var(--surface); color: var(--ink); min-height: 2.75rem; }
-.raga-card { position: relative; display: flex; flex-direction: column; }
-.raga-card .star { position: absolute; top: .6rem; right: .6rem; font-size: 1.4rem; line-height: 1; min-width: 2.5rem; min-height: 2.5rem; border: 0; background: transparent; color: var(--accent-ink); cursor: pointer; border-radius: 50%; }
-.raga-card .star:hover { background: var(--surface-2); }
-.aroha { font-size: .9rem; margin: .4rem 0 0 !important; color: var(--ink) !important; }
-.card-actions { display: flex; flex-wrap: wrap; gap: var(--s-2); margin-top: auto; padding-top: var(--s-3); }
-.card-actions .btn { margin-top: 0; }
-.card-actions .btn.on { outline: 3px solid var(--focus); }
 /* tuner */
 .tuner-top { display: flex; flex-wrap: wrap; gap: var(--s-3) var(--s-4); align-items: center; }
 .tuner-top label { display: inline-flex; gap: .5rem; align-items: center; font-weight: 600; }
@@ -253,24 +239,13 @@ output.vol { font-weight: 600; font-variant-numeric: tabular-nums; min-width: 3.
 .note-label textarea { display: block; width: 100%; margin-top: .35rem; font: inherit; font-weight: 400; padding: .5rem .7rem; border-radius: var(--r-sm); border: 1px solid var(--line-2); background: var(--surface); color: var(--ink); resize: vertical; }
 .data-panel h3 { margin-top: 0; }
 
-/* ===== 8. dialogs: routine editor and the "how to play" demos ===== */
-#demo, #routine-editor { padding: 1.25rem; border: 1px solid var(--line); border-radius: var(--r-card); background: var(--surface); color: var(--ink); box-shadow: var(--shadow-sheet); }
-#demo { width: min(760px, 94vw); max-height: 92vh; overflow: auto; }
+/* ===== 8. dialogs: routine editor and the practice demos' content (the demo sheet itself is in ragas.css) ===== */
+#routine-editor { padding: 1.25rem; border: 1px solid var(--line); border-radius: var(--r-card); background: var(--surface); color: var(--ink); box-shadow: var(--shadow-sheet); }
 #routine-editor { width: min(620px, 94vw); max-height: 92vh; overflow: auto; }
-#demo::backdrop, #routine-editor::backdrop { background: var(--scrim); }
+#routine-editor::backdrop { background: var(--scrim); }
 .demo-head { display: flex; justify-content: space-between; gap: var(--s-4); align-items: flex-start; }
 .demo-head h2 { margin: 0; }
 .demo-head .lead { margin: 0; }
-.facts { display: flex; flex-wrap: wrap; gap: var(--s-4) var(--s-6); margin: var(--s-4) 0; }
-.facts div { display: flex; flex-direction: column; }
-.facts dt { color: var(--ink-3); font-size: .75rem; text-transform: uppercase; letter-spacing: .1em; }
-.facts dd { margin: 0; font-weight: 600; font-size: 1.1rem; color: var(--ink); }
-.nline { display: flex; flex-wrap: wrap; gap: .25rem .75rem; align-items: baseline; margin-bottom: .6rem; }
-.nlabel { min-width: 10rem; color: var(--ink-3); font-size: .9rem; }
-.ntoks { display: flex; flex-wrap: wrap; gap: .3rem; }
-.tok { padding: .15rem .55rem; border-radius: 8px; background: var(--surface-2); font-weight: 600; transition: background .1s, color .1s; }
-.tok.now { background: var(--accent); color: var(--on-accent); }
-.ntoks .sep { color: var(--ink-3); }
 .demo-cap { min-height: 1.6em; color: var(--ink); }
 .demo-controls { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-3); align-items: center; }
 .demo-controls .btn.on { outline: 3px solid var(--focus); }
