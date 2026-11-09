@@ -10,14 +10,14 @@
 .al input[type="number"] { font: inherit; background: var(--bg); color: var(--ink); border: 1px solid var(--line-strong); border-radius: var(--r-sm); padding: .3rem .5rem; min-height: 2.6rem; width: 4.5rem; }
 
 /* sticky "now playing" bar: stays under the site header while a pattern plays, so Stop is always in reach */
-.al-bar { position: sticky; top: var(--al-top, 3.75rem); z-index: 4; display: flex; align-items: center; gap: .6rem; padding: .45rem .75rem; border-radius: var(--r-card); background: var(--accent2); color: #fff; box-shadow: var(--shadow-2); animation: bar-in .25s var(--ease); }
+.al-bar { position: sticky; top: var(--al-top, 3.75rem); z-index: 4; display: flex; align-items: center; gap: .6rem; padding: .45rem .75rem; border-radius: var(--r-card); background: var(--accent); color: var(--on-accent); box-shadow: var(--shadow-2); animation: bar-in .25s var(--ease); }
 .al-bar[hidden] { display: none; }
 @keyframes bar-in { from { opacity: 0; transform: translateY(-6px); } }
-.al-bar .btn { background: #fff; color: #1b1840; flex: none; }
+.al-bar .btn { background: var(--on-accent); border-color: var(--on-accent); color: var(--accent-ink); flex: none; }
 .al-bar-name { flex: 1; min-width: 0; font-weight: 600; font-size: .9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .al-bar-tempo { display: flex; align-items: center; gap: .25rem; flex: none; }
 .al-bar-tempo output { min-width: 2.2rem; text-align: center; font-weight: 700; font-variant-numeric: tabular-nums; }
-.al-bar .dock-btn { color: #fff; border-color: rgba(255, 255, 255, .7); min-width: 2.4rem; }
+.al-bar .dock-btn { background: transparent; color: var(--on-accent); border-color: color-mix(in srgb, var(--on-accent) 70%, transparent); min-width: 2.4rem; }
 
 /* the pattern being practised */
 .al-sub { margin: .15rem 0 var(--s-3); color: var(--muted); font-size: .9rem; }
@@ -31,12 +31,12 @@
 .al-cap { min-height: 3.2em; margin: .25rem 0 var(--s-2); font-size: .92rem; }
 .al-play-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-3) var(--s-4); }
 .al-play { min-width: 9rem; min-height: var(--tap-big); font-size: var(--fs-lg); padding: .8rem 1.8rem; }
-.al-play.on { background: var(--accent2); color: #fff; }
+.al-play.on { background: var(--ink); border-color: var(--ink); color: var(--bg); }
 .al-tempo { display: flex; align-items: center; gap: .4rem; flex: 1 1 14rem; min-width: 0; }
 .al-tempo .dock-btn { min-width: 2.75rem; min-height: 2.75rem; padding: 0; font-size: 1.2rem; }
 .al-tempo input[type="range"] { flex: 1; min-width: 0; }
 .al-bpm { white-space: nowrap; font-size: .9rem; color: var(--muted); }
-.al-bpm output { color: var(--accent-ink); font-weight: 800; font-size: var(--fs-xl); font-variant-numeric: tabular-nums; }
+.al-bpm output { color: var(--accent-ink); font-weight: 600; font-size: var(--fs-xl); font-variant-numeric: tabular-nums; }
 .al-status { margin: var(--s-3) 0 0; color: var(--muted); font-size: .88rem; min-height: 1.4em; }
 
 /* controls */
@@ -44,7 +44,7 @@
 .al-flabel { flex: 0 0 8.5rem; font-weight: 600; font-size: .9rem; }
 .al-seg { display: inline-flex; flex-wrap: wrap; gap: .35rem; }
 .al-seg button, .al-toggle { font: inherit; font-weight: 600; min-height: 2.6rem; min-width: 3.2rem; padding: .3rem .95rem; border-radius: var(--r-pill); border: 1px solid var(--line-strong); background: transparent; color: var(--ink); cursor: pointer; transition: background .15s, color .15s, border-color .15s; }
-.al-seg button[aria-pressed="true"], .al-toggle[aria-pressed="true"] { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+.al-seg button[aria-pressed="true"], .al-toggle[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-ink); }
 .al-row2 { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2) var(--s-4); margin-top: var(--s-3); }
 .al-slider { display: grid; gap: .1rem; flex: 1 1 11rem; margin-top: var(--s-3); font-weight: 600; font-size: .9rem; }
 .al-row2 .al-slider { margin-top: 0; }
@@ -66,8 +66,8 @@
 .al-prev { font-size: .8rem; color: var(--muted); line-height: 1.35; }
 .al-card small { margin-top: auto; font-size: var(--fs-xs); color: var(--muted); }
 .al-card:hover { border-color: var(--accent2); transform: translateY(-1px); }
-.al-card[aria-pressed="true"] { background: var(--accent2); border-color: var(--accent2); color: #fff; }
-.al-card[aria-pressed="true"] .al-prev, .al-card[aria-pressed="true"] small { color: rgba(255, 255, 255, .88); }
+.al-card[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--ink); }
+.al-card[aria-pressed="true"] .al-prev, .al-card[aria-pressed="true"] small { color: var(--ink-2); }
 .al-log p { margin: 0 0 var(--s-2); }
 
 @media (max-width: 420px) {

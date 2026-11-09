@@ -3,7 +3,6 @@
    Today strip sits above them, and the stats and the long hint sit below. */
 
 #practice { padding-top: var(--s-5); }
-#practice .pc-title { font-size: var(--fs-xl); margin: 0 0 var(--s-2); }
 
 /* ----- today strip ----- */
 .practice-top { margin: 0 0 var(--s-3); }
@@ -13,11 +12,11 @@
 #practice .t-actions { justify-content: flex-start; gap: var(--s-2); }
 
 /* ----- carousel: a horizontal scroll-snap track; the cards peek in from the sides ----- */
-.pc-carousel { margin-inline: -1.25rem; }
+.pc-carousel { margin-inline: calc(-1 * var(--gutter)); }
 .pc-track {
   position: relative; /* so card.offsetLeft is measured from the track */
   display: flex; gap: var(--s-3); margin: 0; list-style: none;
-  padding: .35rem max(1.25rem, calc((100% - 34rem) / 2)) 1.1rem;
+  padding: .35rem max(var(--gutter), calc((100% - 34rem) / 2)) 1.1rem;
   overflow-x: auto; overflow-y: hidden;
   scroll-snap-type: x mandatory; overscroll-behavior-x: contain; scrollbar-width: none;
   touch-action: pan-x pan-y; /* swipe sideways for the track, scroll the page up and down */
@@ -37,9 +36,9 @@
 .pc-card h3 { margin: .1rem 0 0; font-size: var(--fs-xl); line-height: 1.25; text-decoration: none !important; }
 .pc-card p { margin: 0; }
 .pc-top { display: flex; align-items: center; gap: .6rem; min-height: 2.6rem; }
-.pc-icon { display: grid; place-items: center; width: 2.6rem; height: 2.6rem; border-radius: var(--r-md); background: color-mix(in srgb, var(--accent2) 22%, transparent); font-size: 1.5rem; line-height: 1; }
+.pc-icon { display: grid; place-items: center; width: 2.6rem; height: 2.6rem; border-radius: var(--r-md); background: var(--accent-soft); font-size: 1.5rem; line-height: 1; }
 .pc-step { color: var(--muted); font-size: var(--fs-sm); font-weight: 600; }
-.pc-badge { margin-left: auto; padding: .15rem .7rem; border-radius: var(--r-pill); background: var(--accent2); color: #fff; font-size: .8rem; font-weight: 700; white-space: nowrap; }
+.pc-badge { margin-left: auto; padding: .15rem .7rem; border-radius: var(--r-pill); background: var(--accent-soft); color: var(--accent-ink); font-size: .8rem; font-weight: 600; white-space: nowrap; }
 .pc-card.running .pc-badge { background: var(--accent); color: var(--on-accent); }
 .pc-card.done .pc-step::after { content: ' · done ✓'; color: var(--ok-ink); }
 .pc-min { color: var(--accent-ink) !important; font-weight: 700; }
@@ -47,14 +46,12 @@
 
 /* the timer: the biggest thing on the card */
 .pc-timer { text-align: center; margin: var(--s-2) 0 .1rem; }
-.pc-time { font-size: var(--fs-display); font-weight: 800; letter-spacing: -.02em; line-height: 1.05; font-variant-numeric: tabular-nums; color: var(--accent-ink); }
+.pc-time { font-size: var(--fs-display); font-weight: 300; letter-spacing: -.02em; line-height: 1.05; font-variant-numeric: tabular-nums; color: var(--ink); }
 .pc-card.active:not(.running) .pc-time { opacity: .75; }
 .pc-actions { display: flex; gap: .6rem; }
 .pc-card .btn { font-weight: 700; }
 .pc-card .btn:hover { transform: none; }
 .pc-card .btn.pc-toggle { flex: 1 1 auto; min-height: 3.5rem; font-size: var(--fs-lg); padding: .6rem 1.2rem; }
-.pc-toggle::before { content: ''; width: 1.15em; height: 1.15em; background: currentColor; -webkit-mask: var(--i-play) center / contain no-repeat; mask: var(--i-play) center / contain no-repeat; }
-.pc-card.running .pc-toggle::before { -webkit-mask-image: var(--i-pause); mask-image: var(--i-pause); }
 .pc-card .btn.pc-reset { flex: 0 0 auto; min-height: 3.5rem; font-size: var(--fs-md); padding: .6rem 1.2rem; background: transparent; color: var(--ink); border: 1px solid var(--line-strong); box-shadow: none; }
 .pc-card .btn.pc-reset:disabled { opacity: .4; cursor: default; }
 .pc-card .btn.pc-how { align-self: center; margin-top: .35rem; min-height: 2.6rem; font-size: var(--fs-sm); padding: .4rem 1rem; background: transparent; color: var(--ink); border: 1px solid var(--line-strong); box-shadow: none; }
@@ -91,6 +88,6 @@
 @media (max-width: 420px) {
   #practice .t-actions { flex-wrap: nowrap; }
   #practice .t-actions #t-go { flex: 1 1 auto; min-width: 0; }
-  #practice #t-ragas { font-size: 0; gap: 0; flex: 0 0 auto; padding-inline: var(--s-3, .75rem); }
-  #practice #t-ragas::before { font-size: 1.1rem; }
+  #practice #t-ragas { flex: 0 0 auto; padding-inline: var(--s-3); }
+  #practice #t-ragas .lbl { display: none; }
 }
