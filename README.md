@@ -38,6 +38,28 @@ It is a plain static site (no build step):
 python3 -m http.server 8000   # then open http://localhost:8000
 ```
 
+### Tests
+The checks need Node and `playwright` (`npm i playwright`). Node checks (no browser):
+
+```sh
+node tools/check-tanpura.js     # pitch of every tanpura string, level and brightness
+node tools/check-transport.js   # tabla and melody share one beat grid
+node tools/check-alankar.js     # alankar pattern data
+node tools/check-contrast.js    # WCAG contrast of the colour tokens, light and dark
+node tools/check-css-unused.js  # no unused class or id names in the stylesheets
+```
+
+Browser suites (tabs, Home, practice cards, timer, wake lock, polish), against the running site:
+
+```sh
+python3 -m http.server 8800                       # in one terminal
+BASE=http://localhost:8800 node tools/browser/run-all.js [--long] [screenshot-folder]
+```
+
+`--long` also runs `tools/check-alankar-browser.js` (about 100 s of real audio time). Each suite can be run
+alone, for example `BASE=http://localhost:8800 node tools/browser/nav.js`. The controls the suites touch are listed in
+`tools/browser/lib.js`, so a UI change only needs that file updated.
+
 ## Deployment
 GitHub Pages deploys via `.github/workflows/pages.yml` on every push to `dev`.
 In the repository go to **Settings → Pages → Source: GitHub Actions** (one-time).

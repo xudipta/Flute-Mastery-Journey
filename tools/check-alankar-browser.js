@@ -4,11 +4,11 @@
    a pattern stays on the taal's beats for 60+ s of audio, tempo and laya changes while playing leave no gap and no
    double beat, the speed trainer raises the tempo on schedule, switching tabs does not stop it, and stopping is silent.
    Run:  python3 -m http.server 8796   (in the repo)
-         BASE=http://localhost:8796 node tools/check-alankar-browser.js [screenshot-folder]   (about 100 s)
+         BASE=http://localhost:8800 node tools/check-alankar-browser.js [screenshot-folder]   (about 100 s)
    Exits 1 on any failure. Screenshots (360 px, light and dark) are written to the folder when one is given. */
 const { chromium } = require('playwright');
 const path = require('path');
-const BASE = (process.env.BASE || 'http://localhost:8000').replace(/\/$/, '');
+const BASE = (process.env.BASE || 'http://localhost:8800').replace(/\/$/, '');
 const SHOTS = process.argv[2] || '';
 let failed = 0, total = 0;
 const check = (name, ok, detail) => { total++; if (!ok) failed++; console.log(`${ok ? 'ok  ' : 'FAIL'} ${name}${detail !== undefined ? ' (' + detail + ')' : ''}`); };
