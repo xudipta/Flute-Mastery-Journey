@@ -133,6 +133,11 @@
   // Create the audio context on first use (needs a user gesture) and apply saved volumes.
   Sound.onCreate = () => { Sound.setVolume('tabla', settings.tablaVol / 100); Sound.setVolume('drone', 0.8 * settings.droneVol / 100); };
   function audio() { Sound.ensure(); return Sound; }
+  // Home and the now-playing bar follow the audio and timer state through these events:
+  // 'audio' (tanpura or taal on/off, tuning), 'timer' (every tick), 'volume', 'tanpura', 'taal', 'sa'.
+  const listeners = {};
+  const emit = (k) => (listeners[k] || []).forEach((f) => { try { f(); } catch (e) { console.error(e); } });
+  const on = (k, fn) => { (listeners[k] = listeners[k] || []).push(fn); };
 
   // The Today card sits at the top of the Practice view.
   function markOnboarded() { if (!settings.onboarded) { settings.onboarded = true; saveSettings(); } }
@@ -149,7 +154,7 @@
       : `All ${total} minutes done. Today's riyaaz is complete${sn ? ` · ${sn}-day streak` : ''}.`;
     $('#t-go').textContent = next ? (done ? `Continue: ${next.title}` : 'Start today\'s riyaaz') : 'Practise a block again';
     $('#t-go').dataset.state = next ? 'go' : 'again';
-    $('#t-ragas').textContent = `${nowGroup()} ragas`;
+    FluteUI.setLabel($('#t-ragas'), `${nowGroup()} ragas`);
     $('#t-ragas').setAttribute('aria-label', `${nowGroup()} ragas`);
   }
   const nowGroup = () => { const h = new Date().getHours(); return h >= 4 && h < 12 ? 'Morning' : h < 17 ? 'Afternoon' : h < 21 ? 'Evening' : 'Night'; };
@@ -182,7 +187,7 @@
       li.innerHTML = `<div class="pc-top"><span class="pc-icon" aria-hidden="true">${BLOCK_ICON[r.id] || '🪈'}</span><span class="pc-step">${i + 1} of ${ROUTINE.length}</span><span class="pc-badge" hidden></span></div>
         <h3>${r.title}</h3><p class="pc-min">${r.min} min</p><p class="pc-text">${r.text}</p>
         <div class="pc-timer" role="timer"><span class="pc-time">${fmt0(r.min * 60)}</span></div>
-        <div class="pc-actions"><button type="button" class="btn pc-toggle" data-timer>Start</button><button type="button" class="btn ghost pc-reset" disabled>Reset</button></div>
+        <div class="pc-actions"><button type="button" class="btn primary pc-toggle" data-timer>Start</button><button type="button" class="btn ghost pc-reset" disabled>Reset</button></div>
         <button type="button" class="btn small ghost pc-how" data-how>Show me how</button>
         <label class="pc-done"><input type="checkbox" aria-label="Done: ${r.title}"> <span>Done</span></label>`;
       const box = li.querySelector('input');
@@ -222,10 +227,10 @@
   let block = null, remaining = 0, handle = null, endAt = 0, runAll = false, bellAt = null;
   const fmt = fmt0;
   const goCard = (id, o) => { if (window.PracticeCards) PracticeCards.goTo(id, o); };
-  // Shows the time in the timer card, and (once a block is under way) in the tools bar and the tab title,
-  // so the timer can be seen from any section.
-  const baseTitle = document.title, chip = $('#dock-timer');
-  let cardKey = '';
+  // Shows the time in the timer card and the tab title, and tells the now-playing bar (assets/mini.js) about it, so the
+  // timer can be seen from any tab.
+  const baseTitle = document.title;
+  let cardKey = '', timerShow = false;
   function renderTimer() {
     const show = !!block && remaining > 0 && (!!handle || remaining < block.min * 60);
     // Cards: the block the timer is on shows live time, Pause/Start and a badge; the others show their full length.
@@ -242,15 +247,11 @@
     });
     const key = (block ? block.id : '') + (handle ? 'r' : '') + (show ? 's' : '');
     if (key !== cardKey) { cardKey = key; if (window.PracticeCards) PracticeCards.sync(); }
-    chip.hidden = !show; $('#dock').classList.toggle('has-timer', show);
+    timerShow = show;
     saveTimer(show);
     const title = show ? `${handle ? '⏱' : '⏸'} ${fmt(remaining)} · ${block.title}` : baseTitle;
     if (document.title !== title) document.title = title;
-    if (!show) return;
-    $('#dock-timer-icon').textContent = handle ? '⏱' : '⏸'; chip.dataset.state = handle ? 'run' : 'pause';
-    $('#dock-timer-time').textContent = fmt(remaining);
-    $('#dock-timer-name').textContent = block.title;
-    chip.setAttribute('aria-label', `${block.title}: ${fmt(remaining)} left${handle ? '' : ', paused'}. Go to the timer`);
+    emit('timer');
   }
   // A block under way is saved, so a reload (or the phone discarding the tab) does not lose it. While it runs
   // the saved entry (end time) does not change, so this only writes on start, pause, reset and finish.
@@ -260,12 +261,13 @@
     if (t) state.timer = t; else delete state.timer;
     store.set(state);
   }
-  chip.addEventListener('click', () => {
+  // Back to the running card (the now-playing bar's timer line).
+  function openTimer() {
     FluteNav.go('practice', { focus: false });
     if (!block || !rows[block.id]) return;
     goCard(block.id, { vertical: 'center' });
     rows[block.id].toggle.focus({ preventScroll: true });
-  });
+  }
   function selectBlock(r, autostart, noScroll) {
     markOnboarded(); stop();
     block = r; remaining = r.min * 60;
@@ -317,52 +319,42 @@
     else { runAll = false; selectBlock(ROUTINE[0], false); }
   });
 
-  // Sa selector (several synced selects) + tanpura drone
-  const saSelects = [...document.querySelectorAll('.sa-sync')];
-  saSelects.forEach((sel) => SA_CHOICES.forEach((i) => { const o = document.createElement('option'); o.value = i; o.textContent = saName(i); sel.appendChild(o); }));
-  function showSa() {
-    saSelects.forEach((s) => { s.value = settings.sa; });
-    $('#pill-sa-name').textContent = saShort(settings.sa);
-  }
+  // Scale (Sa), tanpura, taal and tempo: the state and the sound. Home (assets/home.js) draws the controls.
+  const saListeners = [];
   function setSa(i) {
-    settings.sa = i; settings.onboarded = true; saveSettings(); showSa();
+    settings.sa = i; settings.onboarded = true; saveSettings();
     Sound.setSa(saFreq(settings.sa));
     if (Sound.ctx) Sound.restartDrone();
     renderToday();
     if (typeof renderPicker === 'function' && namesBox.checked) { renderPicker(); showNote(chartTok); }
+    saListeners.forEach((f) => f(settings.sa));
+    emit('sa'); emit('audio');
   }
-  saSelects.forEach((s) => s.addEventListener('change', () => setSa(Number(s.value))));
-  showSa();
-  const droneBtn = $('#drone-toggle'), droneVol = $('#drone-vol');
-  droneVol.value = settings.droneVol;
-  droneBtn.addEventListener('click', () => {
-    const on = !Sound.droneOn;
+  let tuning = false;
+  function setDrone(on) {
+    on = !!on;
+    if (on === Sound.droneOn) return;
     if (on) audio().startDrone(); else Sound.stopDrone();
-    droneBtn.setAttribute('aria-pressed', on); droneBtn.classList.toggle('on', on);
-    keepAwake();
-  });
-  droneVol.addEventListener('input', () => {
-    settings.droneVol = Number(droneVol.value); saveSettings();
-    if (Sound.ctx) Sound.setVolume('drone', 0.8 * settings.droneVol / 100);
-  });
-  // The strings are built in the background; until they are ready the button says so.
-  Sound.onTuning = (on) => {
-    droneBtn.classList.toggle('tuning', on); droneBtn.setAttribute('aria-busy', on);
-    droneBtn.querySelector('.lbl').textContent = on ? 'Tuning…' : 'Tanpura';
-    $('#tp-status').textContent = on ? 'Tuning the tanpura…' : '';
-  };
-  // First string (Pa, or Ma / Ni for ragas without Pa), pluck speed and a fine tune in cents for the tanpura alone.
-  const tpFirst = $('#tp-first'), tpSpeed = $('#tp-speed'), tpFine = $('#tp-fine');
-  tpFirst.value = settings.tanpuraFirst; tpSpeed.value = settings.tanpuraSpeed; tpFine.value = settings.tanpuraFine;
-  const showFine = () => { $('#tp-fine-out').textContent = (tpFine.value > 0 ? '+' : '') + tpFine.value + '¢'; };
-  function applyTanpura() {
-    Object.assign(settings, { tanpuraFirst: tpFirst.value, tanpuraSpeed: tpSpeed.value, tanpuraFine: Number(tpFine.value) });
-    saveSettings(); showFine();
-    Sound.setTanpura({ first: settings.tanpuraFirst, speed: settings.tanpuraSpeed, fine: settings.tanpuraFine });
+    keepAwake(); emit('audio');
   }
-  [tpFirst, tpSpeed, tpFine].forEach((el) => el.addEventListener('input', applyTanpura));
-  tpFine.addEventListener('dblclick', () => { tpFine.value = 0; applyTanpura(); });
-  showFine();
+  // The strings are built in the background; until they are ready the tanpura says it is tuning.
+  Sound.onTuning = (v) => { tuning = v; emit('audio'); };
+  function setVolume(which, v) {
+    v = Math.min(200, Math.max(0, Math.round(Number(v))));
+    if (which === 'drone') { settings.droneVol = v; if (Sound.ctx) Sound.setVolume('drone', 0.8 * v / 100); }
+    else { settings.tablaVol = v; if (Sound.ctx) Sound.setVolume('tabla', v / 100); }
+    saveSettings(); emit('volume');
+  }
+  // First string (Pa, or Ma / Ni for ragas without Pa), pluck speed and a fine tune in cents for the tanpura alone.
+  const tanpuraGet = () => ({ first: settings.tanpuraFirst, speed: settings.tanpuraSpeed, fine: settings.tanpuraFine });
+  function setTanpura(patch) {
+    if (patch.first !== undefined) settings.tanpuraFirst = patch.first;
+    if (patch.speed !== undefined) settings.tanpuraSpeed = patch.speed;
+    if (patch.fine !== undefined) settings.tanpuraFine = Math.min(50, Math.max(-50, Math.round(Number(patch.fine))));
+    saveSettings();
+    Sound.setTanpura(tanpuraGet());
+    emit('tanpura');
+  }
 
   // Tabla taal player (sounds are synthesised in audio.js).
   // vib = beats per vibhag; marks: 'X' sam, number tali, 'O' khali.
@@ -375,66 +367,39 @@
     'Rupak · 7': { vib: [3, 2, 2], marks: ['O', '2', '3'], bols: ['Tin','Tin','Na','Dhi','Na','Dhi','Na'] }
   };
   window.TAALS = TAALS;
-  const taalSelect = $('#taal-select'), grid = $('#taal-grid'), bpm = $('#bpm'), tablaVol = $('#tabla-vol');
-  Object.keys(TAALS).forEach((k) => { const o = document.createElement('option'); o.textContent = k; taalSelect.appendChild(o); });
   if (!TAALS[settings.taal]) settings.taal = 'Teentaal · 16';
-  taalSelect.value = settings.taal; tablaVol.value = settings.tablaVol;
-  let beatEls = [], taalRun = false;
-  function buildGrid() {
-    const t = TAALS[taalSelect.value]; grid.innerHTML = ''; beatEls = []; let i = 0;
-    $('#dock-taal').textContent = taalSelect.value.split(' · ')[0];
-    t.vib.forEach((n, v) => {
-      const box = document.createElement('div'); box.className = 'vibhag';
-      for (let k = 0; k < n; k++, i++) {
-        const el = document.createElement('div'); el.className = 'beat';
-        el.innerHTML = `<small>${k === 0 ? (t.marks[v] === 'X' ? '✕' : t.marks[v] === 'O' ? '○' : t.marks[v]) : '&nbsp;'}</small><b>${t.bols[i]}</b>`;
-        box.appendChild(el); beatEls.push(el);
-      }
-      grid.appendChild(box);
-    });
-  }
+  let taalRun = false;
+  const beatListeners = [], bpmListeners = [];
   // The beats come from the shared transport (transport.js), which keeps the tabla and any melody pattern
-  // on one clock. This page only starts it, stops it and shows the beat that is sounding.
-  const onBeat = (n, idx) => { if (taalRun) beatEls.forEach((e, j) => e.classList.toggle('on', j === idx)); };
+  // on one clock. This page only starts it, stops it and passes on the beat that is sounding.
+  const onBeat = (n, idx) => { if (taalRun) beatListeners.forEach((f) => f(n, idx)); };
   function setTaalRunning(on) {
+    on = !!on;
+    if (on === taalRun) return;
     taalRun = on;
-    $('#taal-toggle').textContent = on ? 'Stop' : 'Play'; $('#taal-toggle').classList.toggle('on', on);
-    $('#dock-tabla').classList.toggle('on', on); $('#dock-tabla').setAttribute('aria-pressed', on);
     const T = FluteTransport;
     if (on) {
       audio();
-      const taal = TAALS[taalSelect.value];
-      if (T.running) { T.setBpm(Number(bpm.value)); T.setTaal(taal); T.setTabla(true); T.setOnBeat(onBeat); }
-      else T.start({ bpm: Number(bpm.value), taal, tabla: true, onBeat });
-    } else {
-      beatEls.forEach((e) => e.classList.remove('on'));
-      if (T.patternActive) { T.setTabla(false); T.setOnBeat(null); } else T.stop(); // a melody keeps the beat grid
-    }
-    keepAwake();
+      const taal = TAALS[settings.taal];
+      if (T.running) { T.setBpm(settings.bpm); T.setTaal(taal); T.setTabla(true); T.setOnBeat(onBeat); }
+      else T.start({ bpm: settings.bpm, taal, tabla: true, onBeat });
+    } else if (T.patternActive) { T.setTabla(false); T.setOnBeat(null); } // a melody keeps the beat grid
+    else T.stop();
+    keepAwake(); emit('audio');
   }
-  const bpmListeners = [];
   function setBpm(v) {
     v = Math.min(240, Math.max(40, Math.round(v)));
-    bpm.value = v; settings.bpm = v; saveSettings();
-    $('#bpm-out').textContent = v; $('#dock-bpm').textContent = v;
+    settings.bpm = v; saveSettings();
     if (FluteTransport.running) FluteTransport.setBpm(v);
     bpmListeners.forEach((f) => f(v));
+    emit('audio');
   }
-  bpm.value = settings.bpm; setBpm(settings.bpm);
-  $('#taal-toggle').addEventListener('click', () => setTaalRunning(!taalRun));
-  $('#dock-tabla').addEventListener('click', () => setTaalRunning(!taalRun));
-  bpm.addEventListener('input', () => setBpm(Number(bpm.value)));
-  $('#bpm-down').addEventListener('click', () => setBpm(Number(bpm.value) - 5));
-  $('#bpm-up').addEventListener('click', () => setBpm(Number(bpm.value) + 5));
-  tablaVol.addEventListener('input', () => {
-    settings.tablaVol = Number(tablaVol.value); saveSettings();
-    if (Sound.ctx) Sound.setVolume('tabla', settings.tablaVol / 100);
-  });
-  taalSelect.addEventListener('change', () => {
-    settings.taal = taalSelect.value; saveSettings(); buildGrid();
-    if (taalRun) FluteTransport.setTaal(TAALS[taalSelect.value]);
-  });
-  buildGrid();
+  function setTaal(name) {
+    if (!TAALS[name] || settings.taal === name) return;
+    settings.taal = name; saveSettings();
+    if (taalRun) FluteTransport.setTaal(TAALS[name]);
+    emit('taal'); emit('audio');
+  }
 
   // Keep the screen on while a block timer, the tabla or the tanpura runs, so a phone on a stand does not
   // lock mid-practice. The browser drops the lock when the page is hidden; it is asked for again on return.
@@ -443,7 +408,6 @@
   async function keepAwake() {
     if (!('wakeLock' in navigator) || wakeBusy) return;
     const want = !!handle || taalRun || Sound.droneOn || FluteTransport.running;
-    if (want) $('#dock').classList.remove('tuck'); // something is playing: keep its controls in view
     wakeBusy = true;
     try {
       if (want && !wakeLock && document.visibilityState === 'visible') {
@@ -593,53 +557,15 @@
   });
   $('#technique-cards').innerHTML = cards(TECHNIQUES);
 
-  // Tools bar: expandable panel, synced controls, keyboard shortcuts
-  const panel = $('#dock-panel'), pill = $('#pill-sa');
-  function togglePanel(open) {
-    open = open === undefined ? panel.hidden : open;
-    panel.hidden = !open; pill.setAttribute('aria-expanded', open);
-  }
-  pill.addEventListener('click', () => togglePanel());
-  document.addEventListener('click', (e) => { if (!panel.hidden && !e.target.closest('#dock')) togglePanel(false); });
-  const dockTv = $('#dock-tabla-vol'), dockTaal = $('#dock-taal-select');
-  dockTv.value = tablaVol.value;
-  dockTv.addEventListener('input', () => { tablaVol.value = dockTv.value; tablaVol.dispatchEvent(new Event('input')); });
-  tablaVol.addEventListener('input', () => { dockTv.value = tablaVol.value; });
-  // Volume readouts; double-click a slider to go back to 100%.
-  const vols = [[droneVol, '#drone-vol-out'], [tablaVol, '#tabla-vol-out'], [dockTv, '#dock-tabla-vol-out']];
-  const showVols = () => vols.forEach(([el, out]) => { $(out).textContent = el.value + '%'; });
-  vols.forEach(([el]) => {
-    el.addEventListener('input', showVols);
-    el.addEventListener('dblclick', () => { el.value = 100; el.dispatchEvent(new Event('input')); });
-  });
-  showVols();
-  // Phones: tuck the tools bar away while the user scrolls down, unless something is running or it is in use.
-  // Jumps from links and buttons (tab bar, "Ragas for now") don't count, so the bar is there when you land.
-  let lastY = scrollY, userScrollAt = 0;
-  const dock = $('#dock'), narrow = matchMedia('(max-width: 720px)');
-  ['touchmove', 'wheel'].forEach((t) => addEventListener(t, () => { userScrollAt = Date.now(); }, { passive: true }));
-  addEventListener('keydown', (e) => { if (/^(Arrow|Page|Home|End| )/.test(e.key)) userScrollAt = Date.now(); });
-  addEventListener('scroll', () => {
-    const y = scrollY, d = y - lastY;
-    if (Math.abs(d) < 8) return;
-    lastY = y;
-    const byUser = Date.now() - userScrollAt < 400;
-    const busy = !panel.hidden || !chip.hidden || taalRun || Sound.droneOn || !!dock.querySelector(':focus-visible'); // keyboard focus only, not a tapped button
-    dock.classList.toggle('tuck', narrow.matches && byUser && d > 0 && y > 200 && !busy);
-  }, { passive: true });
-  Object.keys(TAALS).forEach((k) => { const o = document.createElement('option'); o.textContent = k; dockTaal.appendChild(o); });
-  dockTaal.value = taalSelect.value;
-  dockTaal.addEventListener('change', () => { taalSelect.value = dockTaal.value; taalSelect.dispatchEvent(new Event('change')); });
-  taalSelect.addEventListener('change', () => { dockTaal.value = taalSelect.value; });
+  // Keyboard shortcuts: T tanpura, B tabla, [ ] tempo (5 BPM), / search ragas
   document.addEventListener('keydown', (e) => {
     if (e.ctrlKey || e.metaKey || e.altKey || e.target.closest('input, select, textarea, [contenteditable]') || document.querySelector('dialog[open]')) return;
     const k = e.key.toLowerCase();
-    if (k === 't') droneBtn.click();
-    else if (k === 'b') $('#dock-tabla').click();
-    else if (k === '[') $('#bpm-down').click();
-    else if (k === ']') $('#bpm-up').click();
+    if (k === 't') setDrone(!Sound.droneOn);
+    else if (k === 'b') setTaalRunning(!taalRun);
+    else if (k === '[') setBpm(settings.bpm - 5);
+    else if (k === ']') setBpm(settings.bpm + 5);
     else if (k === '/') { e.preventDefault(); FluteNav.go('ragas', { focus: false }); $('#raga-search').focus(); }
-    else if (k === 'escape') togglePanel(false);
     else return;
   });
 
@@ -655,9 +581,9 @@
     // of what was paused and a restore() that switches them back on.
     quiet() {
       const drone = Sound.droneOn, tabla = taalRun, paused = [];
-      if (drone) { droneBtn.click(); paused.push('tanpura'); }
+      if (drone) { setDrone(false); paused.push('tanpura'); }
       if (tabla) { setTaalRunning(false); paused.push('tabla'); }
-      return { paused, restore() { if (drone && !Sound.droneOn) droneBtn.click(); if (tabla && !taalRun) setTaalRunning(true); } };
+      return { paused, restore() { if (drone && !Sound.droneOn) setDrone(true); if (tabla && !taalRun) setTaalRunning(true); } };
     },
     setPlan(plan) {
       if (handle) stop();
@@ -668,16 +594,22 @@
   };
   if (window.FluteProgress) window.FluteProgress.refresh();
 
-  // Hooks for the Alankar tab (assets/alankar.js): the shared tempo, tabla, tanpura, volumes and settings.
+  // Hooks for the Home tab, the now-playing bar and the Alankar tab: the shared scale, tempo, taal, tabla, tanpura,
+  // volumes and settings. `on(kind, fn)` follows 'audio', 'timer', 'volume', 'tanpura', 'taal' and 'sa'.
   Object.assign(window.FluteApp, {
-    saveSettings,
-    bpm: () => Number(bpm.value), setBpm, onBpm: (fn) => bpmListeners.push(fn),
-    taalName: () => taalSelect.value,
-    setTaal(name) { if (TAALS[name] && taalSelect.value !== name) { taalSelect.value = name; taalSelect.dispatchEvent(new Event('change')); } },
-    tabla: { on: () => taalRun, set: setTaalRunning },
-    drone: { on: () => Sound.droneOn, set(on) { if (!!on !== Sound.droneOn) droneBtn.click(); } },
-    volume: (which) => (which === 'drone' ? settings.droneVol : settings.tablaVol),
-    setVolume(which, v) { const el = which === 'drone' ? droneVol : tablaVol; el.value = v; el.dispatchEvent(new Event('input')); },
+    saveSettings, on,
+    sa: () => settings.sa, onSa: (fn) => saListeners.push(fn),
+    saChoices: () => SA_CHOICES.slice(), saName, saShort, saFreq,
+    bpm: () => settings.bpm, setBpm, onBpm: (fn) => bpmListeners.push(fn),
+    taalName: () => settings.taal, taals: () => Object.keys(TAALS), setTaal,
+    onBeat: (fn) => beatListeners.push(fn),
+    tabla: { on: () => taalRun, set: setTaalRunning, toggle: () => setTaalRunning(!taalRun) },
+    drone: { on: () => Sound.droneOn, set: setDrone, toggle: () => setDrone(!Sound.droneOn), tuning: () => tuning },
+    tanpura: { get: tanpuraGet, set: setTanpura },
+    volume: (which) => (which === 'drone' ? settings.droneVol : settings.tablaVol), setVolume,
+    // the running block timer, for the now-playing bar; openTimer() goes back to its card
+    timerInfo: () => ({ show: timerShow, running: !!handle, remaining, title: block ? block.title : '', id: block ? block.id : null }),
+    openTimer,
     // 'off' (not in today's routine), 'todo' or 'done'; markBlock ticks a block off like the checkbox does.
     blockState: (id) => { const r = ROUTINE.find((x) => x.id === id); return !r ? 'off' : state.checks[id] ? 'done' : 'todo'; },
     markBlock(id) { if (!ROUTINE.some((x) => x.id === id) || state.checks[id]) return false; setChecked(id, true); return true; }

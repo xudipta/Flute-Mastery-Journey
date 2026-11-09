@@ -1,7 +1,7 @@
 /* Alankar view (#view-alankar): practise alankar patterns (assets/alankar-data.js) with the tanpura and a tabla taal.
 
    The notes and the tabla beats are played by the shared transport (transport.js), so the melody stays on the taal's beats
-   and loops without gaps. The tempo, tabla, tanpura and volumes are the same ones as in the tools bar: this tab drives
+   and loops without gaps. The tempo, tabla, tanpura and volumes are the same ones as on Home: this tab drives
    them through the hooks at the end of app.js (FluteApp.bpm/setBpm/onBpm, tabla, drone, setVolume, saveSettings,
    blockState/markBlock). It renders into #alankar-root the first time the tab is shown. */
 (function (root) {
@@ -58,7 +58,7 @@
         <svg class="demo-chart al-chart" id="al-chart" viewBox="0 0 640 150" role="img" aria-label="Bansuri finger-hole chart for the note being played"></svg>
         <p class="al-cap" id="al-cap"></p>
         <div class="al-play-row">
-          <button type="button" class="btn al-play" id="al-play">Play</button>
+          <button type="button" class="btn primary al-play" id="al-play">Play</button>
           <div class="al-tempo" role="group" aria-label="Tempo">
             <button type="button" class="dock-btn" id="al-slower" aria-label="Slower">−</button>
             <input type="range" id="al-bpm" min="40" max="240" step="1" aria-label="Tempo in beats per minute">
@@ -98,7 +98,7 @@
       <section class="panel al-pick" aria-labelledby="al-pick-h">
         <h3 id="al-pick-h">Patterns</h3>
         <div class="al-field"><label class="al-flabel" for="al-scale">Scale</label><select id="al-scale">${D.scales.map((s) => `<option value="${s.id}">${s.name}</option>`).join('')}</select></div>
-        <p class="hint">Tap a pattern to hear it. The tonic is the Sa chosen in the tools bar.</p>
+        <p class="hint">Tap a pattern to hear it. The tonic is the Sa chosen on Home.</p>
         <div class="al-cards" id="al-cards"></div>
       </section>
 
@@ -276,10 +276,9 @@
     ui.slower.addEventListener('click', () => bpmBy(-1)); ui.faster.addEventListener('click', () => bpmBy(1));
     ui.barSlower.addEventListener('click', () => bpmBy(-1)); ui.barFaster.addEventListener('click', () => bpmBy(1));
     A.onBpm((v) => { if (playing && !fromTrainer) tempoAtStart = v; syncTempo(v); });   // your own tempo changes become the new starting point
-    // tanpura, which is also switched from the tools bar and the T key
+    // tanpura, which is also switched from Home and the T key
     ui.drone.addEventListener('click', () => { A.drone.set(!A.drone.on()); syncDrone(); });
-    const dt = document.getElementById('drone-toggle');
-    if (dt) new MutationObserver(syncDrone).observe(dt, { attributes: true, attributeFilter: ['aria-pressed'] });
+    A.on('audio', syncDrone);
     // volumes (double-click goes back to 100%)
     const volume = (el, apply) => {
       el.addEventListener('input', () => { apply(Number(el.value)); $('#' + el.id + '-out').textContent = el.value + '%'; });
@@ -294,7 +293,7 @@
     trainerField(ui.trStep, 'step', 1, 20); trainerField(ui.trEvery, 'every', 1, 10); trainerField(ui.trTarget, 'target', 40, 240);
     // today's practice block
     ui.mark.addEventListener('click', () => { A.markBlock('alankar'); syncLog(); });
-    // the taal can be changed on the Home tab or in the tools bar
+    // the taal can be changed on the Home tab
     const ts = document.getElementById('taal-select');
     if (ts) ts.addEventListener('change', syncTaal);
     addEventListener('resize', () => { const hdr = $('.site-header'); if (hdr) ui.root.style.setProperty('--al-top', hdr.offsetHeight + 'px'); });

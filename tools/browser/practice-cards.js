@@ -49,17 +49,17 @@ const ok = (c, msg, extra) => { if (!c) fails++; console.log((c ? 'ok   ' : 'FAI
   // ---------- 2. a running timer keeps running while swiping away ----------
   await p.click('.pc-dot >> nth=1'); await p.waitForTimeout(600);
   await p.click('.routine li[data-id="sa"] .pc-toggle'); await p.waitForTimeout(1300);
-  const run1 = await p.evaluate(() => ({ time: document.querySelector('li[data-id="sa"] .pc-time').textContent, label: document.querySelector('li[data-id="sa"] .pc-toggle').textContent, badge: document.querySelector('li[data-id="sa"] .pc-badge').textContent, chip: document.querySelector('#dock-timer').hidden, statusLabel: document.querySelector('#timer-label').textContent }));
+  const run1 = await p.evaluate(() => ({ time: document.querySelector('li[data-id="sa"] .pc-time').textContent, label: document.querySelector('li[data-id="sa"] .pc-toggle').textContent, badge: document.querySelector('li[data-id="sa"] .pc-badge').textContent, chip: document.querySelector('#mini').hidden, statusLabel: document.querySelector('#timer-label').textContent }));
   ok(run1.label === 'Pause' && /Running/.test(run1.badge) && !run1.chip && run1.statusLabel === 'Sur sadhana (long tones)', 'Start on a card runs that block', run1);
   await swipe(p, -260); await swipe(p, -260);
   s = await S(p);
-  const run2 = await p.evaluate(() => ({ saTime: document.querySelector('li[data-id="sa"] .pc-time').textContent, saBadge: document.querySelector('li[data-id="sa"] .pc-badge').textContent, otherTime: document.querySelector('li[data-id="alankar"] .pc-time').textContent, otherBtn: document.querySelector('li[data-id="alankar"] .pc-toggle').textContent, dotRunning: document.querySelectorAll('.pc-dot.is-running').length, chip: document.querySelector('#dock-timer-time').textContent }));
+  const run2 = await p.evaluate(() => ({ saTime: document.querySelector('li[data-id="sa"] .pc-time').textContent, saBadge: document.querySelector('li[data-id="sa"] .pc-badge').textContent, otherTime: document.querySelector('li[data-id="alankar"] .pc-time').textContent, otherBtn: document.querySelector('li[data-id="alankar"] .pc-toggle').textContent, dotRunning: document.querySelectorAll('.pc-dot.is-running').length, chip: document.querySelector('#mini-title').textContent.slice(0, 5) }));
   ok(s.idx === 3 && /Running/.test(run2.saBadge) && run2.otherTime === '10:00' && run2.otherBtn === 'Start' && run2.dotRunning === 1, 'swiping away does not stop it; other cards show full length', run2);
   ok(run2.saTime < '10:00' && run2.chip === run2.saTime, 'timer kept counting, chip matches', run2);
   // chip tap returns to the running card
-  await p.click('#dock-timer'); await p.waitForTimeout(900);
+  await p.click('#mini-open'); await p.waitForTimeout(900);
   s = await S(p);
-  const vis = await p.evaluate(() => { const r = document.querySelector('li[data-id="sa"] .pc-time').getBoundingClientRect(); return r.top >= 0 && r.bottom <= document.querySelector('.dock').getBoundingClientRect().top; });
+  const vis = await p.evaluate(() => { const r = document.querySelector('li[data-id="sa"] .pc-time').getBoundingClientRect(); return r.top >= 0 && r.bottom <= document.querySelector('.mini').getBoundingClientRect().top; });
   ok(s.idx === 1 && vis, 'chip tap opens the running card with its timer on screen', { idx: s.idx, vis });
   ok(await p.evaluate(() => document.activeElement.classList.contains('pc-toggle') && document.activeElement.closest('li').dataset.id === 'sa'), 'chip tap focuses that card\'s Pause button');
   // pause / reset on the card
@@ -89,7 +89,7 @@ const ok = (c, msg, extra) => { if (!c) fails++; console.log((c ? 'ok   ' : 'FAI
   await p.click('#edit-routine'); await p.waitForTimeout(200);
   await p.uncheck('#re-list li:nth-child(6) input[type=checkbox]'); await p.click('#re-save'); await p.waitForTimeout(600);
   s = await S(p); ok((await p.locator('.pc-card').count()) === 5 && s.count.endsWith('of 5') && s.idx === 4, 'editing the routine rebuilds the cards and keeps a valid place', s);
-  ok(await p.evaluate(() => !document.querySelector('#dock-timer') || true), 'editor ok');
+  ok(await p.evaluate(() => !!document.querySelector('#mini')), 'editor ok');
   await p.screenshot({ path: OUT + '/after-edit.png' });
   await p.context().close();
 

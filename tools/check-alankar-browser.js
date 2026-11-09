@@ -50,10 +50,10 @@ const near = (a, b, tol) => Math.abs(a - b) <= tol;
 
   // ----- tanpura on, then 60+ s of a straight run over Teentaal -----
   await p.click('#al-drone'); await wait(300);
-  check('tanpura toggle switches the real tanpura', (await p.getAttribute('#drone-toggle', 'aria-pressed')) === 'true' && (await p.getAttribute('#al-drone', 'aria-pressed')) === 'true');
+  check('tanpura toggle switches the real tanpura', (await p.evaluate(() => FluteApp.drone.on())) === true && (await p.getAttribute('#al-drone', 'aria-pressed')) === 'true');
   await reset();
   await p.click('#al-play'); await wait(500);
-  check('Play starts the tabla (tools bar shows it)', (await p.getAttribute('#dock-tabla', 'aria-pressed')) === 'true');
+  check('Play starts the tabla (Home and the now-playing bar show it)', (await p.evaluate(() => FluteApp.tabla.on())) === true);
   check('the Stop bar shows while playing', await p.isVisible('#al-bar'));
   await wait(61500);
   let g = await grab(), spb = 60 / 90, f0 = await expectedFreqs();
@@ -116,8 +116,8 @@ const near = (a, b, tol) => Math.abs(a - b) <= tol;
   await p.click('#al-play'); await wait(300);
   check('stopping puts the tempo back to where it started', (await bpmNow()) === 90);
   check('status says how far you got', /reached 110/.test(await p.textContent('#al-status')), await p.textContent('#al-status'));
-  check('tanpura goes on after Stop', (await p.getAttribute('#drone-toggle', 'aria-pressed')) === 'true');
-  check('the tabla this tab started is off after Stop', (await p.getAttribute('#dock-tabla', 'aria-pressed')) === 'false');
+  check('tanpura goes on after Stop', (await p.evaluate(() => FluteApp.drone.on())) === true);
+  check('the tabla this tab started is off after Stop', (await p.evaluate(() => FluteApp.tabla.on())) === false);
   await p.uncheck('#al-tr-on');
 
   // ----- each round on sam: 4 notes per beat at 240 BPM, a 37-note pattern (9.25 beats) -> 16 beats between rounds -----
@@ -141,7 +141,7 @@ const near = (a, b, tol) => Math.abs(a - b) <= tol;
   await reset();
   await p.click('#al-play'); await wait(3500);
   g = await grab(); spb = 60 / (await bpmNow());
-  check('click mode: the tools bar tabla stays off', (await p.getAttribute('#dock-tabla', 'aria-pressed')) === 'false');
+  check('click mode: the tabla stays off', (await p.evaluate(() => FluteApp.tabla.on())) === false);
   check('click mode: a click on every beat', g.hits.length >= 4 && g.hits.every((h) => h.bol === 'Ta' || h.bol === 'Ti'), g.hits.map((h) => h.bol).slice(0, 6).join(' '));
   check('click mode: notes on the beats or quarter beats (4 notes a beat)', g.notes.length >= 8 && g.notes.every((n) => g.hits.some((h) => { const k = (n.t - h.when) / (spb / 4); return k > -0.01 && k < 3.01 && near(k, Math.round(k), 0.006); })), g.notes.length + ' notes');
   // Read the audio clock inside the page at the moment of the click: the click can be delayed by the page's smooth scroll back up to Play.

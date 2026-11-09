@@ -172,7 +172,7 @@
           <label>Speed <select data-speed>${Object.keys(SPEEDS).map((s) => `<option${s === 'Normal' ? ' selected' : ''}>${s}</option>`).join('')}</select></label>
           <label><input type="checkbox" data-loop> Loop</label>
         </div>
-        <p class="demo-note">The tonic follows the Sa chosen in the tools bar. Simplified notation and fingering: check with your guru.</p>`;
+        <p class="demo-note">The tonic follows the Sa chosen on Home. Simplified notation and fingering: check with your guru.</p>`;
       const chart = createChart($('.demo-chart', body)), cap = $('.demo-cap', body);
       const rows = {};
       lines.forEach(([k]) => {

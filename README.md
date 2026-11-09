@@ -5,15 +5,16 @@ An interactive, animated guide to the **Indian classical bansuri** — daily riy
 **Live site:** https://xudipta.github.io/Flute-Mastery-Journey/
 
 ## Features
-- A calm, warm look in light and dark mode: one design system (colour, type and spacing tokens, one card style with active/running/done states), one set of SVG icons, big round controls for play, scale and tempo, safe-area padding on notched phones, and a Tanpura whose strings vibrate while it plays. The tools bar hides on Home, where the same controls are the page
+- A paper-and-ink look in light and dark mode with one terracotta accent, a serif for titles and the system sans for everything else: one set of design tokens, flat surfaces with 1 px lines (no gradients, glows or coloured shadows), one set of monoline SVG icons, round play buttons, bottom sheets for choices, and safe-area padding on notched phones. Contrast is checked in `tools/check-contrast.js`
 - App-style navigation: five tabs (Home, Practice, Alankar, Ragas, Learn) in a bottom tab bar on phones and a top bar on desktop. The tanpura, tabla and timer keep playing when you change tab, and Back/Forward and links such as `#practice` or `#tuner` work
 - Alankar tab: 18 practice patterns (straight run, groups of three to five, skips, criss-cross, arches ...) in 10 scales (Shuddha, Kalyan, Kafi, Asavari, Khamaj, Bhairav and four pentatonic ragas), played ascending then descending on the Sa you chose. Play them with the tanpura and a tabla taal (or a click), at 1, 2 or 4 notes a beat, with a tempo slider, a speed trainer that raises the tempo every few rounds, the finger chart lighting up note by note, and a Stop bar that stays on screen
-- Daily riyaaz as swipeable cards, one per practice block, each with its own large timer (a running block keeps running when you swipe away, survives a reload and shows in the tools bar), plus a streak tracker (saved in your browser)
+- Daily riyaaz as swipeable cards, one per practice block, each with its own large timer (a running block keeps running when you swipe away, survives a reload and shows in the now-playing bar), plus a streak tracker (saved in your browser)
 - Keeps the screen on while a timer, the tanpura or the tabla is running, and keeps the sound and the end-of-block bell steady when the phone locks or another app is in front
-- Home is a Tanpura and Taal player: one big button starts the tanpura, a large scale (Sa) button opens all scales (with ◀ ▶ semitone steps), "Hear Sa" lets you check the tanpura against a clean note, and a taal card with tempo (−/+, slider, tap tempo) plays alongside. The Today card and your streak sit at the top of Practice
+- Home is a Tanpura and Taal player on one screen: the scale (Sa) is the big letter, with ◀ ▶ semitone steps and a sheet of all scales; "Hear Sa" lets you check the tanpura against a clean note. The tanpura and the taal sit in one panel (play buttons, volume, tempo −/+ and the beat grid with sam ✕, tali numbers and khali ○), and two sheets hold the taal list with a tempo slider and tap tempo, and the tuning options (first string, pluck speed, fine tune, volumes). The Today card and your streak sit at the top of Practice
+- A slim now-playing bar above the tab bar shows what is sounding (tanpura, taal) and what is counting down (a block timer) on every tab but Home, with a button that stops the sound
 - Raga finder (search, time of day, starter ragas, favourites, one-tap aroha preview)
 - Pitch tuner: pauses the tanpura and tabla while it listens through the microphone, shows the swar and cents sharp/flat against your Sa, with a pitch trace and a steadiness score (analysed on the device)
-- Synthesised tanpura and tabla, controlled from a tools bar that stays on screen. The tanpura is tuned exactly (each string is built from exact harmonics), has a jivari shimmer, a choice of first string (Pa, Ma or Ni), pluck speed and a fine tune, and a Sa range that goes down to a low G; it is built in the background, so changing the scale never freezes the page
+- Synthesised tanpura and tabla, controlled from Home (and stopped from the now-playing bar on other tabs). The tanpura is tuned exactly (each string is built from exact harmonics), has a jivari shimmer, a choice of first string (Pa, Ma or Ni), pluck speed and a fine tune, and a Sa range that goes down to a low G; it is built in the background, so changing the scale never freezes the page
 - Tabla taal player (Teentaal, Dadra, Keherwa, Jhaptaal, Ektaal, Rupak) with adjustable tempo
 - Tap-to-hear six-hole finger chart across three octaves (komal/tivra and note-name options, play the scale), with half-covered holes
 - Animated "How to play" demos for 16 ragas (aroha, avaroha, pakad on a finger-hole diagram with sound)
@@ -67,8 +68,10 @@ In the repository go to **Settings → Pages → Source: GitHub Actions** (one-t
 ## Structure
 ```
 index.html          page markup
-assets/styles.css   design system: tokens (light/dark), base, icons, controls, cards, app shell, shared content (see its header)
-assets/app.js       routine, timer, tools bar, finger chart, content data
+assets/styles.css   design system: tokens (light/dark), base, icons, form controls, cards, app shell, shared content, and the shared components (v2) the views build on (see its header)
+assets/ui.js        shared UI helpers (window.FluteUI): icons, button labels, bottom sheets, slider fill
+assets/app.js       routine, timer, audio state (scale, tanpura, taal, tempo) with window.FluteApp, finger chart, content data
+assets/mini.js      the now-playing bar
 assets/nav.js       tab router: one view at a time (window.FluteNav: go, current, onShow, onHide)
 assets/home.js, home.css, practice-cards.js, practice-cards.css, alankar.js, alankar.css
                     one script and stylesheet per view (Home, Practice, Alankar), loaded after the others

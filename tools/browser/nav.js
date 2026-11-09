@@ -17,7 +17,7 @@ const S = process.argv[2] || require('os').tmpdir(); // screenshots go here
   const inView = (p, sel) => p.evaluate((sel) => { const e = document.querySelector(sel); if (!e) return 'missing'; const r = e.getBoundingClientRect(); return r.width > 0 && r.top < innerHeight && r.bottom > 0; }, sel);
 
   // --- deep links: every hash opens the right view and shows the right section
-  const deep = { '': ['home', null], '#home': ['home', null], '#top': ['home', null], '#practice': ['practice', null], '#routine': ['practice', null], '#progress': ['practice', '#progress'], '#alankar': ['alankar', null], '#ragas': ['ragas', null], '#learn': ['learn', null], '#tuner': ['learn', '#tuner'], '#fingering': ['learn', '#fingering'], '#roadmap': ['learn', '#roadmap'], '#techniques': ['learn', '#techniques'], '#tabla': ['home', '#tabla'] };
+  const deep = { '': ['home', null], '#home': ['home', null], '#top': ['home', null], '#practice': ['practice', null], '#routine': ['practice', null], '#progress': ['practice', '#progress'], '#alankar': ['alankar', null], '#ragas': ['ragas', null], '#learn': ['learn', null], '#tuner': ['learn', '#tuner'], '#fingering': ['learn', '#fingering'], '#roadmap': ['learn', '#roadmap'], '#techniques': ['learn', '#techniques'], '#tabla': ['home', null] };
   for (const [h, [view, sec]] of Object.entries(deep)) {
     const p = await fresh(null, h); await p.waitForTimeout(150);
     const s = await state(p);
@@ -53,11 +53,11 @@ const S = process.argv[2] || require('os').tmpdir(); // screenshots go here
   await p.click('.tabbar a[data-view="practice"]'); await p.click('#t-go'); await p.waitForTimeout(300);
   let s = await state(p); ok(s.view === 'practice' && (await p.textContent('.pc-card.active .pc-toggle')) === 'Pause', 'Today card Continue -> practice, timer running', { label: await p.textContent('#timer-label') });
   ok((await inView(p, '.routine li.active')) === true, 'the active block is scrolled into view');
-  // timer chip from another tab
+  // the now-playing bar carries the timer to every tab
   await p.click('.tabbar a[data-view="learn"]'); await p.waitForTimeout(100);
-  ok(await p.isVisible('#dock-timer'), 'timer chip visible on another tab');
-  await p.click('#dock-timer'); await p.waitForTimeout(600);
-  s = await state(p); ok(s.view === 'practice' && (await inView(p, '.pc-card.active')) === true, 'chip tap -> practice with the timer card in view', s.focus);
+  ok(await p.isVisible('#mini'), 'the now-playing bar shows the running timer on another tab');
+  await p.click('#mini-open'); await p.waitForTimeout(600);
+  s = await state(p); ok(s.view === 'practice' && (await inView(p, '.pc-card.active')) === true, 'tapping the now-playing bar -> practice with the timer card in view', s.focus);
   ok((await p.evaluate(() => document.activeElement.classList.contains('pc-toggle'))) === true, '  focus on Start/Pause');
   await p.click('.pc-card.active .pc-toggle');
   // slash shortcut
@@ -74,14 +74,14 @@ const S = process.argv[2] || require('os').tmpdir(); // screenshots go here
   await p.click('footer a[href="#progress"]'); await p.waitForTimeout(100);
   ok((await state(p)).view === 'practice' && (await inView(p, '#progress h2')) === true, 'footer back-it-up link -> practice, progress section');
   await p.focus('.skip'); await p.keyboard.press('Enter'); await p.waitForTimeout(80);
-  ok((await state(p)).view === 'practice' && (await p.evaluate(() => document.activeElement.tagName)) === 'H2', 'skip link focuses the view heading, keeps the view');
+  ok((await state(p)).view === 'practice' && (await p.evaluate(() => document.activeElement.tagName)) === 'H1', 'skip link focuses the view heading, keeps the view');
 
   // --- audio keeps going across tabs
-  await p.click('.tabbar a[data-view="home"]'); await p.click('#taal-toggle'); await p.click('#home-drone'); await p.waitForTimeout(1500); // the tools bar is hidden on Home (it repeats these controls)
+  await p.click('.tabbar a[data-view="home"]'); await p.click('#taal-toggle'); await p.click('#home-drone'); await p.waitForTimeout(1500);
   const beat = () => p.evaluate(() => [...document.querySelectorAll('#taal-grid .beat')].findIndex((e) => e.classList.contains('on')));
   const b1 = await beat(); await p.click('.tabbar a[data-view="learn"]'); await p.waitForTimeout(1300); await p.click('.tabbar a[data-view="home"]'); const b2 = await beat();
   ok(b1 >= 0 && b2 >= 0 && b2 !== b1, 'tabla beat highlight kept advancing while on another tab', { b1, b2 });
-  ok(await p.evaluate(() => document.querySelector('#dock-tabla').getAttribute('aria-pressed') === 'true' && FluteAudio.Engine.droneOn), 'tabla and tanpura still on');
+  ok(await p.evaluate(() => FluteApp.tabla.on() && FluteAudio.Engine.droneOn), 'tabla and tanpura still on');
   await p.click('#taal-toggle'); await p.click('#home-drone');
 
   // --- no horizontal overflow on any tab at 360 px

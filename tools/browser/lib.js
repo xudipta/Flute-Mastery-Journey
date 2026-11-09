@@ -23,17 +23,18 @@ const SEL = {
   cardToggle: '.pc-card.active .pc-toggle',
   cardReset: '.pc-card.active .pc-reset',
   cardTime: '.pc-card.active .pc-time',
-  timerChip: '#dock-timer',
-  timerChipTime: '#dock-timer-time',
-  bottomBar: '.dock', // the fixed bar at the bottom of the screen that content must stay above
+  timerChip: '#mini', // the now-playing bar: it carries the running timer on every tab
+  bottomBar: '.mini', // the fixed bar that content must stay above while a timer runs
 };
 
+/* The sound controls live on Home, so the suites drive them through the app's API (FluteApp), which Home also uses.
+   The Home suite (home.js) clicks the real buttons. */
 const act = {
-  droneToggle: (p) => p.click('#drone-toggle'),
-  taalToggle: (p) => p.click('#dock-tabla'),
-  bpmUp: (p) => p.click('#bpm-up'),
-  /* true while the timer chip is on screen */
-  chipVisible: (p) => p.evaluate((s) => { const c = document.querySelector(s); return !!c && !c.hidden && c.offsetParent !== null; }, SEL.timerChip),
+  droneToggle: (p) => p.evaluate(() => FluteApp.drone.toggle()),
+  taalToggle: (p) => p.evaluate(() => FluteApp.tabla.toggle()),
+  bpmUp: (p) => p.evaluate(() => FluteApp.setBpm(FluteApp.bpm() + 5)),
+  /* true while the now-playing bar is on screen */
+  chipVisible: (p) => p.evaluate((s) => { const c = document.querySelector(s); return !!c && !c.hidden && getComputedStyle(c).display !== 'none'; }, SEL.timerChip), // (fixed elements have no offsetParent)
   chipText: (p) => p.evaluate((s) => document.querySelector(s).innerText.replace(/\s+/g, ' ').trim(), SEL.timerChip),
 };
 

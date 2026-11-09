@@ -1,5 +1,5 @@
-/* The small usability fixes of issue #19: undo toast, done message, volume readouts, the tools bar tucking away,
-   the tuner pausing the accompaniment, and the practice calendar. */
+/* The small usability fixes of issue #19: undo toast, done message, the tuner pausing the accompaniment, and the
+   practice calendar. */
 const { BASE, OUT, launch, SEL, act, suite, seed } = require('./lib');
 (async () => {
   const b = await launch(['--use-fake-device-for-media-stream', '--use-fake-ui-for-media-stream']); const t = suite();
@@ -28,29 +28,13 @@ const { BASE, OUT, launch, SEL, act, suite, seed } = require('./lib');
   t.ok((await p.evaluate(() => FluteNav.current())) === 'ragas', 'the ragas link opens the Ragas tab');
   t.ok(/^\d+ of 23 ragas$/.test(count) && !/^23 of/.test(count), 'and filters to this time of day', count);
 
-  // volume readouts on Home, kept in sync, double-click resets
-  await p.evaluate(() => FluteNav.go('home', { focus: false })); await p.waitForTimeout(250);
-  await p.evaluate(() => { const v = document.querySelector('#tabla-vol'); v.value = 150; v.dispatchEvent(new Event('input')); });
-  const outs = [await p.textContent('#tabla-vol-out'), await p.textContent('#dock-tabla-vol-out'), await p.textContent('#drone-vol-out')];
-  t.ok(outs[0] === '150%' && outs[1] === '150%' && outs[2] === '100%', 'volume sliders show their value, and stay in sync', outs);
-  await p.dblclick('#tabla-vol');
-  t.ok((await p.textContent('#tabla-vol-out')) === '100%' && (await p.evaluate(() => JSON.parse(localStorage.getItem('flute-journey')).settings.tablaVol)) === 100, 'double-click resets to 100% and saves it');
-
-  // the tools bar tucks away on a hand scroll down, not on link jumps, not while something plays
-  await p.evaluate(() => FluteNav.go('practice', { focus: false })); await p.waitForTimeout(250);
-  const tuck = () => p.evaluate(() => document.querySelector('#dock').classList.contains('tuck'));
-  await p.mouse.move(180, 300); await p.mouse.wheel(0, 300); await p.waitForTimeout(150); await p.mouse.wheel(0, 300); await p.waitForTimeout(150);
-  t.ok(await tuck(), 'the bottom tools bar tucks away when you scroll down by hand');
-  await p.mouse.wheel(0, -200); await p.waitForTimeout(150);
-  t.ok(!(await tuck()), 'and comes back on scrolling up');
-  await act.taalToggle(p); await p.mouse.wheel(0, 400); await p.waitForTimeout(150);
-  t.ok(!(await tuck()), 'but not while the tabla is playing');
+  // (volume readouts and resets are checked by home.js; the bottom tools bar and its tucking are gone with the redesign)
 
   // the tuner pauses tanpura and tabla while it listens, and restores them
-  await act.droneToggle(p);
+  await act.droneToggle(p); await act.taalToggle(p); // both sounds on
   await p.evaluate(() => FluteNav.go('learn', { focus: false })); await p.waitForTimeout(300);
   await p.click('#tuner-toggle'); await p.waitForTimeout(500);
-  const pressed = () => p.evaluate(() => ({ tabla: document.querySelector('#dock-tabla').getAttribute('aria-pressed'), drone: document.querySelector('#drone-toggle').getAttribute('aria-pressed') }));
+  const pressed = () => p.evaluate(() => ({ tabla: String(FluteApp.tabla.on()), drone: String(FluteApp.drone.on()) }));
   let pr = await pressed();
   t.ok(pr.tabla === 'false' && pr.drone === 'false' && /come back on/.test(await p.textContent('#tuner-msg')), 'the tuner pauses tanpura and tabla while listening, and says so', pr);
   await p.click('#tuner-ref'); await p.waitForTimeout(400);
