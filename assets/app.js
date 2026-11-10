@@ -57,14 +57,14 @@
   const RAGA_GROUPS = ['All', 'Morning', 'Afternoon', 'Evening', 'Night', 'Monsoon'];
 
   const TECHNIQUES = [
-    ['🌬️', 'Breath control', 'Breathe from the diaphragm and keep air speed steady so long phrases stay unbroken.'],
-    ['👄', 'Embouchure', 'Rest the blowing hole against your lower lip, aim the air across the edge, and keep your lips soft and flexible.'],
-    ['〰️', 'Meend', 'Glide smoothly between swaras by sliding fingers off or half-covering holes while the air stays steady.'],
-    ['✨', 'Kan', 'A quick grace note touched just before the main swar, ornamenting the line.'],
-    ['⚡', 'Taan & murki', 'Rapid note runs (taan) and short twisting ornaments (murki) — practise slowly, then raise speed.'],
-    ['🗣️', 'Tonguing (tu-ku)', 'Double-tongue articulation used in jhala and fast passages.'],
-    ['🥁', 'Taal & laya', 'Count beats with the hands (tali/khali) to hold Teentaal, Dadra and Keherwa.'],
-    ['🎚️', 'Dynamics', 'Shape phrases with air pressure; breathe lightly in the lower octave and increase for taar saptak.']
+    ['Breath control', 'Breathe from the diaphragm and keep air speed steady so long phrases stay unbroken.'],
+    ['Embouchure', 'Rest the blowing hole against your lower lip, aim the air across the edge, and keep your lips soft and flexible.'],
+    ['Meend', 'Glide smoothly between swaras by sliding fingers off or half-covering holes while the air stays steady.'],
+    ['Kan', 'A quick grace note touched just before the main swar, ornamenting the line.'],
+    ['Taan & murki', 'Rapid note runs (taan) and short twisting ornaments (murki): practise slowly, then raise speed.'],
+    ['Tonguing (tu-ku)', 'Double-tongue articulation used in jhala and fast passages.'],
+    ['Taal & laya', 'Count beats with the hands (tali/khali) to hold Teentaal, Dadra and Keherwa.'],
+    ['Dynamics', 'Shape phrases with air pressure; breathe lightly in the lower octave and increase for taar saptak.']
   ];
 
   const SA_NAMES = ['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
@@ -456,6 +456,10 @@
     CHART.push({ a, l, semi: ((a % 12) + 12) % 12, tok: (a < 0 ? '.' : '') + l + (a >= 12 ? "'" : ''), reg: a < 0 ? 'Lower octave' : a < 12 ? 'Middle octave' : 'Upper octave' });
   }
   let chartTok = 'S';
+  function paintScale(on) {
+    FluteUI.setLabel(scaleBtn, on ? 'Stop' : 'Play the scale'); FluteUI.setIcon(scaleBtn, on ? 'stop' : 'play');
+    scaleBtn.classList.toggle('on', on);
+  }
   function renderPicker() {
     picker.innerHTML = '';
     ['Lower octave', 'Middle octave', 'Upper octave'].forEach((reg) => {
@@ -463,13 +467,15 @@
       if (!notes.length) return;
       const wrap = document.createElement('div'); wrap.className = 'note-group';
       wrap.setAttribute('role', 'group'); wrap.setAttribute('aria-label', reg);
-      wrap.innerHTML = `<span class="group-label">${reg}</span>`;
+      wrap.innerHTML = `<p class="eyebrow group-label">${reg}</p><div class="notes"></div>`;
+      const holder = wrap.querySelector('.notes');
+      holder.style.setProperty('--cols', notes.length > 7 ? 6 : 7); // 12 swars make two rows of six; 7 or fewer make one row
       notes.forEach((n) => {
         const sw = FluteDemo.parseSwar(n.tok), b = document.createElement('button');
         b.type = 'button'; b.dataset.tok = n.tok; b.setAttribute('aria-pressed', n.tok === chartTok);
         b.innerHTML = sw.label + (namesBox.checked ? `<small>${SA_NAMES[saClass(settings.sa + n.semi)]}</small>` : '');
-        b.addEventListener('click', () => { scaleOn = false; scaleBtn.textContent = 'Play the scale'; scaleBtn.classList.remove('on'); showNote(n.tok); playNote(n.tok); });
-        wrap.appendChild(b);
+        b.addEventListener('click', () => { scaleOn = false; paintScale(false); showNote(n.tok); playNote(n.tok); });
+        holder.appendChild(b);
       });
       picker.appendChild(wrap);
     });
@@ -484,14 +490,14 @@
   }
   function playNote(tok) { FluteDemo.player.play([{ tok, beats: 2 }], 80, { onStep() {}, onEnd() {} }); }
   let scaleOn = false;
-  const resetScale = () => { scaleOn = false; scaleBtn.textContent = 'Play the scale'; scaleBtn.classList.remove('on'); };
+  const resetScale = () => { scaleOn = false; paintScale(false); };
   FluteDemo.player.hooks.push(resetScale);
   scaleBtn.addEventListener('click', () => {
     if (scaleOn) { FluteDemo.player.stop(); return; }
     const items = "S R G m P D N S'".split(' ').map((tok) => ({ tok, beats: 1, ref: tok }));
     items[items.length - 1].beats = 2;
     FluteDemo.player.play(items, 80, { onStep(step) { if (step) showNote(step.ref); }, onEnd() { showNote('S'); } });
-    scaleOn = true; scaleBtn.textContent = 'Stop'; scaleBtn.classList.add('on');
+    scaleOn = true; paintScale(true);
   });
   komalBox.addEventListener('change', () => { renderPicker(); });
   namesBox.addEventListener('change', () => { renderPicker(); showNote(chartTok); });
@@ -504,9 +510,8 @@
   renderPicker(); showNote('S');
 
   // Roadmap, ragas, techniques
-  $('#roadmap-list').innerHTML = STAGES.map(([t, when, items]) =>
-    `<article class="stage"><h3>${t}</h3><small>${when}</small><ul>${items.map((i) => `<li>${i}</li>`).join('')}</ul></article>`).join('');
-  const cards = (arr) => arr.map(([i, t, d]) => `<article class="card"><div class="icon">${i}</div><h3>${t}</h3><p>${d}</p></article>`).join('');
+  $('#roadmap-list').innerHTML = STAGES.map(([t, when, items], i) =>
+    `<li><span class="node" aria-hidden="true">${i + 1}</span><h3>${t.split(' · ')[1] || t}</h3><p class="when">${when}</p><ul>${items.map((x) => `<li>${x}</li>`).join('')}</ul></li>`).join('');
   // Ragas: a time-of-day filter row, a search field, and one grouped list. A row opens the raga's demo sheet.
   const STARTER = ['Bhoopali', 'Durga', 'Hamsadhwani', 'Yaman', 'Kafi', 'Khamaj'];
   const GROUP_ICON = { Morning: 'sunrise', Afternoon: 'sun', Evening: 'sunset', Night: 'moon', Monsoon: 'rain' };
@@ -588,7 +593,8 @@
     } else if (hear) { audio(); FluteDemo.preview(hear.dataset.hear, hear); }
     else if (open) FluteDemo.ragaDemo(open.dataset.raga, open.dataset.group, (RAGAS.find((r) => r[0] === open.dataset.raga) || [])[2]);
   });
-  $('#technique-cards').innerHTML = cards(TECHNIQUES);
+  $('#technique-cards').innerHTML = TECHNIQUES.map(([t, d], i) =>
+    `<div class="row tech"><span class="tnum" aria-hidden="true">${String(i + 1).padStart(2, '0')}</span><div class="grow"><b>${t}</b><small>${d}</small></div></div>`).join('');
 
   // Keyboard shortcuts: T tanpura, B tabla, [ ] tempo (5 BPM), / search ragas
   document.addEventListener('keydown', (e) => {

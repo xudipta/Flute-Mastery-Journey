@@ -53,7 +53,7 @@
 .sheet-titles { min-width: 0; }
 .sheet-sub { margin: .125rem 0 0; color: var(--ink-3); font-size: var(--fs-sm); }
 #demo .sheet-head { align-items: flex-start; padding-top: .5rem; }
-@media (min-width: 721px) { #demo.sheet { max-width: 40rem; } }
+@media (min-width: 721px) { #demo.sheet { max-width: 40rem; } #demo .sheet-head { padding-top: 1rem; } } /* no drag handle above the title here */
 .raga-demo { display: grid; gap: var(--s-4); }
 .raga-demo > * { margin: 0; min-width: 0; }
 .raga-mood { color: var(--ink-2); }

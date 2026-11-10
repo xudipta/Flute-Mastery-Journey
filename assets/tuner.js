@@ -95,6 +95,11 @@
   function median(a) { const s = [...a].sort((x, y) => x - y); return s[s.length >> 1]; }
   function setMsg(t) { $('#tuner-msg').textContent = t; }
 
+  function listeningUI(on) {
+    const b = $('#tuner-toggle');
+    root.FluteUI.setLabel(b, on ? 'Stop listening' : 'Start listening'); root.FluteUI.setIcon(b, on ? 'stop' : 'mic');
+    b.classList.toggle('on', on);
+  }
   async function start() {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { setMsg('This browser cannot use the microphone here. Try Chrome, Edge, Firefox or Safari over https.'); return; }
     const c = Sound().ensure(); // inside the tap, so iOS lets the audio context run
@@ -110,7 +115,7 @@
     state.buf = new Float32Array(state.an.fftSize); state.filter.reset(); state.trace = [];
     state.bytes = state.an.getFloatTimeDomainData ? null : new Uint8Array(state.an.fftSize);
     state.voicedAt = performance.now();
-    $('#tuner-toggle').textContent = 'Stop listening'; $('#tuner-toggle').classList.add('on');
+    listeningUI(true);
     // The tanpura and tabla would reach the microphone too, so pause them while listening.
     const q = App() && App().quiet ? App().quiet() : { paused: [], restore: null };
     state.restore = q.restore;
@@ -125,7 +130,7 @@
     if (state.stream) state.stream.getTracks().forEach((t) => t.stop());
     if (state.src) state.src.disconnect();
     state.stream = state.src = state.an = null; state.current = null;
-    $('#tuner-toggle').textContent = 'Start listening'; $('#tuner-toggle').classList.remove('on');
+    listeningUI(false);
     $('#tuner-setsa').disabled = true;
     render(null); setMsg('');
   }
@@ -166,6 +171,7 @@
   let lastVerdict = '';
   function render(cur) {
     const big = $('#tuner-swar'), sub = $('#tuner-sub'), needle = $('#tuner-needle'), verdict = $('#tuner-verdict'), tgtSel = $('#tuner-target').value;
+    big.classList.toggle('idle', !cur);
     if (!cur) {
       big.textContent = '—';
       sub.textContent = !state.stream ? 'Not listening' : performance.now() - state.voicedAt > 3000 ? 'No clear note heard. Move closer, play a little louder, or mute the site sound.' : 'Waiting for a note';
@@ -186,7 +192,7 @@
     } else {
       const c = Math.max(-50, Math.min(50, sw.cents));
       needle.style.left = (50 + c) + '%';
-      v = inTune ? '✔ In tune' : `${Math.abs(Math.round(sw.cents))} cents ${sw.cents > 0 ? 'sharp ♯: ease the air or cover a little more' : 'flat ♭: a little more air or lift a finger slightly'}`;
+      v = inTune ? 'In tune' :`${Math.abs(Math.round(sw.cents))} cents ${sw.cents > 0 ? 'sharp ♯: ease the air or cover a little more' : 'flat ♭: a little more air or lift a finger slightly'}`;
     }
     needle.classList.toggle('ok', inTune);
     if (v !== lastVerdict) { verdict.textContent = v; lastVerdict = v; }
@@ -231,6 +237,8 @@
   function init() {
     const tgt = $('#tuner-target');
     LETTERS.split('').forEach((l, i) => { const o = document.createElement('option'); o.value = i; o.textContent = SHOW[l]; tgt.appendChild(o); });
+    // the "Aim for" field shows the chosen swar; the select itself sits invisibly over it
+    tgt.addEventListener('change', () => { $('#tuner-target-val').textContent = tgt.options[tgt.selectedIndex].textContent; });
     $('#tuner-toggle').addEventListener('click', () => (state.stream ? stop() : start()));
     // Any stop of the player (end of the note, or another sound taking over) ends the pause.
     if (root.FluteDemo) root.FluteDemo.player.hooks.push(() => { state.refUntil = 0; });

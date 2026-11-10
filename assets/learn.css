@@ -1,2 +1,96 @@
 /* Learn view (#view-learn): the tuner, the finger-hole guide, the roadmap and the techniques.
-   Built on the tokens and shared components in styles.css. */
+   Built on the tokens and shared components in styles.css (.view-head, .eyebrow, .btn, .chip, .field, .list > .row).
+   Each block has an eyebrow, a serif title and one line of help. The finger-chart styles at the end are also used by the
+   raga demo sheet (.demo-chart) and the Alankar tab. */
+
+:root { --bamboo: #DCC9A4; --bamboo-edge: #A98E5E; }
+@media (prefers-color-scheme: dark) { :root { --bamboo: #6A5A40; --bamboo-edge: #94795A; } }
+
+#view-learn .view-head-pad, #view-learn > section { max-width: 44rem; }
+.learn-head { padding-bottom: 0; }
+.jump { display: flex; gap: .375rem; margin: var(--s-3) calc(-1 * var(--gutter)) 0; padding: 2px var(--gutter); overflow-x: auto; scrollbar-width: none; }
+.jump::-webkit-scrollbar { display: none; }
+.jump .chip { flex: none; padding: 0 .625rem; text-decoration: none; }
+.learn-block { padding-top: var(--s-6); padding-bottom: var(--s-2); }
+.block-head { margin-bottom: var(--s-4); }
+.block-head h2 { margin: .25rem 0 .375rem; }
+.block-head .lead { margin: 0; }
+
+/* ----- tuner ----- */
+.tuner-card, .fingering { padding: var(--s-4); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card); }
+.tuner-card > .btn.big { width: 100%; }
+#tuner-toggle.on, #tuner-toggle.on:hover { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-ink); }
+.tuner-aim { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--s-2); margin-top: var(--s-2); }
+.tuner-aim .btn { min-height: 2.875rem; }
+/* the "Aim for" select sits invisibly over the field, so the whole field opens the native picker */
+.field select { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; font-size: 1rem; }
+.field:focus-within { outline: 3px solid var(--focus); outline-offset: 2px; }
+.tuner-read { margin: var(--s-4) 0 var(--s-2); text-align: center; }
+.tuner-swar { font-family: var(--serif); font-size: var(--fs-display); font-weight: 500; line-height: 1; color: var(--ink); }
+.tuner-swar.idle { color: var(--line-2); } /* the dash that stands in for a swar while nothing is heard */
+.tuner-sub { min-height: 1.5em; color: var(--ink-2); }
+.gauge { position: relative; height: 2.25rem; margin: var(--s-4) .25rem 0; border-radius: var(--r-md); background: var(--surface-2); }
+.gauge .zone { position: absolute; left: 40%; width: 20%; top: 0; bottom: 0; border-radius: 6px; background: color-mix(in srgb, var(--ok) 28%, transparent); }
+.gauge .mid { position: absolute; left: 50%; top: 4px; bottom: 4px; width: 2px; background: var(--ink-3); opacity: .6; }
+.gauge .needle { position: absolute; top: 3px; bottom: 3px; left: 50%; width: 6px; margin-left: -3px; border-radius: 3px; background: var(--ink); transition: left .08s linear, background .15s; }
+.gauge .needle.ok { background: var(--ok); }
+.gauge i { position: absolute; bottom: -1.4rem; font-style: normal; font-size: var(--fs-xs); color: var(--ink-3); }
+.gauge .g-l { left: .5rem; }
+.gauge .g-r { right: .5rem; }
+.tuner-verdict { min-height: 1.6em; margin: 1.75rem 0 var(--s-2); text-align: center; font-weight: 600; }
+.tuner-verdict.ok { color: var(--ok); }
+.tuner-trace { display: block; width: 100%; height: 120px; border-radius: var(--r-md); background: var(--surface-2); }
+.tuner-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s-2) var(--s-4); margin-top: var(--s-3); color: var(--ink-2); font-size: var(--fs-sm); }
+.tuner-foot b { color: var(--ink); }
+
+/* ----- finger-hole guide ----- */
+.chart-tools { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); margin-bottom: var(--s-4); }
+.chart-tools .btn { margin-left: auto; }
+@media (max-width: 480px) { .chart-tools .btn { flex: 1 1 100%; margin-left: 0; } }
+.chart-tools .chip { position: relative; cursor: pointer; }
+.chart-tools .chip input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.chart-tools .chip .i { display: none; }
+.chart-tools .chip:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-ink); }
+.chart-tools .chip:has(input:checked) .i { display: inline-block; }
+.chart-tools .chip:has(input:focus-visible) { outline: 3px solid var(--focus); outline-offset: 2px; }
+.note-groups { display: grid; gap: var(--s-4); margin-bottom: var(--s-4); }
+.note-group { display: grid; gap: .375rem; }
+.note-group .notes { display: grid; grid-template-columns: repeat(var(--cols, 7), 1fr); gap: .25rem; }
+.note-group button { min-height: 2.5rem; min-width: 0; padding: .25rem 0; border: 1px solid var(--line-2); border-radius: 10px; background: var(--surface); color: var(--ink); font: 600 .875rem/1.1 var(--sans); cursor: pointer; transition: background .15s, color .15s, border-color .15s; }
+.note-group button:hover { background: var(--surface-2); }
+.note-group button[aria-pressed="true"] { border-color: var(--ink); background: var(--ink); color: var(--bg); }
+.note-group button small { display: block; margin-top: .125rem; font-size: .6875rem; font-weight: 500; color: var(--ink-3); }
+.note-group button[aria-pressed="true"] small { color: inherit; }
+.note-info { margin: var(--s-2) 0 0; color: var(--ink-2); font-size: var(--fs-sm); }
+
+/* the chart itself: bamboo body, finger holes that fill with the accent while covered */
+#flute, .demo-chart { display: block; width: 100%; height: auto; }
+#flute .body, .demo-chart .body { fill: var(--bamboo); stroke: var(--bamboo-edge); stroke-width: 1; }
+#flute .hole, .demo-chart .hole { fill: var(--bg); stroke: var(--bamboo-edge); stroke-width: 2; }
+#flute .key, .demo-chart .key { fill: var(--surface); stroke: var(--ink-3); stroke-width: 2; transition: fill .2s, transform .2s; transform-box: fill-box; transform-origin: center; }
+#flute .key.on, .demo-chart .key.on { fill: var(--accent); stroke: var(--accent); }
+#flute .key.on { transform: scale(1.12); }
+#flute .key.halfring, .demo-chart .key.halfring { stroke: var(--accent); }
+#flute .half, .demo-chart .half { fill: var(--accent); opacity: 0; transition: opacity .2s; }
+#flute .half.on, .demo-chart .half.on { opacity: 1; }
+#flute text, .demo-chart text { fill: var(--ink-2); font-size: 15px; text-anchor: middle; }
+.demo-chart { margin-top: var(--s-2); }
+.demo-chart .over { fill: var(--accent-ink); font-weight: 600; font-size: 16px; }
+
+/* ----- roadmap: a vertical timeline, one numbered node per stage ----- */
+.timeline { margin: 0; padding: 0; list-style: none; }
+.timeline > li { position: relative; padding: 0 0 var(--s-5) 3rem; }
+.timeline > li:last-child { padding-bottom: 0; }
+.timeline > li::before { content: ''; position: absolute; left: 1.0625rem; top: 2.5rem; bottom: .375rem; width: 1px; background: var(--line-2); }
+.timeline > li:last-child::before { display: none; }
+.node { position: absolute; left: 0; top: 0; width: 2.125rem; height: 2.125rem; display: grid; place-items: center; border: 1px solid var(--line-2); border-radius: 50%; background: var(--surface); color: var(--ink); font: 600 var(--fs-sm) var(--sans); font-variant-numeric: tabular-nums; }
+.timeline h3 { margin: 0; font: 600 var(--fs-xl)/2.125rem var(--serif); }
+.timeline .when { margin: 0; color: var(--accent-ink); font-size: var(--fs-sm); font-weight: 600; }
+.timeline ul { margin: var(--s-2) 0 0; padding-left: 1.1rem; list-style: disc; color: var(--ink-2); }
+.timeline ul li::marker { color: var(--ink-3); }
+.timeline ul li { margin-bottom: .25rem; }
+
+/* ----- techniques ----- */
+.tech { align-items: flex-start; }
+.tnum { flex: none; width: 1.75rem; padding-top: .125rem; color: var(--ink-3); font-size: var(--fs-sm); font-weight: 600; font-variant-numeric: tabular-nums; }
+.tech small { margin-top: .125rem; color: var(--ink-2); font-size: var(--fs-md); }

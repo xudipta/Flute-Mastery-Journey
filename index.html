@@ -234,15 +234,22 @@
 
     <!-- Learn: tuner, finger-hole guide, roadmap, techniques -->
     <section class="view" id="view-learn" data-view="learn" hidden>
-    <div class="view-head view-head-pad"><h1 class="title-lg">Learn</h1></div>
-    <section id="tuner">
-      <h2>Pitch tuner</h2>
-      <p class="lead">Play a note on your bansuri and see which swar you are on and whether you are sharp or flat. Sound is analysed on this device and never uploaded.</p>
+    <div class="view-head view-head-pad learn-head">
+      <h1 class="title-lg">Learn</h1>
+      <nav class="jump" aria-label="On this page"><a class="chip" href="#tuner">Tuner</a><a class="chip" href="#fingering">Finger chart</a><a class="chip" href="#roadmap">Roadmap</a><a class="chip" href="#techniques">Techniques</a></nav>
+    </div>
+
+    <section id="tuner" class="learn-block">
+      <header class="block-head">
+        <p class="eyebrow">Listen</p>
+        <h2>Pitch tuner</h2>
+        <p class="lead">Play a note on your bansuri and see which swar you are on and whether you are sharp or flat. Sound is analysed on this device and never uploaded.</p>
+      </header>
       <div class="tuner-card">
-        <div class="tuner-top">
-          <button id="tuner-toggle" class="btn primary" type="button">Start listening</button>
-          <button id="tuner-ref" class="btn sm ghost" type="button">Hear Sa</button>
-          <label>Aim for <select id="tuner-target"><option value="auto">Any swar</option></select></label>
+        <button id="tuner-toggle" class="btn primary big" type="button"><svg class="i" aria-hidden="true" focusable="false"><use href="#i-mic"/></svg><span class="lbl">Start listening</span></button>
+        <div class="tuner-aim">
+          <label class="field"><small>Aim for</small><b id="tuner-target-val">Any swar</b><svg class="i" aria-hidden="true" focusable="false"><use href="#i-down"/></svg><select id="tuner-target" aria-label="Aim for"><option value="auto">Any swar</option></select></label>
+          <button id="tuner-ref" class="btn ghost" type="button"><svg class="i" aria-hidden="true" focusable="false"><use href="#i-bell"/></svg><span class="lbl">Hear Sa</span></button>
         </div>
         <div class="tuner-read">
           <div id="tuner-swar" class="tuner-swar" aria-live="off">—</div>
@@ -259,14 +266,17 @@
       </div>
     </section>
 
-    <section id="fingering">
-      <h2>Finger-hole guide</h2>
-      <p class="lead">The bansuri has six finger holes — three for the left hand, three for the right. Tap a swar to see which holes are covered and hear it at your Sa.</p>
+    <section id="fingering" class="learn-block">
+      <header class="block-head">
+        <p class="eyebrow">Play</p>
+        <h2>Finger-hole guide</h2>
+        <p class="lead">The bansuri has six finger holes: three for the left hand, three for the right. Tap a swar to see which holes are covered and hear it at your Sa.</p>
+      </header>
       <div class="fingering">
         <div class="chart-tools">
-          <label><input type="checkbox" id="chart-komal"> Show komal &amp; tivra</label>
-          <label><input type="checkbox" id="chart-names"> Show note names</label>
-          <button id="chart-scale" class="btn sm" type="button">Play the scale</button>
+          <label class="chip"><input type="checkbox" id="chart-komal"><svg class="i" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span>Komal &amp; tivra</span></label>
+          <label class="chip"><input type="checkbox" id="chart-names"><svg class="i" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span>Note names</span></label>
+          <button id="chart-scale" class="btn sm" type="button"><svg class="i" aria-hidden="true" focusable="false"><use href="#i-play"/></svg><span class="lbl">Play the scale</span></button>
         </div>
         <div id="note-picker" class="note-groups"></div>
         <div class="flute-wrap">
@@ -276,14 +286,21 @@
       </div>
     </section>
 
-    <section id="roadmap">
-      <h2>The roadmap</h2>
-      <div class="roadmap" id="roadmap-list"></div>
+    <section id="roadmap" class="learn-block">
+      <header class="block-head">
+        <p class="eyebrow">Journey</p>
+        <h2>The roadmap</h2>
+        <p class="lead">Five stages from your first sur to the concert stage. Years, not weeks: take each one at your own pace.</p>
+      </header>
+      <ol class="timeline" id="roadmap-list"></ol>
     </section>
 
-    <section id="techniques">
-      <h2>Core bansuri techniques</h2>
-      <div class="cards" id="technique-cards"></div>
+    <section id="techniques" class="learn-block">
+      <header class="block-head">
+        <p class="eyebrow">Craft</p>
+        <h2>Core bansuri techniques</h2>
+      </header>
+      <div class="list" id="technique-cards"></div>
     </section>
     </section>
   </main>

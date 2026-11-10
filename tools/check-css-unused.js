@@ -15,9 +15,6 @@ const sources = ['index.html'].map((f) => fs.readFileSync(path.join(root, f), 'u
 // built from pieces at run time, or set by the browser: not findable as whole words in the source
 const ALLOW = new Set(['lv1', 'lv2', 'has-note', 'today', 'sel', 'is-done', 'is-running', 'is-current', 'running', 'on', 'ok', 'active', 'done', 'tuning', 'now', 'sep']);
 
-// shared components (v2) in styles.css that no view uses yet; remove a name here when a view starts using it
-for (const n of ['field']) ALLOW.add(n);
-
 const used = (name) => ALLOW.has(name) || new RegExp('(^|[^\\w-])' + name.replace(/[-]/g, '\\-') + '([^\\w-]|$)').test(sources);
 
 let bad = 0;
