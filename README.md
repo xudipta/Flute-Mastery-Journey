@@ -12,16 +12,16 @@ An interactive, animated guide to the **Indian classical bansuri** — daily riy
 - Keeps the screen on while a timer, the tanpura or the tabla is running, and keeps the sound and the end-of-block bell steady when the phone locks or another app is in front
 - Home is a Tanpura and Taal player on one screen: the scale (Sa) is the big letter, with ◀ ▶ semitone steps and a sheet of all scales; "Hear Sa" lets you check the tanpura against a clean note. The tanpura and the taal sit in one panel (play buttons, volume, tempo −/+ and the beat grid with sam ✕, tali numbers and khali ○), and two sheets hold the taal list with a tempo slider and tap tempo, and the tuning options (first string, pluck speed, fine tune, volumes). The Today card and your streak sit at the top of Practice
 - A slim now-playing bar above the tab bar shows what is sounding (tanpura, taal) and what is counting down (a block timer) on every tab but Home, with a button that stops the sound
-- Raga finder (search, time of day, starter ragas, favourites, one-tap aroha preview)
+- Ragas: one list of 23 ragas with a time-of-day tile, search, a time-of-day filter row, Starter and Favourites toggles, a one-tap aroha preview on each row, and a header button for the ragas of the current time of day
 - Pitch tuner: pauses the tanpura and tabla while it listens through the microphone, shows the swar and cents sharp/flat against your Sa, with a pitch trace and a steadiness score (analysed on the device)
 - Synthesised tanpura and tabla, controlled from Home (and stopped from the now-playing bar on other tabs). The tanpura is tuned exactly (each string is built from exact harmonics), has a jivari shimmer, a choice of first string (Pa, Ma or Ni), pluck speed and a fine tune, and a Sa range that goes down to a low G; it is built in the background, so changing the scale never freezes the page
 - Tabla taal player (Teentaal, Dadra, Keherwa, Jhaptaal, Ektaal, Rupak) with adjustable tempo
 - Tap-to-hear six-hole finger chart across three octaves (komal/tivra and note-name options, play the scale), with half-covered holes
-- Animated "How to play" demos for 16 ragas (aroha, avaroha, pakad on a finger-hole diagram with sound)
+- A raga's row opens a bottom sheet with its mood, vadi/samvadi/thaat, and (for 16 ragas) an animated "How to play" demo: aroha, avaroha and pakad on a finger-hole diagram with sound, speed and loop
 - "Show me how" animated demos for each daily practice block (breathing, long tones, alankars, alaap, taan & taal, cool-down)
 - Your progress: practice calendar with day notes, streaks, and backup/restore (export and import)
 - Editable routine: presets (15, 30, 55 min), on/off, minutes and order
-- Five-stage roadmap, 23 raga cards filterable by time of day, and bansuri technique cards (meend, kan, taan, tonguing)
+- Learn tab: the tuner, the finger-hole guide, a five-stage roadmap as a timeline, and eight core bansuri techniques (meend, kan, taan, tonguing ...)
 
 ## Install and offline
 The site is an installable web app (manifest + service worker). After the first visit it works offline, and
@@ -79,6 +79,7 @@ assets/audio.js     tabla, tanpura, bell and flute-line synthesis, audio engine
 assets/transport.js shared beat grid: tabla and melody on one clock, gapless loops (see header for the API)
 assets/demo.js      finger chart, swar fingering model, demo dialog and player
 assets/ragas.js     raga notation data
+assets/ragas.css, learn.css  styles of the Ragas tab (list, filters, demo sheet) and the Learn tab (tuner, finger chart, roadmap, techniques)
 assets/alankar-data.js  alankar patterns and scales (add a line to add one; `node tools/check-alankar.js` checks them all)
 assets/tuner.js     microphone pitch tuner (YIN detector)
 assets/progress.js  calendar, day notes, routine editor, backup/restore

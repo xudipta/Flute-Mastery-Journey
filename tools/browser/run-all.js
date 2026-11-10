@@ -13,7 +13,7 @@ const args = process.argv.slice(2);
 const long = args.includes('--long');
 const out = args.find((a) => !a.startsWith('--')) || os.tmpdir();
 const here = __dirname;
-const suites = ['nav', 'home', 'practice-cards', 'timer-chip', 'timer-restore', 'wake-lock', 'bell-fallback', 'polish']
+const suites = ['nav', 'home', 'practice-cards', 'ragas-learn', 'timer-chip', 'timer-restore', 'wake-lock', 'bell-fallback', 'polish']
   .map((n) => ({ name: n, file: path.join(here, n + '.js') }));
 if (long) suites.push({ name: 'alankar (long)', file: path.join(here, '..', 'check-alankar-browser.js') });
 
