@@ -122,6 +122,8 @@ output.vol { font-weight: 600; font-variant-numeric: tabular-nums; min-width: 3.
 /* now playing: a slim bar on every tab but Home while sound or a timer runs (assets/mini.js) */
 .mini { position: fixed; z-index: 10; left: .75rem; right: .75rem; bottom: calc(var(--bar-h) + .5rem); height: 3.375rem; display: flex; align-items: center; border-radius: 14px; background: var(--mini); color: var(--on-mini); box-shadow: var(--shadow-sheet); }
 .mini[hidden] { display: none; }
+/* phones: fill the thin gap under the floating bar (down to the tab bar) with the page colour, so no list text shows through it */
+@media (max-width: 720px) { .mini { box-shadow: 0 .5rem 0 .75rem var(--bg), var(--shadow-sheet); } }
 .mini-main { flex: 1; min-width: 0; height: 100%; display: flex; align-items: center; gap: .75rem; padding: 0 .5rem 0 .875rem; background: none; border: 0; color: inherit; font: inherit; text-align: left; cursor: pointer; border-radius: 14px 0 0 14px; }
 .mini .t { display: block; min-width: 0; }
 .mini .t b { display: block; font-size: .875rem; font-weight: 600; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }

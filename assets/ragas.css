@@ -30,7 +30,7 @@
 /* ----- the list ----- */
 .raga-row { gap: 0; padding: 0 .375rem 0 0; }
 .raga-open { flex: 1; min-width: 0; align-self: stretch; display: flex; align-items: center; gap: .75rem; padding: .75rem .5rem .75rem .875rem; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
-.raga-open:hover { background: var(--surface-2); }
+@media (hover: hover) { .raga-row:hover { background: var(--surface-2); } }
 .raga-open:focus-visible { outline-offset: -3px; } /* inside the row: the list clips an outer ring */
 .raga-open .grow b { display: flex; align-items: baseline; gap: .5rem; }
 .raga-open .grow small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
