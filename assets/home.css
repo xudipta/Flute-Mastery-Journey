@@ -1,94 +1,71 @@
-/* Home view (#view-home): the Tanpura and Taal player. Built on the tokens and card styles in styles.css. */
+/* Home view (#view-home): the scale, then the tanpura and the taal in one panel, and the sheets they open.
+   Built on the tokens and shared components in styles.css (.round, .step, .btn, .list, .row, .seg, .slider, dialog.sheet). */
 
-/* ----- layout ----- */
-.home { max-width: 44rem; margin: 0 auto; padding: var(--s-5) 1.25rem var(--s-6); }
-.home-title { font-size: var(--fs-title); line-height: 1.1; margin: 0 0 .35rem; background: linear-gradient(100deg, var(--ink) 30%, var(--accent-ink)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
-.home .lead { margin: 0 0 var(--s-5); max-width: 34rem; }
-.home-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--gap); align-items: start; }
-.home .panel + .panel { margin-top: 0; }
-.home .card-title { font-size: var(--fs-lg); margin: 0 0 var(--s-3); }
-@media (min-width: 900px) {
-  .home { max-width: 62rem; }
-  .home-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
-}
+.home { max-width: 34rem; margin: 0 auto; padding: 0 var(--gutter) var(--s-4); }
+.appbar { display: flex; align-items: center; height: 3.25rem; padding-top: env(safe-area-inset-top); }
+@media (min-width: 721px) { .appbar { display: none; } .home { padding-top: var(--s-5); } }
 
-/* ----- tanpura card ----- */
-.tp-card { padding: var(--s-4) 1.25rem 1.25rem; transition: border-color .3s, box-shadow .3s; }
-.tp-card:has(.play-big.on) { border-color: color-mix(in srgb, var(--accent) 60%, transparent); box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent), 0 10px 36px color-mix(in srgb, var(--accent) 14%, transparent); }
-/* the four strings: still when stopped, they take turns to vibrate while the tanpura plays */
-.strings { display: grid; gap: 7px; margin: 0 0 var(--s-4); }
-.strings i { display: block; height: 2px; border-radius: 2px; background: linear-gradient(90deg, transparent, var(--line-strong) 10%, var(--line-strong) 90%, transparent); opacity: .7; transition: background .4s, opacity .4s; }
-.tp-card:has(.play-big.on) .strings i { background: linear-gradient(90deg, transparent, var(--accent) 10%, var(--accent) 90%, transparent); opacity: 1; animation: string-vibe 1.15s ease-in-out infinite; }
-.tp-card:has(.play-big.on) .strings i:nth-child(2) { animation-delay: .29s; }
-.tp-card:has(.play-big.on) .strings i:nth-child(3) { animation-delay: .58s; }
-.tp-card:has(.play-big.on) .strings i:nth-child(4) { animation-delay: .87s; }
-@keyframes string-vibe { 0%, 100% { transform: scaleY(1); } 18% { transform: scaleY(3); } 34% { transform: scaleY(.7); } 52% { transform: scaleY(2); } 72% { transform: scaleY(1.2); } }
+/* ----- the scale: the first thing on the page, because it governs both sounds ----- */
+.scale { text-align: center; padding-top: .25rem; }
+.scale .pick { display: flex; align-items: center; justify-content: center; gap: 1.25rem; margin-top: .375rem; }
+.scale .note { display: inline-flex; align-items: flex-start; justify-content: center; gap: .25rem; min-width: 7rem; height: 5.25rem; padding: 0 .25rem; border: 0; border-radius: var(--r-md); background: none; color: var(--ink); font-family: var(--serif); font-size: 5.5rem; font-weight: 500; line-height: .95; letter-spacing: -.02em; cursor: pointer; }
+.scale .note:hover { background: var(--surface-2); }
+.scale .note small { margin-top: .75rem; font: 600 .6875rem/1 var(--sans); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
+.scale .note small[hidden] { display: none; }
+.scale .meta { display: inline-flex; align-items: center; gap: .375rem; min-height: 2rem; margin-top: .125rem; padding: 0 .5rem; border: 0; border-radius: var(--r-sm); background: none; color: var(--ink-3); font: inherit; font-size: var(--fs-sm); cursor: pointer; }
+.scale .meta .i { width: .875rem; height: .875rem; }
+.scale .btn.sm { margin-top: .5rem; }
 
-.tp-main { display: flex; align-items: center; gap: 1.2rem; }
-.play-big { position: relative; flex: none; width: 6.75rem; height: 6.75rem; border-radius: 50%; border: 0; cursor: pointer; font: inherit; font-weight: 800;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.1; gap: .15rem;
-  background: var(--accent); color: var(--on-accent); box-shadow: 0 12px 28px color-mix(in srgb, var(--accent) 34%, transparent), inset 0 -4px 0 rgba(0, 0, 0, .1);
-  transition: transform .15s var(--ease), background .25s, color .25s, box-shadow .25s; touch-action: manipulation; }
-.play-big:hover { transform: scale(1.03); }
-.play-big:active { transform: scale(.96); }
-.play-big .play-ico { display: block; width: 2.6rem; height: 2.6rem; font-size: 0; } /* the glyph script puts here is replaced by an icon */
-.play-big .play-ico::before { content: ''; display: block; width: 100%; height: 100%; background: currentColor; -webkit-mask: var(--i-play) center / contain no-repeat; mask: var(--i-play) center / contain no-repeat; }
-.play-big.on .play-ico::before { -webkit-mask-image: var(--i-stop); mask-image: var(--i-stop); }
-.play-big.tuning .play-ico::before { -webkit-mask-image: var(--i-dots); mask-image: var(--i-dots); }
-.play-big .play-txt { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .1em; }
-.play-big.on { background: var(--accent2); color: #fff; box-shadow: 0 12px 28px color-mix(in srgb, var(--accent2) 40%, transparent), inset 0 -4px 0 rgba(0, 0, 0, .12); }
-.play-big.on::after { content: ''; position: absolute; inset: 0; border-radius: 50%; border: 2px solid var(--accent2); animation: ring 2.4s ease-out infinite; pointer-events: none; }
-@keyframes ring { from { transform: scale(1); opacity: .8; } to { transform: scale(1.5); opacity: 0; } }
-.play-big.tuning { animation: pulse 1s ease-in-out infinite; }
-.tp-scale { flex: 1; min-width: 0; }
-.tp-label { display: block; color: var(--muted); font-size: var(--fs-sm); margin-bottom: .35rem; }
-.scale-row { display: flex; align-items: center; gap: .4rem; }
-.scale-row .dock-btn { flex: none; min-width: 3rem; min-height: 3rem; padding: 0; }
-.scale-btn { flex: 1; min-width: 0; min-height: 3.5rem; padding: .3rem .6rem; border-radius: var(--r-pill); border: 2px solid var(--accent2); background: color-mix(in srgb, var(--accent2) 14%, transparent); color: var(--ink);
-  font: inherit; font-size: var(--fs-xl); font-weight: 700; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: background .2s, color .2s; }
-.scale-btn b { color: var(--accent-ink); font-size: 1.15em; }
-.scale-btn[aria-expanded="true"] { background: var(--accent2); color: #fff; }
-.scale-btn[aria-expanded="true"] b { color: #fff; }
+/* ----- the deck: tanpura row, taal row, options row ----- */
+.deck { margin-top: 1.125rem; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card); overflow: hidden; }
+.deck .sec { padding: 1rem; border-top: 1px solid var(--line); }
+.deck .sec:first-child { border-top: 0; }
+.hd { display: flex; align-items: center; gap: .875rem; }
+.hd .grow { flex: 1; min-width: 0; }
+.hd b { display: block; font-size: var(--fs-lg); font-weight: 600; line-height: 1.25; }
+.hd small { display: block; font-size: var(--fs-sm); color: var(--ink-3); line-height: 1.3; }
+#home-tanpura .slider { margin-top: .875rem; }
+#home-tanpura .round[aria-pressed="true"] { background: var(--accent); }
 
-/* narrow phones: the scale button gets a full line so "Sa · D♯" never truncates; the arrows sit below it as a stepper */
-@media (max-width: 480px) {
-  .play-big { width: 5.9rem; height: 5.9rem; }
-  .tp-main { gap: 1rem; }
-  .scale-row { display: grid; grid-template-columns: 1fr 1fr; gap: .4rem; }
-  .scale-row .scale-btn { order: -1; grid-column: 1 / -1; font-size: var(--fs-lg); }
-  .scale-row .dock-btn { min-width: 0; width: 100%; min-height: 3rem; }
-}
-.sa-grid { margin-top: var(--s-4); padding: var(--s-3); border-radius: var(--r-md); background: var(--bg); border: 1px solid var(--line); display: grid; gap: .6rem; }
-.sa-grid[hidden] { display: none; }
-.sa-group { display: grid; grid-template-columns: repeat(auto-fill, minmax(3.3rem, 1fr)); gap: .4rem; align-items: center; }
-.sa-grp { grid-column: 1 / -1; color: var(--muted); font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .08em; }
-.sa-opt { font: inherit; font-weight: 700; min-height: 3rem; border-radius: var(--r-md); border: 1px solid var(--line-strong); background: transparent; color: var(--ink); cursor: pointer; transition: background .15s, color .15s; }
-.sa-opt[aria-pressed="true"] { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+/* the four strings shimmer while the tanpura plays */
+.strings { display: flex; align-items: center; gap: 5px; height: 1.5rem; flex: none; }
+.strings i { display: block; width: 2px; height: 100%; border-radius: 1px; background: var(--ink-3); opacity: .35; transform-origin: center; }
+#home-tanpura.playing .strings i { background: var(--accent); opacity: .9; animation: shimmer 1.1s ease-in-out infinite alternate; }
+#home-tanpura.playing .strings i:nth-child(2) { animation-delay: -.3s; }
+#home-tanpura.playing .strings i:nth-child(3) { animation-delay: -.6s; }
+#home-tanpura.playing .strings i:nth-child(4) { animation-delay: -.9s; }
+@keyframes shimmer { from { transform: scaleY(.45); } to { transform: scaleY(1); } }
 
-.tp-sa-hint { margin: .75rem 0 0; }
-#home-tp-status { min-height: 1.3em; margin: .25rem 0 0; }
-.tp-check { display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--s-2) .9rem; margin-top: var(--s-2); padding-top: .9rem; border-top: 1px solid var(--line); }
-.tp-check .hint { flex: 1 1 14rem; margin: 0; }
-.tp-opts { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-3) var(--s-4); margin-top: var(--s-4); }
-.tp-opts label { display: flex; flex-direction: column; gap: .25rem; font-weight: 600; font-size: .9rem; min-width: 0; }
-.tp-opts label.wide { grid-column: 1 / -1; }
-.tp-opts select { width: 100%; }
-.tp-opts input[type="range"] { width: 100%; }
+.pickrow { padding: 0; border: 0; border-radius: var(--r-sm); background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; min-height: 2.75rem; }
+.pickrow:hover b { text-decoration: underline; text-underline-offset: 3px; }
+.pickrow small .i { width: .875rem; height: .875rem; margin-left: .25rem; vertical-align: -2px; }
+.bpm { display: flex; align-items: center; gap: .375rem; flex: none; }
+.bpm .n { min-width: 2.5rem; text-align: center; }
+.bpm output { display: block; font-size: 1.5rem; line-height: 1; font-weight: 600; font-variant-numeric: tabular-nums; }
+.bpm small { display: block; margin-top: 3px; font-size: .625rem; letter-spacing: .1em; color: var(--ink-3); }
 
-/* ----- taal card ----- */
-.home .taal-card { padding: var(--s-4) 1.25rem; }
-.taal-intro { margin: 0 0 .9rem; }
-.taal-main { display: flex; align-items: center; gap: .9rem; flex-wrap: wrap; }
-.taal-main .btn.big { min-width: 8.5rem; }
-.taal-pick { display: flex; align-items: center; gap: var(--s-2); font-weight: 600; flex: 1 1 10rem; min-width: 0; }
-.taal-pick select { flex: 1; min-width: 0; min-height: var(--tap); }
-.tempo-row { display: flex; align-items: center; flex-wrap: wrap; gap: var(--s-2); margin-top: var(--s-4); }
-.tempo-row .tp-label { margin: 0; flex: 0 0 100%; }
-.tempo-row .dock-btn { min-width: 3rem; min-height: 3rem; padding: 0; font-size: 1.35rem; }
-.tempo-read { min-width: 5.5rem; text-align: center; }
-.tempo-read output { font-size: 2.2rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; color: var(--accent-ink); }
-.tempo-read small { color: var(--muted); font-weight: 600; }
-.tempo-row .btn { margin-left: auto; }
-.home #bpm, .home #tabla-vol { width: 100%; }
-.taal-vol { display: flex; flex-direction: column; gap: .15rem; font-weight: 600; font-size: .9rem; margin-top: .25rem; }
-.home .taal-grid { margin-top: .9rem; }
+/* the beat grid: rows of up to 8, a thin bar line where each section (vibhag) starts */
+.beats { display: grid; grid-template-columns: repeat(var(--cols, 8), minmax(0, 1fr)); gap: 6px 4px; margin-top: .875rem; }
+.beat { position: relative; height: 2.875rem; display: flex; align-items: flex-end; justify-content: center; padding: 0 1px .4375rem; border-radius: 8px; background: var(--surface-2); color: var(--ink); font-size: .75rem; font-weight: 500; line-height: 1.05; text-align: center; transition: background .08s, color .08s; }
+.beat.two { font-size: .6875rem; padding-bottom: .25rem; }
+.beat u { position: absolute; top: 4px; left: 6px; text-decoration: none; font-size: .59375rem; font-weight: 600; color: var(--ink-3); }
+.beat.vs::before { content: ''; position: absolute; left: -2.5px; top: 6px; bottom: 6px; width: 1px; background: var(--line-2); }
+.beat.on { background: var(--accent); color: var(--on-accent); }
+.beat.on u { color: var(--on-accent); opacity: .85; }
+
+.opts { display: flex; align-items: center; justify-content: space-between; gap: var(--s-3); width: 100%; min-height: 3.25rem; padding: .875rem 1rem; border: 0; border-top: 1px solid var(--line); background: none; color: var(--ink); font: 600 var(--fs-md) var(--sans); text-align: left; cursor: pointer; }
+.opts:hover { background: var(--surface-2); }
+.opts .val { display: inline-flex; align-items: center; gap: .25rem; color: var(--ink-3); font-weight: 500; font-size: var(--fs-sm); }
+.opts .val .i { width: 1rem; height: 1rem; }
+.home-hint { margin: .875rem 1.25rem 0; text-align: center; }
+
+/* ----- sheets: scale grid, taal list ----- */
+.sa-grid { display: grid; gap: var(--s-4); }
+.sa-group { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .5rem; }
+.sa-grp { grid-column: 1 / -1; margin: 0; font: 600 .6875rem/1.2 var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
+.sa-opt { min-height: 3rem; border: 1px solid var(--line-2); border-radius: var(--r-md); background: var(--surface); color: var(--ink); font: 600 1rem var(--sans); cursor: pointer; }
+.sa-opt:hover { background: var(--surface-2); }
+.sa-opt[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+#taal-list .row .i { color: var(--accent); width: 1.25rem; height: 1.25rem; }
+#taal-list .row:not(.sel) .i { visibility: hidden; }
+.sheet-group .btn { justify-self: start; }

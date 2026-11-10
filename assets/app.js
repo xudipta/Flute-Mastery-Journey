@@ -28,43 +28,43 @@
     ['Stage 5 · Concert level', 'Years 4+', ['Full raga exposition: alaap, jod, jhala and gat', 'Playing different-sized bansuris', 'Learning under a guru, performing and teaching']]
   ];
 
-  // [icon, name, time group, description]
+  // [name, time group, description]
   const RAGAS = [
-    ['🌅', 'Bhairav', 'Morning', 'Dawn raga with komal Re and Dha. Serious, devotional mood.'],
-    ['🌄', 'Ahir Bhairav', 'Morning', 'Komal Re and komal Ni, blending Bhairav and Kafi flavours. Calm and expansive.'],
-    ['🌤️', 'Lalit', 'Morning', 'Pre-dawn raga with both Ma and no Pa. Restless, searching mood.'],
-    ['☀️', 'Todi', 'Morning', 'Komal Re, Ga and Dha with tivra Ma. Deep, intense and rich in meend.'],
-    ['🌞', 'Asavari', 'Morning', 'Komal Ga, Dha and Ni. Pensive and tender.'],
-    ['🏞️', 'Jaunpuri', 'Morning', 'Close to Asavari, with natural Dha. Pathos and gravity.'],
-    ['🌻', 'Bhimpalasi', 'Afternoon', 'Komal Ga and Ni. Tender, longing character.'],
-    ['🌾', 'Shuddha Sarang', 'Afternoon', 'Both Ma with Ni komal. Bright and spacious.'],
-    ['🌇', 'Madhuvanti', 'Afternoon', 'Komal Ga with tivra Ma. Sweet and romantic.'],
-    ['🌆', 'Marwa', 'Evening', 'Sunset raga with komal Re, tivra Ma and a weak Pa. Restless, yearning tension.'],
-    ['🌅', 'Puriya', 'Evening', 'Komal Re and tivra Ma with a strong Ga. Stately and sober.'],
-    ['🌙', 'Yaman', 'Evening', 'Uses tivra Ma. Graceful and serene — a good first full raga.'],
-    ['🪔', 'Bhoopali', 'Evening', 'Pentatonic (Sa Re Ga Pa Dha). Sweet and easy to shape; ideal for beginners.'],
-    ['🦢', 'Hamsadhwani', 'Evening', 'Pentatonic (Sa Re Ga Pa Ni). Bright and joyful; popular for openings.'],
-    ['🎶', 'Khamaj', 'Evening', 'Both Ni. Light, playful, ideal for thumri-style phrases.'],
-    ['🌃', 'Bihag', 'Night', 'Both Ma and mostly shuddha swars. Romantic and flowing.'],
-    ['🌧️', 'Desh', 'Night', 'Both Ni. Associated with the monsoon; yearning mood.'],
-    ['🌌', 'Durga', 'Night', 'Pentatonic (Sa Re Ma Pa Dha). Calm and devotional; very beginner-friendly.'],
-    ['🌠', 'Kafi', 'Night', 'Komal Ga and Ni. Light-classical feel; great for expressive meend.'],
-    ['🌑', 'Bageshree', 'Night', 'Komal Ga and Ni. Tender and romantic.'],
-    ['🌒', 'Darbari Kanada', 'Night', 'Late-night raga with komal Ga, Dha, Ni and slow, deep andolan on Ga. Majestic.'],
-    ['🕯️', 'Malkauns', 'Night', 'Pentatonic (Sa komal-Ga Ma komal-Dha komal-Ni). Midnight raga; deep and meditative.'],
-    ['⛈️', 'Miyan Malhar', 'Monsoon', 'Rainy-season raga with both Ni. Grand and joyful.']
+    ['Bhairav', 'Morning', 'Dawn raga with komal Re and Dha. Serious, devotional mood.'],
+    ['Ahir Bhairav', 'Morning', 'Komal Re and komal Ni, blending Bhairav and Kafi flavours. Calm and expansive.'],
+    ['Lalit', 'Morning', 'Pre-dawn raga with both Ma and no Pa. Restless, searching mood.'],
+    ['Todi', 'Morning', 'Komal Re, Ga and Dha with tivra Ma. Deep, intense and rich in meend.'],
+    ['Asavari', 'Morning', 'Komal Ga, Dha and Ni. Pensive and tender.'],
+    ['Jaunpuri', 'Morning', 'Close to Asavari, with natural Dha. Pathos and gravity.'],
+    ['Bhimpalasi', 'Afternoon', 'Komal Ga and Ni. Tender, longing character.'],
+    ['Shuddha Sarang', 'Afternoon', 'Both Ma with Ni komal. Bright and spacious.'],
+    ['Madhuvanti', 'Afternoon', 'Komal Ga with tivra Ma. Sweet and romantic.'],
+    ['Marwa', 'Evening', 'Sunset raga with komal Re, tivra Ma and a weak Pa. Restless, yearning tension.'],
+    ['Puriya', 'Evening', 'Komal Re and tivra Ma with a strong Ga. Stately and sober.'],
+    ['Yaman', 'Evening', 'Uses tivra Ma. Graceful and serene — a good first full raga.'],
+    ['Bhoopali', 'Evening', 'Pentatonic (Sa Re Ga Pa Dha). Sweet and easy to shape; ideal for beginners.'],
+    ['Hamsadhwani', 'Evening', 'Pentatonic (Sa Re Ga Pa Ni). Bright and joyful; popular for openings.'],
+    ['Khamaj', 'Evening', 'Both Ni. Light, playful, ideal for thumri-style phrases.'],
+    ['Bihag', 'Night', 'Both Ma and mostly shuddha swars. Romantic and flowing.'],
+    ['Desh', 'Night', 'Both Ni. Associated with the monsoon; yearning mood.'],
+    ['Durga', 'Night', 'Pentatonic (Sa Re Ma Pa Dha). Calm and devotional; very beginner-friendly.'],
+    ['Kafi', 'Night', 'Komal Ga and Ni. Light-classical feel; great for expressive meend.'],
+    ['Bageshree', 'Night', 'Komal Ga and Ni. Tender and romantic.'],
+    ['Darbari Kanada', 'Night', 'Late-night raga with komal Ga, Dha, Ni and slow, deep andolan on Ga. Majestic.'],
+    ['Malkauns', 'Night', 'Pentatonic (Sa komal-Ga Ma komal-Dha komal-Ni). Midnight raga; deep and meditative.'],
+    ['Miyan Malhar', 'Monsoon', 'Rainy-season raga with both Ni. Grand and joyful.']
   ];
   const RAGA_GROUPS = ['All', 'Morning', 'Afternoon', 'Evening', 'Night', 'Monsoon'];
 
   const TECHNIQUES = [
-    ['🌬️', 'Breath control', 'Breathe from the diaphragm and keep air speed steady so long phrases stay unbroken.'],
-    ['👄', 'Embouchure', 'Rest the blowing hole against your lower lip, aim the air across the edge, and keep your lips soft and flexible.'],
-    ['〰️', 'Meend', 'Glide smoothly between swaras by sliding fingers off or half-covering holes while the air stays steady.'],
-    ['✨', 'Kan', 'A quick grace note touched just before the main swar, ornamenting the line.'],
-    ['⚡', 'Taan & murki', 'Rapid note runs (taan) and short twisting ornaments (murki) — practise slowly, then raise speed.'],
-    ['🗣️', 'Tonguing (tu-ku)', 'Double-tongue articulation used in jhala and fast passages.'],
-    ['🥁', 'Taal & laya', 'Count beats with the hands (tali/khali) to hold Teentaal, Dadra and Keherwa.'],
-    ['🎚️', 'Dynamics', 'Shape phrases with air pressure; breathe lightly in the lower octave and increase for taar saptak.']
+    ['Breath control', 'Breathe from the diaphragm and keep air speed steady so long phrases stay unbroken.'],
+    ['Embouchure', 'Rest the blowing hole against your lower lip, aim the air across the edge, and keep your lips soft and flexible.'],
+    ['Meend', 'Glide smoothly between swaras by sliding fingers off or half-covering holes while the air stays steady.'],
+    ['Kan', 'A quick grace note touched just before the main swar, ornamenting the line.'],
+    ['Taan & murki', 'Rapid note runs (taan) and short twisting ornaments (murki): practise slowly, then raise speed.'],
+    ['Tonguing (tu-ku)', 'Double-tongue articulation used in jhala and fast passages.'],
+    ['Taal & laya', 'Count beats with the hands (tali/khali) to hold Teentaal, Dadra and Keherwa.'],
+    ['Dynamics', 'Shape phrases with air pressure; breathe lightly in the lower octave and increase for taar saptak.']
   ];
 
   const SA_NAMES = ['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
@@ -114,8 +114,6 @@
   }
   function renderStats() {
     const checked = ROUTINE.filter((r) => state.checks[r.id]).reduce((a, r) => a + r.min, 0);
-    $('#streak').textContent = streak();
-    $('#total').textContent = practisedDays().length;
     $('#minutes').textContent = checked;
     $('#done-msg').hidden = !(state.log[todayKey()] && state.log[todayKey()].complete);
     if (typeof renderToday === 'function') renderToday();
@@ -133,7 +131,21 @@
   // Create the audio context on first use (needs a user gesture) and apply saved volumes.
   Sound.onCreate = () => { Sound.setVolume('tabla', settings.tablaVol / 100); Sound.setVolume('drone', 0.8 * settings.droneVol / 100); };
   function audio() { Sound.ensure(); return Sound; }
+  // Home and the now-playing bar follow the audio and timer state through these events:
+  // 'audio' (tanpura or taal on/off, tuning), 'timer' (every tick), 'volume', 'tanpura', 'taal', 'sa'.
+  const listeners = {};
+  const emit = (k) => (listeners[k] || []).forEach((f) => { try { f(); } catch (e) { console.error(e); } });
+  const on = (k, fn) => { (listeners[k] = listeners[k] || []).push(fn); };
 
+  // How a block is shown on its card: a short serif name, a small kind label above it and a hint after the minutes.
+  const CARD = {
+    breath: { name: 'Pranayama & posture', kind: 'Breath', hint: 'no flute' },
+    sa: { name: 'Sur sadhana', kind: 'Long tones', hint: 'with the tanpura' },
+    alankar: { name: 'Alankars', kind: 'Patterns', hint: 'slow and even' },
+    raga: { name: 'Raga alaap', kind: 'Raga', hint: 'with the tanpura' },
+    taal: { name: 'Taan & taal', kind: 'Rhythm', hint: 'with the tabla' },
+    cool: { name: 'Bandish', kind: 'Cool-down', hint: 'end softly on Sa' }
+  };
   // The Today card sits at the top of the Practice view.
   function markOnboarded() { if (!settings.onboarded) { settings.onboarded = true; saveSettings(); } }
   function renderToday() {
@@ -141,15 +153,17 @@
     const total = ROUTINE.reduce((s, r) => s + r.min, 0);
     const done = ROUTINE.filter((r) => state.checks[r.id]).reduce((s, r) => s + r.min, 0);
     const next = ROUTINE.find((r) => !state.checks[r.id]);
-    const sn = streak();
-    $('#t-fill').style.width = Math.round(100 * done / total) + '%';
-    $('.t-bar').setAttribute('aria-valuenow', Math.round(100 * done / total));
-    $('#t-line').textContent = next
-      ? `${done} of ${total} minutes done${sn ? ` · ${sn}-day streak` : ''}. Next up: ${next.title} (${next.min} min).`
-      : `All ${total} minutes done. Today's riyaaz is complete${sn ? ` · ${sn}-day streak` : ''}.`;
-    $('#t-go').textContent = next ? (done ? `Continue: ${next.title}` : 'Start today\'s riyaaz') : 'Practise a block again';
+    const sn = streak(), pct = total ? Math.round(100 * done / total) : 0;
+    $('#t-date').textContent = new Date().toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' });
+    $('#t-total').textContent = total;
+    $('#t-fill').style.width = pct + '%';
+    const bar = $('.t-bar');
+    bar.setAttribute('aria-valuenow', pct); bar.setAttribute('aria-valuetext', `${done} of ${total} minutes`);
+    $('#streak').textContent = sn; $('#streak').hidden = !sn;
+    $('#t-streak-label').textContent = sn ? '-day streak' : 'Start a streak today';
+    FluteUI.setLabel($('#t-go'), next ? (done ? `Continue: ${CARD[next.id].name}` : 'Start today\'s riyaaz') : 'Practise a block again');
     $('#t-go').dataset.state = next ? 'go' : 'again';
-    $('#t-ragas').textContent = `${nowGroup()} ragas`;
+    FluteUI.setLabel($('#t-ragas'), `${nowGroup()} ragas`);
     $('#t-ragas').setAttribute('aria-label', `${nowGroup()} ragas`);
   }
   const nowGroup = () => { const h = new Date().getHours(); return h >= 4 && h < 12 ? 'Morning' : h < 17 ? 'Afternoon' : h < 21 ? 'Evening' : 'Night'; };
@@ -164,29 +178,31 @@
     if (val) state.checkMins[id] = ROUTINE.find((r) => r.id === id).min; else delete state.checkMins[id];
     rows[id].box.checked = val;
     rows[id].li.classList.toggle('done', val);
+    paintCard(ROUTINE.find((r) => r.id === id));
     recordToday();
     store.set(state); renderStats();
     if (window.PracticeCards) PracticeCards.sync();
   }
   const list = $('#routine');
-  const BLOCK_ICON = { breath: '🌬️', sa: '🎵', alankar: '🔁', raga: '🎼', taal: '🥁', cool: '🌙' };
   // Each block is one slide of the swipeable practice cards (carousel behaviour is in practice-cards.js). The
   // card shows live time only for the block the shared timer is on; the others show their full length.
   function renderRoutine() {
     list.innerHTML = ''; Object.keys(rows).forEach((k) => delete rows[k]);
     ROUTINE.forEach((r, i) => {
+      const c = CARD[r.id] || { name: r.title, kind: '', hint: '' };
       const li = document.createElement('li');
       li.className = 'pc-card'; li.dataset.id = r.id;
       li.setAttribute('role', 'group'); li.setAttribute('aria-roledescription', 'slide');
       li.setAttribute('aria-label', `${r.title}, ${i + 1} of ${ROUTINE.length}`);
-      li.innerHTML = `<div class="pc-top"><span class="pc-icon" aria-hidden="true">${BLOCK_ICON[r.id] || '🪈'}</span><span class="pc-step">${i + 1} of ${ROUTINE.length}</span><span class="pc-badge" hidden></span></div>
-        <h3>${r.title}</h3><p class="pc-min">${r.min} min</p><p class="pc-text">${r.text}</p>
-        <div class="pc-timer" role="timer"><span class="pc-time">${fmt0(r.min * 60)}</span></div>
-        <div class="pc-actions"><button type="button" class="btn pc-toggle" data-timer>Start</button><button type="button" class="btn ghost pc-reset" disabled>Reset</button></div>
-        <button type="button" class="btn small ghost pc-how" data-how>Show me how</button>
-        <label class="pc-done"><input type="checkbox" aria-label="Done: ${r.title}"> <span>Done</span></label>`;
+      li.innerHTML = `<div class="pc-top"><span class="eyebrow pc-kind">${c.kind}</span><span class="pc-badge" hidden></span></div>
+        <h3>${c.name}</h3><p class="pc-min">${r.min} min${c.hint ? ' · ' + c.hint : ''}</p><p class="pc-text">${r.text}</p>
+        <div class="pc-timer" role="timer"><span class="pc-time">${fmt0(r.min * 60)}</span><button type="button" class="iconbtn pc-reset" aria-label="Reset the timer" disabled>${FluteUI.icon('replay')}</button></div>
+        <div class="bar pc-bar" aria-hidden="true"><i></i></div>
+        <button type="button" class="btn primary pc-toggle" data-timer>${FluteUI.icon('play')}<span class="lbl">Start</span></button>
+        <div class="pc-two"><button type="button" class="btn ghost pc-how" data-how>${FluteUI.icon('play')}<span class="lbl">Show me how</span></button>
+        <label class="btn ghost pc-done"><input type="checkbox" aria-label="Done: ${r.title}">${FluteUI.icon('check')}<span class="lbl">Mark done</span></label></div>`;
       const box = li.querySelector('input');
-      rows[r.id] = { li, box, time: li.querySelector('.pc-time'), toggle: li.querySelector('.pc-toggle'), reset: li.querySelector('.pc-reset'), badge: li.querySelector('.pc-badge') };
+      rows[r.id] = { li, box, time: li.querySelector('.pc-time'), toggle: li.querySelector('.pc-toggle'), reset: li.querySelector('.pc-reset'), badge: li.querySelector('.pc-badge'), fill: li.querySelector('.pc-bar > i'), doneLbl: li.querySelector('.pc-done .lbl') };
       box.checked = !!state.checks[r.id];
       li.classList.toggle('done', box.checked);
       box.addEventListener('change', () => { setChecked(r.id, box.checked); if (!box.checked) offerUndo(r); });
@@ -197,6 +213,7 @@
       rows[r.id].reset.addEventListener('click', () => { if (block && block.id === r.id) { stop(); remaining = block.min * 60; renderTimer(); } });
       li.querySelector('[data-how]').addEventListener('click', () => PracticeDemos.open(r.id));
       list.appendChild(li);
+      if (box.checked) { const w = rows[r.id]; w.badge.hidden = false; w.badge.textContent = 'Done'; w.badge.dataset.state = 'done'; w.fill.style.width = '100%'; w.doneLbl.textContent = 'Done'; }
     });
     $('#routine-total').textContent = ROUTINE.reduce((a, r) => a + r.min, 0);
     if (window.PracticeCards) PracticeCards.sync();
@@ -222,35 +239,38 @@
   let block = null, remaining = 0, handle = null, endAt = 0, runAll = false, bellAt = null;
   const fmt = fmt0;
   const goCard = (id, o) => { if (window.PracticeCards) PracticeCards.goTo(id, o); };
-  // Shows the time in the timer card, and (once a block is under way) in the tools bar and the tab title,
-  // so the timer can be seen from any section.
-  const baseTitle = document.title, chip = $('#dock-timer');
-  let cardKey = '';
+  // Shows the time in the timer card and the tab title, and tells the now-playing bar (assets/mini.js) about it, so the
+  // timer can be seen from any tab.
+  const baseTitle = document.title;
+  let cardKey = '', timerShow = false;
+  // One card's live parts: time, Start/Pause/Resume, the badge (Running, Paused or Done), the thin progress line.
+  function paintCard(r) {
+    const row = rows[r.id]; if (!row) return;
+    const mine = !!block && block.id === r.id, shown = mine && !!block && remaining > 0 && (!!handle || remaining < r.min * 60);
+    const total = r.min * 60, running = mine && !!handle, paused = shown && !handle, done = !!state.checks[r.id];
+    row.time.textContent = fmt(mine ? remaining : total);
+    FluteUI.setLabel(row.toggle, running ? 'Pause' : paused ? 'Resume' : 'Start');
+    FluteUI.setIcon(row.toggle, running ? 'pause' : 'play');
+    row.reset.disabled = !(mine && (!!handle || remaining < total));
+    row.li.classList.toggle('active', mine);
+    row.li.classList.toggle('running', running);
+    row.fill.style.width = (mine ? Math.round(100 * (1 - remaining / total)) : done ? 100 : 0) + '%';
+    row.badge.hidden = !(shown || done);
+    if (shown) row.badge.textContent = running ? 'Running' : 'Paused'; else if (done) row.badge.textContent = 'Done';
+    row.badge.dataset.state = shown ? (running ? 'running' : 'paused') : done ? 'done' : '';
+    row.doneLbl.textContent = done ? 'Done' : 'Mark done';
+  }
   function renderTimer() {
     const show = !!block && remaining > 0 && (!!handle || remaining < block.min * 60);
     // Cards: the block the timer is on shows live time, Pause/Start and a badge; the others show their full length.
-    ROUTINE.forEach((r) => {
-      const row = rows[r.id]; if (!row) return;
-      const mine = !!block && block.id === r.id;
-      row.time.textContent = fmt(mine ? remaining : r.min * 60);
-      row.toggle.textContent = mine && handle ? 'Pause' : 'Start';
-      row.reset.disabled = !(mine && (!!handle || remaining < r.min * 60));
-      row.li.classList.toggle('active', mine);
-      row.li.classList.toggle('running', mine && !!handle);
-      row.badge.hidden = !(mine && show);
-      if (mine && show) row.badge.textContent = handle ? '● Running' : '⏸ Paused';
-    });
+    ROUTINE.forEach(paintCard);
     const key = (block ? block.id : '') + (handle ? 'r' : '') + (show ? 's' : '');
     if (key !== cardKey) { cardKey = key; if (window.PracticeCards) PracticeCards.sync(); }
-    chip.hidden = !show; $('#dock').classList.toggle('has-timer', show);
+    timerShow = show;
     saveTimer(show);
     const title = show ? `${handle ? '⏱' : '⏸'} ${fmt(remaining)} · ${block.title}` : baseTitle;
     if (document.title !== title) document.title = title;
-    if (!show) return;
-    $('#dock-timer-icon').textContent = handle ? '⏱' : '⏸'; chip.dataset.state = handle ? 'run' : 'pause';
-    $('#dock-timer-time').textContent = fmt(remaining);
-    $('#dock-timer-name').textContent = block.title;
-    chip.setAttribute('aria-label', `${block.title}: ${fmt(remaining)} left${handle ? '' : ', paused'}. Go to the timer`);
+    emit('timer');
   }
   // A block under way is saved, so a reload (or the phone discarding the tab) does not lose it. While it runs
   // the saved entry (end time) does not change, so this only writes on start, pause, reset and finish.
@@ -260,12 +280,13 @@
     if (t) state.timer = t; else delete state.timer;
     store.set(state);
   }
-  chip.addEventListener('click', () => {
+  // Back to the running card (the now-playing bar's timer line).
+  function openTimer() {
     FluteNav.go('practice', { focus: false });
     if (!block || !rows[block.id]) return;
     goCard(block.id, { vertical: 'center' });
     rows[block.id].toggle.focus({ preventScroll: true });
-  });
+  }
   function selectBlock(r, autostart, noScroll) {
     markOnboarded(); stop();
     block = r; remaining = r.min * 60;
@@ -317,52 +338,42 @@
     else { runAll = false; selectBlock(ROUTINE[0], false); }
   });
 
-  // Sa selector (several synced selects) + tanpura drone
-  const saSelects = [...document.querySelectorAll('.sa-sync')];
-  saSelects.forEach((sel) => SA_CHOICES.forEach((i) => { const o = document.createElement('option'); o.value = i; o.textContent = saName(i); sel.appendChild(o); }));
-  function showSa() {
-    saSelects.forEach((s) => { s.value = settings.sa; });
-    $('#pill-sa-name').textContent = saShort(settings.sa);
-  }
+  // Scale (Sa), tanpura, taal and tempo: the state and the sound. Home (assets/home.js) draws the controls.
+  const saListeners = [];
   function setSa(i) {
-    settings.sa = i; settings.onboarded = true; saveSettings(); showSa();
+    settings.sa = i; settings.onboarded = true; saveSettings();
     Sound.setSa(saFreq(settings.sa));
     if (Sound.ctx) Sound.restartDrone();
     renderToday();
     if (typeof renderPicker === 'function' && namesBox.checked) { renderPicker(); showNote(chartTok); }
+    saListeners.forEach((f) => f(settings.sa));
+    emit('sa'); emit('audio');
   }
-  saSelects.forEach((s) => s.addEventListener('change', () => setSa(Number(s.value))));
-  showSa();
-  const droneBtn = $('#drone-toggle'), droneVol = $('#drone-vol');
-  droneVol.value = settings.droneVol;
-  droneBtn.addEventListener('click', () => {
-    const on = !Sound.droneOn;
+  let tuning = false;
+  function setDrone(on) {
+    on = !!on;
+    if (on === Sound.droneOn) return;
     if (on) audio().startDrone(); else Sound.stopDrone();
-    droneBtn.setAttribute('aria-pressed', on); droneBtn.classList.toggle('on', on);
-    keepAwake();
-  });
-  droneVol.addEventListener('input', () => {
-    settings.droneVol = Number(droneVol.value); saveSettings();
-    if (Sound.ctx) Sound.setVolume('drone', 0.8 * settings.droneVol / 100);
-  });
-  // The strings are built in the background; until they are ready the button says so.
-  Sound.onTuning = (on) => {
-    droneBtn.classList.toggle('tuning', on); droneBtn.setAttribute('aria-busy', on);
-    droneBtn.querySelector('.lbl').textContent = on ? 'Tuning…' : 'Tanpura';
-    $('#tp-status').textContent = on ? 'Tuning the tanpura…' : '';
-  };
-  // First string (Pa, or Ma / Ni for ragas without Pa), pluck speed and a fine tune in cents for the tanpura alone.
-  const tpFirst = $('#tp-first'), tpSpeed = $('#tp-speed'), tpFine = $('#tp-fine');
-  tpFirst.value = settings.tanpuraFirst; tpSpeed.value = settings.tanpuraSpeed; tpFine.value = settings.tanpuraFine;
-  const showFine = () => { $('#tp-fine-out').textContent = (tpFine.value > 0 ? '+' : '') + tpFine.value + '¢'; };
-  function applyTanpura() {
-    Object.assign(settings, { tanpuraFirst: tpFirst.value, tanpuraSpeed: tpSpeed.value, tanpuraFine: Number(tpFine.value) });
-    saveSettings(); showFine();
-    Sound.setTanpura({ first: settings.tanpuraFirst, speed: settings.tanpuraSpeed, fine: settings.tanpuraFine });
+    keepAwake(); emit('audio');
   }
-  [tpFirst, tpSpeed, tpFine].forEach((el) => el.addEventListener('input', applyTanpura));
-  tpFine.addEventListener('dblclick', () => { tpFine.value = 0; applyTanpura(); });
-  showFine();
+  // The strings are built in the background; until they are ready the tanpura says it is tuning.
+  Sound.onTuning = (v) => { tuning = v; emit('audio'); };
+  function setVolume(which, v) {
+    v = Math.min(200, Math.max(0, Math.round(Number(v))));
+    if (which === 'drone') { settings.droneVol = v; if (Sound.ctx) Sound.setVolume('drone', 0.8 * v / 100); }
+    else { settings.tablaVol = v; if (Sound.ctx) Sound.setVolume('tabla', v / 100); }
+    saveSettings(); emit('volume');
+  }
+  // First string (Pa, or Ma / Ni for ragas without Pa), pluck speed and a fine tune in cents for the tanpura alone.
+  const tanpuraGet = () => ({ first: settings.tanpuraFirst, speed: settings.tanpuraSpeed, fine: settings.tanpuraFine });
+  function setTanpura(patch) {
+    if (patch.first !== undefined) settings.tanpuraFirst = patch.first;
+    if (patch.speed !== undefined) settings.tanpuraSpeed = patch.speed;
+    if (patch.fine !== undefined) settings.tanpuraFine = Math.min(50, Math.max(-50, Math.round(Number(patch.fine))));
+    saveSettings();
+    Sound.setTanpura(tanpuraGet());
+    emit('tanpura');
+  }
 
   // Tabla taal player (sounds are synthesised in audio.js).
   // vib = beats per vibhag; marks: 'X' sam, number tali, 'O' khali.
@@ -375,66 +386,39 @@
     'Rupak · 7': { vib: [3, 2, 2], marks: ['O', '2', '3'], bols: ['Tin','Tin','Na','Dhi','Na','Dhi','Na'] }
   };
   window.TAALS = TAALS;
-  const taalSelect = $('#taal-select'), grid = $('#taal-grid'), bpm = $('#bpm'), tablaVol = $('#tabla-vol');
-  Object.keys(TAALS).forEach((k) => { const o = document.createElement('option'); o.textContent = k; taalSelect.appendChild(o); });
   if (!TAALS[settings.taal]) settings.taal = 'Teentaal · 16';
-  taalSelect.value = settings.taal; tablaVol.value = settings.tablaVol;
-  let beatEls = [], taalRun = false;
-  function buildGrid() {
-    const t = TAALS[taalSelect.value]; grid.innerHTML = ''; beatEls = []; let i = 0;
-    $('#dock-taal').textContent = taalSelect.value.split(' · ')[0];
-    t.vib.forEach((n, v) => {
-      const box = document.createElement('div'); box.className = 'vibhag';
-      for (let k = 0; k < n; k++, i++) {
-        const el = document.createElement('div'); el.className = 'beat';
-        el.innerHTML = `<small>${k === 0 ? (t.marks[v] === 'X' ? '✕' : t.marks[v] === 'O' ? '○' : t.marks[v]) : '&nbsp;'}</small><b>${t.bols[i]}</b>`;
-        box.appendChild(el); beatEls.push(el);
-      }
-      grid.appendChild(box);
-    });
-  }
+  let taalRun = false;
+  const beatListeners = [], bpmListeners = [];
   // The beats come from the shared transport (transport.js), which keeps the tabla and any melody pattern
-  // on one clock. This page only starts it, stops it and shows the beat that is sounding.
-  const onBeat = (n, idx) => { if (taalRun) beatEls.forEach((e, j) => e.classList.toggle('on', j === idx)); };
+  // on one clock. This page only starts it, stops it and passes on the beat that is sounding.
+  const onBeat = (n, idx) => { if (taalRun) beatListeners.forEach((f) => f(n, idx)); };
   function setTaalRunning(on) {
+    on = !!on;
+    if (on === taalRun) return;
     taalRun = on;
-    $('#taal-toggle').textContent = on ? 'Stop' : 'Play'; $('#taal-toggle').classList.toggle('on', on);
-    $('#dock-tabla').classList.toggle('on', on); $('#dock-tabla').setAttribute('aria-pressed', on);
     const T = FluteTransport;
     if (on) {
       audio();
-      const taal = TAALS[taalSelect.value];
-      if (T.running) { T.setBpm(Number(bpm.value)); T.setTaal(taal); T.setTabla(true); T.setOnBeat(onBeat); }
-      else T.start({ bpm: Number(bpm.value), taal, tabla: true, onBeat });
-    } else {
-      beatEls.forEach((e) => e.classList.remove('on'));
-      if (T.patternActive) { T.setTabla(false); T.setOnBeat(null); } else T.stop(); // a melody keeps the beat grid
-    }
-    keepAwake();
+      const taal = TAALS[settings.taal];
+      if (T.running) { T.setBpm(settings.bpm); T.setTaal(taal); T.setTabla(true); T.setOnBeat(onBeat); }
+      else T.start({ bpm: settings.bpm, taal, tabla: true, onBeat });
+    } else if (T.patternActive) { T.setTabla(false); T.setOnBeat(null); } // a melody keeps the beat grid
+    else T.stop();
+    keepAwake(); emit('audio');
   }
-  const bpmListeners = [];
   function setBpm(v) {
     v = Math.min(240, Math.max(40, Math.round(v)));
-    bpm.value = v; settings.bpm = v; saveSettings();
-    $('#bpm-out').textContent = v; $('#dock-bpm').textContent = v;
+    settings.bpm = v; saveSettings();
     if (FluteTransport.running) FluteTransport.setBpm(v);
     bpmListeners.forEach((f) => f(v));
+    emit('audio');
   }
-  bpm.value = settings.bpm; setBpm(settings.bpm);
-  $('#taal-toggle').addEventListener('click', () => setTaalRunning(!taalRun));
-  $('#dock-tabla').addEventListener('click', () => setTaalRunning(!taalRun));
-  bpm.addEventListener('input', () => setBpm(Number(bpm.value)));
-  $('#bpm-down').addEventListener('click', () => setBpm(Number(bpm.value) - 5));
-  $('#bpm-up').addEventListener('click', () => setBpm(Number(bpm.value) + 5));
-  tablaVol.addEventListener('input', () => {
-    settings.tablaVol = Number(tablaVol.value); saveSettings();
-    if (Sound.ctx) Sound.setVolume('tabla', settings.tablaVol / 100);
-  });
-  taalSelect.addEventListener('change', () => {
-    settings.taal = taalSelect.value; saveSettings(); buildGrid();
-    if (taalRun) FluteTransport.setTaal(TAALS[taalSelect.value]);
-  });
-  buildGrid();
+  function setTaal(name) {
+    if (!TAALS[name] || settings.taal === name) return;
+    settings.taal = name; saveSettings();
+    if (taalRun) FluteTransport.setTaal(TAALS[name]);
+    emit('taal'); emit('audio');
+  }
 
   // Keep the screen on while a block timer, the tabla or the tanpura runs, so a phone on a stand does not
   // lock mid-practice. The browser drops the lock when the page is hidden; it is asked for again on return.
@@ -443,7 +427,6 @@
   async function keepAwake() {
     if (!('wakeLock' in navigator) || wakeBusy) return;
     const want = !!handle || taalRun || Sound.droneOn || FluteTransport.running;
-    if (want) $('#dock').classList.remove('tuck'); // something is playing: keep its controls in view
     wakeBusy = true;
     try {
       if (want && !wakeLock && document.visibilityState === 'visible') {
@@ -492,6 +475,10 @@
     CHART.push({ a, l, semi: ((a % 12) + 12) % 12, tok: (a < 0 ? '.' : '') + l + (a >= 12 ? "'" : ''), reg: a < 0 ? 'Lower octave' : a < 12 ? 'Middle octave' : 'Upper octave' });
   }
   let chartTok = 'S';
+  function paintScale(on) {
+    FluteUI.setLabel(scaleBtn, on ? 'Stop' : 'Play the scale'); FluteUI.setIcon(scaleBtn, on ? 'stop' : 'play');
+    scaleBtn.classList.toggle('on', on);
+  }
   function renderPicker() {
     picker.innerHTML = '';
     ['Lower octave', 'Middle octave', 'Upper octave'].forEach((reg) => {
@@ -499,13 +486,15 @@
       if (!notes.length) return;
       const wrap = document.createElement('div'); wrap.className = 'note-group';
       wrap.setAttribute('role', 'group'); wrap.setAttribute('aria-label', reg);
-      wrap.innerHTML = `<span class="group-label">${reg}</span>`;
+      wrap.innerHTML = `<p class="eyebrow group-label">${reg}</p><div class="notes"></div>`;
+      const holder = wrap.querySelector('.notes');
+      holder.style.setProperty('--cols', notes.length > 7 ? 6 : 7); // 12 swars make two rows of six; 7 or fewer make one row
       notes.forEach((n) => {
         const sw = FluteDemo.parseSwar(n.tok), b = document.createElement('button');
         b.type = 'button'; b.dataset.tok = n.tok; b.setAttribute('aria-pressed', n.tok === chartTok);
         b.innerHTML = sw.label + (namesBox.checked ? `<small>${SA_NAMES[saClass(settings.sa + n.semi)]}</small>` : '');
-        b.addEventListener('click', () => { scaleOn = false; scaleBtn.textContent = 'Play the scale'; scaleBtn.classList.remove('on'); showNote(n.tok); playNote(n.tok); });
-        wrap.appendChild(b);
+        b.addEventListener('click', () => { scaleOn = false; paintScale(false); showNote(n.tok); playNote(n.tok); });
+        holder.appendChild(b);
       });
       picker.appendChild(wrap);
     });
@@ -520,14 +509,14 @@
   }
   function playNote(tok) { FluteDemo.player.play([{ tok, beats: 2 }], 80, { onStep() {}, onEnd() {} }); }
   let scaleOn = false;
-  const resetScale = () => { scaleOn = false; scaleBtn.textContent = 'Play the scale'; scaleBtn.classList.remove('on'); };
+  const resetScale = () => { scaleOn = false; paintScale(false); };
   FluteDemo.player.hooks.push(resetScale);
   scaleBtn.addEventListener('click', () => {
     if (scaleOn) { FluteDemo.player.stop(); return; }
     const items = "S R G m P D N S'".split(' ').map((tok) => ({ tok, beats: 1, ref: tok }));
     items[items.length - 1].beats = 2;
     FluteDemo.player.play(items, 80, { onStep(step) { if (step) showNote(step.ref); }, onEnd() { showNote('S'); } });
-    scaleOn = true; scaleBtn.textContent = 'Stop'; scaleBtn.classList.add('on');
+    scaleOn = true; paintScale(true);
   });
   komalBox.addEventListener('change', () => { renderPicker(); });
   namesBox.addEventListener('change', () => { renderPicker(); showNote(chartTok); });
@@ -540,106 +529,101 @@
   renderPicker(); showNote('S');
 
   // Roadmap, ragas, techniques
-  $('#roadmap-list').innerHTML = STAGES.map(([t, when, items]) =>
-    `<article class="stage"><h3>${t}</h3><small>${when}</small><ul>${items.map((i) => `<li>${i}</li>`).join('')}</ul></article>`).join('');
-  const cards = (arr) => arr.map(([i, t, d]) => `<article class="card"><div class="icon">${i}</div><h3>${t}</h3><p>${d}</p></article>`).join('');
+  $('#roadmap-list').innerHTML = STAGES.map(([t, when, items], i) =>
+    `<li><span class="node" aria-hidden="true">${i + 1}</span><h3>${t.split(' · ')[1] || t}</h3><p class="when">${when}</p><ul>${items.map((x) => `<li>${x}</li>`).join('')}</ul></li>`).join('');
+  // Ragas: a time-of-day filter row, a search field, and one grouped list. A row opens the raga's demo sheet.
   const STARTER = ['Bhoopali', 'Durga', 'Hamsadhwani', 'Yaman', 'Kafi', 'Khamaj'];
+  const GROUP_ICON = { Morning: 'sunrise', Afternoon: 'sun', Evening: 'sunset', Night: 'moon', Monsoon: 'rain' };
   const rf = { group: 'All', q: '', starter: false, fav: false };
   const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-  const arohaText = (n) => window.RAGA_NOTATION[n].aroha.split(/\s+/).map((t) => FluteDemo.parseSwar(t).label).join(' ');
+  const summary = (d) => d.split(/(?<=\.)\s/)[0]; // the first sentence is the one-line summary; the sheet shows all of it
+  const ragaList = $('#raga-cards'), timeRow = $('#raga-filter');
+  const favLabel = (t, fav) => `${fav ? 'Remove' : 'Add'} ${t} ${fav ? 'from' : 'to'} favourites`;
+  function ragaRow([t, g, d]) {
+    const fav = settings.favs.includes(t), notated = !!window.RAGA_NOTATION[t];
+    return `<article class="row raga-row">
+      <button type="button" class="raga-open" data-raga="${t}" data-group="${g}" aria-label="${t}, ${g} raga: ${notated ? 'how to play' : 'details'}">
+        <span class="tile" aria-hidden="true">${FluteUI.icon(GROUP_ICON[g] || 'sunrise')}</span>
+        <span class="grow"><b>${t}${STARTER.includes(t) ? ' <span class="tag">Starter</span>' : ''}</b><small>${esc(summary(d))}</small></span>
+      </button>
+      ${notated ? `<button type="button" class="play" data-hear="${t}" aria-label="Hear aroha of ${t}">${FluteUI.icon('play')}</button>` : '<span class="tag soon">Demo soon</span>'}
+      <button type="button" class="star" data-fav="${t}" aria-pressed="${fav}" aria-label="${favLabel(t, fav)}">${FluteUI.icon('star')}</button>
+    </article>`;
+  }
+  // Keeps the selected time of day in view in the scrolling filter row, and fades its right edge while more follows.
+  function placeFilter() {
+    const on = timeRow.querySelector('[aria-pressed="true"]');
+    if (on && timeRow.clientWidth) timeRow.scrollLeft = on.offsetLeft - (timeRow.clientWidth - on.offsetWidth) / 2;
+    timeRow.classList.toggle('more', timeRow.scrollLeft + timeRow.clientWidth < timeRow.scrollWidth - 4);
+  }
   function showRagas() {
     const q = rf.q.trim().toLowerCase();
-    const shown = RAGAS.filter((r) => (rf.group === 'All' || r[2] === rf.group)
-      && (!rf.starter || STARTER.includes(r[1])) && (!rf.fav || settings.favs.includes(r[1]))
-      && (!q || (r[1] + ' ' + r[2] + ' ' + r[3]).toLowerCase().includes(q)));
-    $('#raga-cards').innerHTML = shown.map(([i, t, g, d]) => {
-      const fav = settings.favs.includes(t), n = window.RAGA_NOTATION[t];
-      return `<article class="card raga-card"><button type="button" class="star" data-fav="${t}" aria-pressed="${fav}" aria-label="${fav ? 'Remove' : 'Add'} ${t} ${fav ? 'from' : 'to'} favourites">${fav ? '★' : '☆'}</button>
-        <div class="icon">${i}</div><h3>Raga ${t}</h3>${STARTER.includes(t) ? '<span class="badge">Starter</span>' : ''}
-        <p><strong>${g}.</strong> ${esc(d)}</p>${n ? `<p class="aroha"><b>Aroha:</b> ${arohaText(t)}</p>
-        <div class="card-actions"><button type="button" class="btn small" data-hear="${t}">Hear aroha</button><button type="button" class="btn small ghost" data-raga="${t}" data-group="${g}">How to play</button></div>` : '<p class="soon">Demo notation coming soon</p>'}</article>`;
-    }).join('') || '<p class="empty">No ragas match. Try clearing a filter.</p>';
+    const shown = RAGAS.filter(([t, g, d]) => (rf.group === 'All' || g === rf.group)
+      && (!rf.starter || STARTER.includes(t)) && (!rf.fav || settings.favs.includes(t))
+      && (!q || (t + ' ' + g + ' ' + d).toLowerCase().includes(q)));
+    ragaList.classList.toggle('list', shown.length > 0);
+    ragaList.innerHTML = shown.length ? shown.map(ragaRow).join('')
+      : '<div class="raga-empty"><p>No ragas match.</p><button type="button" class="btn sm" data-clear>Clear filters</button></div>';
     $('#raga-count').textContent = `${shown.length} of ${RAGAS.length} ragas`;
-    $('#raga-filter').querySelectorAll('button').forEach((b) => {
-      const k = b.dataset.kind;
-      b.setAttribute('aria-pressed', k === 'group' ? rf.group === b.dataset.v : rf[k]);
-    });
+    timeRow.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', rf.group === b.dataset.v));
+    $('#raga-flags').querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', rf[b.dataset.kind]));
+    placeFilter();
   }
-  const chips = [...RAGA_GROUPS.map((g) => ['group', g, g]), ['starter', 'true', 'Starter'], ['fav', 'true', '★ Favourites']];
-  chips.forEach(([kind, v, label]) => {
+  // a change of filter or search also ends a running aroha preview, whose button is about to be replaced
+  const refilter = () => { FluteDemo.player.stop(); showRagas(); };
+  RAGA_GROUPS.forEach((g) => {
     const b = document.createElement('button');
-    b.type = 'button'; b.textContent = label; b.dataset.kind = kind; b.dataset.v = v; b.style.width = 'auto'; b.style.padding = '.45rem .9rem';
-    b.addEventListener('click', () => { if (kind === 'group') rf.group = v; else rf[kind] = !rf[kind]; showRagas(); });
-    $('#raga-filter').appendChild(b);
+    b.type = 'button'; b.textContent = g; b.dataset.v = g;
+    b.addEventListener('click', () => { rf.group = g; refilter(); });
+    timeRow.appendChild(b);
   });
-  $('#raga-search').addEventListener('input', (e) => { rf.q = e.target.value; showRagas(); });
-  $('#raga-now').textContent = `Ragas for now (${nowGroup()})`;
+  [['starter', 'Starter', ''], ['fav', 'Favourites', 'star']].forEach(([kind, label, icon]) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'chip'; b.dataset.kind = kind; b.innerHTML = (icon ? FluteUI.icon(icon) : '') + label;
+    b.addEventListener('click', () => { rf[kind] = !rf[kind]; refilter(); });
+    $('#raga-flags').appendChild(b);
+  });
+  timeRow.addEventListener('scroll', () => timeRow.classList.toggle('more', timeRow.scrollLeft + timeRow.clientWidth < timeRow.scrollWidth - 4), { passive: true });
+  // the header button shows the icon of the current time of day (sunrise, sun, sunset, moon)
+  const paintNow = () => FluteUI.setIcon($('#raga-now'), GROUP_ICON[nowGroup()]);
+  new ResizeObserver(() => { placeFilter(); paintNow(); }).observe(timeRow); // runs when the tab is shown, when the row can first be measured
+  $('#raga-search').addEventListener('input', (e) => { rf.q = e.target.value; refilter(); });
+  const nowLabel = () => `Ragas for ${nowGroup()}`;
+  $('#raga-now').setAttribute('aria-label', nowLabel()); $('#raga-now').title = nowLabel(); paintNow();
   function ragasForNow() {
-    Object.assign(rf, { group: nowGroup(), q: '', starter: false, fav: false }); $('#raga-search').value = ''; showRagas();
+    Object.assign(rf, { group: nowGroup(), q: '', starter: false, fav: false }); $('#raga-search').value = ''; refilter();
     FluteNav.go('ragas', { top: true });
   }
   $('#raga-now').addEventListener('click', ragasForNow);
   $('#t-ragas').addEventListener('click', (e) => { e.preventDefault(); ragasForNow(); });
   $('#done-ragas').addEventListener('click', (e) => { e.preventDefault(); ragasForNow(); });
   showRagas();
-  $('#raga-cards').addEventListener('click', (e) => {
-    const fav = e.target.closest('[data-fav]'), hear = e.target.closest('[data-hear]'), how = e.target.closest('[data-raga]');
-    if (fav) {
+  ragaList.parentNode.addEventListener('click', (e) => {
+    const fav = e.target.closest('[data-fav]'), hear = e.target.closest('[data-hear]'), open = e.target.closest('[data-raga]');
+    if (e.target.closest('[data-clear]')) {
+      Object.assign(rf, { group: 'All', q: '', starter: false, fav: false }); $('#raga-search').value = ''; refilter();
+      $('#raga-search').focus();
+    } else if (fav) {
       const n = fav.dataset.fav, i = settings.favs.indexOf(n);
       if (i >= 0) settings.favs.splice(i, 1); else settings.favs.push(n);
-      saveSettings(); showRagas();
+      saveSettings();
+      if (rf.fav) { showRagas(); } // the list itself changes
+      else { const on = i < 0; fav.setAttribute('aria-pressed', on); fav.setAttribute('aria-label', favLabel(n, on)); } // only the star changes
     } else if (hear) { audio(); FluteDemo.preview(hear.dataset.hear, hear); }
-    else if (how) FluteDemo.ragaDemo(how.dataset.raga, how.dataset.group);
+    else if (open) FluteDemo.ragaDemo(open.dataset.raga, open.dataset.group, (RAGAS.find((r) => r[0] === open.dataset.raga) || [])[2]);
   });
-  $('#technique-cards').innerHTML = cards(TECHNIQUES);
+  $('#technique-cards').innerHTML = TECHNIQUES.map(([t, d], i) =>
+    `<div class="row tech"><span class="tnum" aria-hidden="true">${String(i + 1).padStart(2, '0')}</span><div class="grow"><b>${t}</b><small>${d}</small></div></div>`).join('');
 
-  // Tools bar: expandable panel, synced controls, keyboard shortcuts
-  const panel = $('#dock-panel'), pill = $('#pill-sa');
-  function togglePanel(open) {
-    open = open === undefined ? panel.hidden : open;
-    panel.hidden = !open; pill.setAttribute('aria-expanded', open);
-  }
-  pill.addEventListener('click', () => togglePanel());
-  document.addEventListener('click', (e) => { if (!panel.hidden && !e.target.closest('#dock')) togglePanel(false); });
-  const dockTv = $('#dock-tabla-vol'), dockTaal = $('#dock-taal-select');
-  dockTv.value = tablaVol.value;
-  dockTv.addEventListener('input', () => { tablaVol.value = dockTv.value; tablaVol.dispatchEvent(new Event('input')); });
-  tablaVol.addEventListener('input', () => { dockTv.value = tablaVol.value; });
-  // Volume readouts; double-click a slider to go back to 100%.
-  const vols = [[droneVol, '#drone-vol-out'], [tablaVol, '#tabla-vol-out'], [dockTv, '#dock-tabla-vol-out']];
-  const showVols = () => vols.forEach(([el, out]) => { $(out).textContent = el.value + '%'; });
-  vols.forEach(([el]) => {
-    el.addEventListener('input', showVols);
-    el.addEventListener('dblclick', () => { el.value = 100; el.dispatchEvent(new Event('input')); });
-  });
-  showVols();
-  // Phones: tuck the tools bar away while the user scrolls down, unless something is running or it is in use.
-  // Jumps from links and buttons (tab bar, "Ragas for now") don't count, so the bar is there when you land.
-  let lastY = scrollY, userScrollAt = 0;
-  const dock = $('#dock'), narrow = matchMedia('(max-width: 720px)');
-  ['touchmove', 'wheel'].forEach((t) => addEventListener(t, () => { userScrollAt = Date.now(); }, { passive: true }));
-  addEventListener('keydown', (e) => { if (/^(Arrow|Page|Home|End| )/.test(e.key)) userScrollAt = Date.now(); });
-  addEventListener('scroll', () => {
-    const y = scrollY, d = y - lastY;
-    if (Math.abs(d) < 8) return;
-    lastY = y;
-    const byUser = Date.now() - userScrollAt < 400;
-    const busy = !panel.hidden || !chip.hidden || taalRun || Sound.droneOn || !!dock.querySelector(':focus-visible'); // keyboard focus only, not a tapped button
-    dock.classList.toggle('tuck', narrow.matches && byUser && d > 0 && y > 200 && !busy);
-  }, { passive: true });
-  Object.keys(TAALS).forEach((k) => { const o = document.createElement('option'); o.textContent = k; dockTaal.appendChild(o); });
-  dockTaal.value = taalSelect.value;
-  dockTaal.addEventListener('change', () => { taalSelect.value = dockTaal.value; taalSelect.dispatchEvent(new Event('change')); });
-  taalSelect.addEventListener('change', () => { dockTaal.value = taalSelect.value; });
+  // Keyboard shortcuts: T tanpura, B tabla, [ ] tempo (5 BPM), / search ragas
   document.addEventListener('keydown', (e) => {
     if (e.ctrlKey || e.metaKey || e.altKey || e.target.closest('input, select, textarea, [contenteditable]') || document.querySelector('dialog[open]')) return;
     const k = e.key.toLowerCase();
-    if (k === 't') droneBtn.click();
-    else if (k === 'b') $('#dock-tabla').click();
-    else if (k === '[') $('#bpm-down').click();
-    else if (k === ']') $('#bpm-up').click();
+    if (k === 't') setDrone(!Sound.droneOn);
+    else if (k === 'b') setTaalRunning(!taalRun);
+    else if (k === '[') setBpm(settings.bpm - 5);
+    else if (k === ']') setBpm(settings.bpm + 5);
     else if (k === '/') { e.preventDefault(); FluteNav.go('ragas', { focus: false }); $('#raga-search').focus(); }
-    else if (k === 'escape') togglePanel(false);
     else return;
   });
 
@@ -655,9 +639,9 @@
     // of what was paused and a restore() that switches them back on.
     quiet() {
       const drone = Sound.droneOn, tabla = taalRun, paused = [];
-      if (drone) { droneBtn.click(); paused.push('tanpura'); }
+      if (drone) { setDrone(false); paused.push('tanpura'); }
       if (tabla) { setTaalRunning(false); paused.push('tabla'); }
-      return { paused, restore() { if (drone && !Sound.droneOn) droneBtn.click(); if (tabla && !taalRun) setTaalRunning(true); } };
+      return { paused, restore() { if (drone && !Sound.droneOn) setDrone(true); if (tabla && !taalRun) setTaalRunning(true); } };
     },
     setPlan(plan) {
       if (handle) stop();
@@ -668,16 +652,22 @@
   };
   if (window.FluteProgress) window.FluteProgress.refresh();
 
-  // Hooks for the Alankar tab (assets/alankar.js): the shared tempo, tabla, tanpura, volumes and settings.
+  // Hooks for the Home tab, the now-playing bar and the Alankar tab: the shared scale, tempo, taal, tabla, tanpura,
+  // volumes and settings. `on(kind, fn)` follows 'audio', 'timer', 'volume', 'tanpura', 'taal' and 'sa'.
   Object.assign(window.FluteApp, {
-    saveSettings,
-    bpm: () => Number(bpm.value), setBpm, onBpm: (fn) => bpmListeners.push(fn),
-    taalName: () => taalSelect.value,
-    setTaal(name) { if (TAALS[name] && taalSelect.value !== name) { taalSelect.value = name; taalSelect.dispatchEvent(new Event('change')); } },
-    tabla: { on: () => taalRun, set: setTaalRunning },
-    drone: { on: () => Sound.droneOn, set(on) { if (!!on !== Sound.droneOn) droneBtn.click(); } },
-    volume: (which) => (which === 'drone' ? settings.droneVol : settings.tablaVol),
-    setVolume(which, v) { const el = which === 'drone' ? droneVol : tablaVol; el.value = v; el.dispatchEvent(new Event('input')); },
+    saveSettings, on,
+    sa: () => settings.sa, onSa: (fn) => saListeners.push(fn),
+    saChoices: () => SA_CHOICES.slice(), saName, saShort, saFreq,
+    bpm: () => settings.bpm, setBpm, onBpm: (fn) => bpmListeners.push(fn),
+    taalName: () => settings.taal, taals: () => Object.keys(TAALS), setTaal,
+    onBeat: (fn) => beatListeners.push(fn),
+    tabla: { on: () => taalRun, set: setTaalRunning, toggle: () => setTaalRunning(!taalRun) },
+    drone: { on: () => Sound.droneOn, set: setDrone, toggle: () => setDrone(!Sound.droneOn), tuning: () => tuning },
+    tanpura: { get: tanpuraGet, set: setTanpura },
+    volume: (which) => (which === 'drone' ? settings.droneVol : settings.tablaVol), setVolume,
+    // the running block timer, for the now-playing bar; openTimer() goes back to its card
+    timerInfo: () => ({ show: timerShow, running: !!handle, remaining, title: block ? block.title : '', id: block ? block.id : null }),
+    openTimer,
     // 'off' (not in today's routine), 'todo' or 'done'; markBlock ticks a block off like the checkbox does.
     blockState: (id) => { const r = ROUTINE.find((x) => x.id === id); return !r ? 'off' : state.checks[id] ? 'done' : 'todo'; },
     markBlock(id) { if (!ROUTINE.some((x) => x.id === id) || state.checks[id]) return false; setChecked(id, true); return true; }

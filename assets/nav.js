@@ -1,5 +1,5 @@
 /* View router: the app is five views (Home, Practice, Alankar, Ragas, Learn), one visible at a time, switched from the
-   tab bar (phones) or the top nav (desktop). Everything lives in one page, so audio, timers and the tools bar keep
+   tab bar (phones) or the top nav (desktop). Everything lives in one page, so audio, timers and the now-playing bar keep
    running when you change tab.
 
    Routes are hash links: #home #practice #alankar #ragas #learn. Older section links still work and open the view
@@ -60,7 +60,6 @@
       if (cur) { scrollAt[cur] = root.scrollY; fire(hidden, cur); }
       VIEWS.forEach((v) => { viewEl(v).hidden = v !== r.view; });
       cur = r.view; markTabs();
-      const dock = document.getElementById('dock'); if (dock) dock.classList.remove('tuck');
       fire(shown, cur); // lets a view render before its scroll position is restored
     }
     const target = r.section && document.getElementById(r.section);

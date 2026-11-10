@@ -77,7 +77,7 @@
     $('[data-go]', body).addEventListener('click', go);
     $('[data-stop]', body).addEventListener('click', stop);
     const dr = $('[data-drone]', body);
-    if (dr) dr.addEventListener('click', () => { document.getElementById('drone-toggle').click(); dr.classList.toggle('on', Sound.droneOn); });
+    if (dr) dr.addEventListener('click', () => { FluteApp.drone.toggle(); dr.classList.toggle('on', Sound.droneOn); });
     const pick = $('[data-pick]', body);
     if (pick) pick.addEventListener('change', () => { stop(); render(); });
     render();

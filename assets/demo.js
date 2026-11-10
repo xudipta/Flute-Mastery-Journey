@@ -115,9 +115,16 @@
     }
   };
 
-  // One-tap preview of a raga's aroha from its card.
+  // One-tap preview of a raga's aroha from its row. The round button swaps play for stop; a text button swaps its words.
   let previewBtn = null;
-  function resetPreview() { if (previewBtn) { previewBtn.textContent = 'Hear aroha'; previewBtn.classList.remove('on'); previewBtn = null; } }
+  function paintPreview(btn, on) {
+    btn.classList.toggle('on', on);
+    if (btn.querySelector('svg')) {
+      root.FluteUI.setIcon(btn, on ? 'stop' : 'play');
+      btn.setAttribute('aria-label', (on ? 'Stop ' : 'Hear aroha of ') + (btn.dataset.hear || ''));
+    } else btn.textContent = on ? 'Stop' : 'Hear aroha';
+  }
+  function resetPreview() { if (previewBtn) { paintPreview(previewBtn, false); previewBtn = null; } }
   function preview(name, btn) {
     const info = root.RAGA_NOTATION[name];
     if (!info) return;
@@ -125,54 +132,70 @@
     const items = info.aroha.split(/\s+/).map((tok) => ({ tok, beats: 1 }));
     items[items.length - 1].beats = 2;
     player.play(items, 80, { onStep() {}, onEnd() {} });
-    previewBtn = btn; btn.textContent = 'Stop'; btn.classList.add('on');
+    previewBtn = btn; paintPreview(btn, true);
   }
 
-  // ---------- dialog ----------
+  // ---------- dialog: one bottom sheet for every "how to play" demo ----------
   let cleanup = null;
   function openDialog(title, sub, build) {
     const dlg = $('#demo');
     $('#demo-title').textContent = title;
-    $('#demo-sub').textContent = sub || '';
-    const body = $('#demo-body'); body.innerHTML = '';
+    const subEl = $('#demo-sub'); subEl.textContent = sub || ''; subEl.hidden = !sub;
+    const body = $('#demo-body'); body.innerHTML = ''; body.scrollTop = 0;
     cleanup = build(body) || null;
-    if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
+    root.FluteUI.openSheet(dlg);
   }
   function closeDialog() {
     player.stop();
     if (cleanup) { cleanup(); cleanup = null; }
-    const dlg = $('#demo');
-    if (typeof dlg.close === 'function') dlg.close(); else dlg.removeAttribute('open');
+    root.FluteUI.closeSheet($('#demo'));
   }
   document.addEventListener('DOMContentLoaded', () => {
-    $('#demo-close').addEventListener('click', closeDialog);
-    $('#demo').addEventListener('close', () => { player.stop(); if (cleanup) { cleanup(); cleanup = null; } });
-    $('#demo').addEventListener('click', (e) => { if (e.target.id === 'demo') closeDialog(); });
+    const dlg = $('#demo');
+    // FluteUI closes the sheet (close button, backdrop, Escape); the sound stops as soon as that starts
+    dlg.addEventListener('click', (e) => { if (e.target.closest('[data-close]') || e.target === dlg) player.stop(); });
+    dlg.addEventListener('cancel', () => player.stop());
+    dlg.addEventListener('close', () => { player.stop(); if (cleanup) { cleanup(); cleanup = null; } });
   });
 
   // ---------- raga demo ----------
   const SPEEDS = { Slow: 50, Normal: 80, Fast: 120 };
   const vname = (t) => (t ? parseSwar(t).name : '—');
-  function ragaDemo(name, timeGroup) {
+  const escText = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const ico = (n) => root.FluteUI.icon(n);
+  // `mood` is the raga's one-paragraph description. A raga without notation still opens, with its description.
+  function ragaDemo(name, timeGroup, mood) {
     const info = root.RAGA_NOTATION[name];
-    if (!info) return;
-    openDialog('Raga ' + name, `${timeGroup} raga · thaat ${info.thaat}`, (body) => {
+    const moodHtml = mood ? `<p class="raga-mood">${escText(mood)}</p>` : '';
+    if (!info) {
+      openDialog(name, `${timeGroup} raga`, (body) => { body.innerHTML = `<div class="raga-demo">${moodHtml}<p class="demo-note">Demo notation for this raga is coming soon.</p></div>`; });
+      return;
+    }
+    openDialog(name, `${timeGroup} raga · thaat ${info.thaat}`, (body) => {
       const lines = [['aroha', 'Aroha (ascending)'], ['avaroha', 'Avaroha (descending)'], ['pakad', 'Pakad (signature phrases)']].filter(([k]) => info[k]);
-      body.innerHTML = `
+      body.innerHTML = `<div class="raga-demo">
+        ${moodHtml}
         <dl class="facts"><div><dt>Vadi</dt><dd>${vname(info.vadi)}</dd></div><div><dt>Samvadi</dt><dd>${vname(info.samvadi)}</dd></div><div><dt>Thaat</dt><dd>${info.thaat}</dd></div></dl>
-        <div class="notation">${lines.map(([k, label]) => `<div class="nline" data-k="${k}"><span class="nlabel">${label}</span><span class="ntoks"></span></div>`).join('')}</div>
-        <svg class="demo-chart" viewBox="0 0 640 150" role="img" aria-label="Bansuri finger-hole chart for the swar being played"></svg>
-        <p class="demo-cap" aria-live="polite">Press a play button to hear and see the raga.</p>
-        <div class="demo-controls">
-          <button class="btn small" data-play="aroha">Aroha</button>
-          <button class="btn small" data-play="avaroha">Avaroha</button>
-          ${info.pakad ? '<button class="btn small" data-play="pakad">Pakad</button>' : ''}
-          <button class="btn small" data-play="both">Aroha + avaroha</button>
-          <button class="btn small ghost" data-stop>Stop</button>
-          <label>Speed <select data-speed>${Object.keys(SPEEDS).map((s) => `<option${s === 'Normal' ? ' selected' : ''}>${s}</option>`).join('')}</select></label>
-          <label><input type="checkbox" data-loop> Loop</label>
+        <div class="demo-stage">
+          <svg class="demo-chart" viewBox="0 0 640 150" role="img" aria-label="Bansuri finger-hole chart for the swar being played"></svg>
+          <p class="demo-cap" aria-live="polite">Press a play button to hear and see the raga.</p>
+          <p class="demo-note">The tonic follows the Sa chosen on Home. Simplified notation and fingering: check with your guru.</p>
         </div>
-        <p class="demo-note">The tonic follows the Sa chosen in the tools bar. Simplified notation and fingering: check with your guru.</p>`;
+        <div class="notation">${lines.map(([k, label]) => `<div class="nline" data-k="${k}"><p class="eyebrow nlabel">${label}</p><div class="ntoks"></div></div>`).join('')}</div>
+        <div class="demo-play">
+          <div class="seg demo-what" role="group" aria-label="What to play">
+            <button type="button" data-play="aroha">Aroha</button>
+            <button type="button" data-play="avaroha">Avaroha</button>
+            ${info.pakad ? '<button type="button" data-play="pakad">Pakad</button>' : ''}
+            <button type="button" data-play="both" aria-label="Aroha and avaroha">Both</button>
+          </div>
+          <div class="demo-opts">
+            <div class="seg demo-speed" role="radiogroup" aria-label="Speed" data-speed>${Object.keys(SPEEDS).map((s) => `<button type="button" role="radio" aria-checked="${s === 'Normal'}">${s}</button>`).join('')}</div>
+            <button type="button" class="chip" data-loop aria-pressed="false">${ico('replay')}Loop</button>
+            <button type="button" class="iconbtn demo-stop" data-stop aria-label="Stop">${ico('stop')}</button>
+          </div>
+        </div>
+      </div>`;
       const chart = createChart($('.demo-chart', body)), cap = $('.demo-cap', body);
       const rows = {};
       lines.forEach(([k]) => {
@@ -199,13 +222,21 @@
         return out;
       };
       const clearMarks = () => body.querySelectorAll('.tok.now').forEach((e) => e.classList.remove('now'));
+      const markPlaying = (which) => body.querySelectorAll('[data-play]').forEach((b) => { const on = b.dataset.play === which; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
+      const speedSeg = $('[data-speed]', body), loopBtn = $('[data-loop]', body);
       let current = null;
-      const speed = () => SPEEDS[$('[data-speed]', body).value];
-      const loop = () => $('[data-loop]', body).checked;
+      const speed = () => SPEEDS[speedSeg.querySelector('[aria-checked="true"]').textContent];
+      const loop = () => loopBtn.getAttribute('aria-pressed') === 'true';
+      speedSeg.addEventListener('click', (e) => {
+        const b = e.target.closest('button'); if (!b) return;
+        speedSeg.querySelectorAll('button').forEach((x) => x.setAttribute('aria-checked', x === b));
+        if (current) run(current); // a new speed applies to what is playing
+      });
+      loopBtn.addEventListener('click', () => { const on = !loop(); loopBtn.setAttribute('aria-pressed', on); loopBtn.classList.toggle('on', on); });
       function run(which) {
         current = which;
         const items = which === 'both' ? itemsFor('aroha').concat([{ rest: 1 }], itemsFor('avaroha')) : itemsFor(which);
-        body.querySelectorAll('[data-play]').forEach((b) => b.classList.toggle('on', b.dataset.play === which));
+        markPlaying(which);
         player.play(items, speed(), {
           onStep(step) {
             clearMarks();
@@ -214,11 +245,11 @@
             chart.show(step.sw.closed, step.sw.half, step.sw.over);
             cap.textContent = describe(step.sw);
           },
-          onEnd() { clearMarks(); chart.clear(); if (loop()) run(current); else { cap.textContent = 'Done. Play again, or change the speed.'; body.querySelectorAll('[data-play]').forEach((b) => b.classList.remove('on')); } }
+          onEnd() { clearMarks(); chart.clear(); if (loop()) run(current); else { current = null; cap.textContent = 'Done. Play again, or change the speed.'; markPlaying(null); } }
         });
       }
       body.querySelectorAll('[data-play]').forEach((b) => b.addEventListener('click', () => run(b.dataset.play)));
-      $('[data-stop]', body).addEventListener('click', () => { current = null; player.stop(); clearMarks(); chart.clear(); body.querySelectorAll('[data-play]').forEach((b) => b.classList.remove('on')); });
+      $('[data-stop]', body).addEventListener('click', () => { current = null; player.stop(); clearMarks(); chart.clear(); markPlaying(null); });
       return () => { clearMarks(); };
     });
   }
