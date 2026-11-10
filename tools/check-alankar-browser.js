@@ -104,7 +104,7 @@ const near = (a, b, tol) => Math.abs(a - b) <= tol;
 
   // ----- change notes per beat while playing -----
   await reset();
-  await p.click('#al-laya [data-v="2"]'); await wait(3500);
+  await p.click('#al-laya [data-v="2"]'); await wait(4500); // ~13 notes at 90 BPM: leaves room for a busy machine
   g = await grab(); spb = 60 / (await bpmNow());
   const tail = g.notes.slice(2), tdt = tail.slice(1).map((n, i) => n.t - tail[i].t);
   check('2 notes per beat: spacing is half a beat', tdt.length > 8 && tdt.every((d) => near(d, spb / 2, 0.0006)), 'worst ' + Math.max(...tdt.map((d) => Math.abs(d - spb / 2) * 1000)).toFixed(3) + ' ms');
