@@ -166,7 +166,7 @@ const { BASE, launch, suite } = require('./lib');
 
   // --- the Today card and stats are on Practice, above the cards
   await q(() => FluteNav.go('practice'));
-  t.ok(await q(() => { const td = document.querySelector('#today'), h = document.querySelector('#practice .pc-carousel'); return !td.hidden && td.getBoundingClientRect().top < h.getBoundingClientRect().top && !!document.querySelector('#view-practice .stats'); }), 'the Today card is at the top of Practice');
+  t.ok(await q(() => { const td = document.querySelector('#today'), h = document.querySelector('#practice .pc-carousel'); return !td.hidden && td.getBoundingClientRect().top < h.getBoundingClientRect().top && !!document.querySelector('#today #minutes'); }), 'the Today card is at the top of Practice');
   t.ok(/Start today/.test(await $('#t-go').textContent()), 'Today says start (nothing done)', await $('#t-go').textContent());
   await p.goto(BASE + '/#practice'); await p.waitForTimeout(500);
   t.ok(await q(() => { const r = document.querySelector('#today').getBoundingClientRect(); return r.top >= 0 && r.top < innerHeight && r.bottom > 0; }), 'a #practice link lands with the Today card on screen');

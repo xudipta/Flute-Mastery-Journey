@@ -27,7 +27,7 @@ const { BASE, launch, SEL, act, suite, seed } = require('./lib');
   const pausedAt = (await st()).time;
   await p.reload(); await p.waitForTimeout(1500);
   s = await st();
-  t.ok(/paused/.test(s.label) && /Start/.test(s.toggle) && s.time === pausedAt && s.saved && s.saved.remaining, 'paused, then reload: it comes back paused with the same time left', { pausedAt, ...s });
+  t.ok(/paused/.test(s.label) && /Resume/.test(s.toggle) && s.time === pausedAt && s.saved && s.saved.remaining, 'paused, then reload: it comes back paused with the same time left', { pausedAt, ...s });
 
   // finished while the page was closed: move the saved end time into the past
   await p.click(SEL.cardToggle); await p.waitForTimeout(200);

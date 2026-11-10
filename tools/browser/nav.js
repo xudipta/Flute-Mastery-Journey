@@ -48,7 +48,7 @@ const S = process.argv[2] || require('os').tmpdir(); // screenshots go here
   await p.evaluate(() => localStorage.setItem('flute-journey', JSON.stringify({ settings: { onboarded: true } }))); await p.reload(); await p.waitForTimeout(150);
   ok(!(await p.isVisible('#today')), 'the Today card is no longer on Home');
   await p.click('.tabbar a[data-view="practice"]'); await p.waitForTimeout(100);
-  ok(await p.isVisible('#today') && await p.isVisible('#view-practice .stats'), 'the Today card and stats are at the top of Practice');
+  ok(await p.isVisible('#today') && await p.isVisible('#today #minutes') && await p.isVisible('#today .pc-streak'), 'the Today summary (minutes and streak) is at the top of Practice');
   await p.click('#t-ragas'); await p.waitForTimeout(100); ok((await state(p)).view === 'ragas' && (await p.textContent('#raga-count')).includes('of 23'), 'Today card "Ragas for now" -> ragas, filtered', await p.textContent('#raga-count'));
   await p.click('.tabbar a[data-view="practice"]'); await p.click('#t-go'); await p.waitForTimeout(300);
   let s = await state(p); ok(s.view === 'practice' && (await p.textContent('.pc-card.active .pc-toggle')) === 'Pause', 'Today card Continue -> practice, timer running', { label: await p.textContent('#timer-label') });

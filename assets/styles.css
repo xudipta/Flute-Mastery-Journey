@@ -107,8 +107,8 @@ output.vol { font-weight: 600; font-variant-numeric: tabular-nums; min-width: 3.
 /* ===== 5. cards =====
    One flat card look everywhere (panels, raga and technique cards, roadmap stages, calendar, tuner, practice cards, stats):
    a surface with a 1 px line. States: default, active (selected), running (in progress), done. */
-.panel, .card, .stage, .cal-card, .data-panel, .tuner-card, .fingering, .pstats > div, .stats > div, .pc-track > .pc-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card); }
-.panel, .cal-card, .data-panel, .tuner-card, .fingering { padding: var(--s-4); }
+.panel, .card, .stage, .tuner-card, .fingering, .pc-track > .pc-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card); }
+.panel, .tuner-card, .fingering { padding: var(--s-4); }
 .panel + .panel { margin-top: var(--gap); }
 :is(.panel, .card, .stage, .pc-card).active { border-color: var(--ink-3); }
 :is(.panel, .card, .stage, .pc-card).running { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
@@ -126,7 +126,6 @@ output.vol { font-weight: 600; font-variant-numeric: tabular-nums; min-width: 3.
 .stage ul { margin: var(--s-2) 0 0; padding-left: 1.2rem; color: var(--ink-2); }
 .soon { color: var(--ink-3); font-size: var(--fs-sm); font-style: italic; }
 .empty { color: var(--ink-3); grid-column: 1 / -1; }
-.done { background: var(--surface); border: 1px solid color-mix(in srgb, var(--ok) 55%, var(--line)); border-left: 3px solid var(--ok); padding: var(--s-4); border-radius: var(--r-md); }
 
 /* ===== 6. app shell: header, tab bar, now-playing bar, toast ===== */
 .site-header { position: sticky; top: 0; z-index: 5; display: flex; justify-content: space-between; align-items: center; gap: var(--s-4); padding: calc(.25rem + env(safe-area-inset-top)) max(1.5rem, env(safe-area-inset-right)) .25rem max(1.5rem, env(safe-area-inset-left)); background: var(--bg); border-bottom: 1px solid var(--line); }
@@ -160,20 +159,6 @@ output.vol { font-weight: 600; font-variant-numeric: tabular-nums; min-width: 3.
 @media (min-width: 721px) { .mini { left: 50%; right: auto; width: min(26rem, calc(100vw - 1.5rem)); transform: translateX(-50%); bottom: 1rem; } }
 
 /* ===== 7. shared content ===== */
-/* practice: today strip, stats, completion message */
-.today { max-width: 40rem; margin: 0 auto; }
-.t-line { color: var(--ink-2); }
-.t-bar { height: 4px; border-radius: 2px; background: var(--surface-2); overflow: hidden; margin: var(--s-4) auto; max-width: 30rem; }
-#t-fill { height: 100%; width: 0; background: var(--accent); border-radius: inherit; transition: width .4s var(--ease); }
-.t-actions { display: flex; flex-wrap: wrap; gap: var(--s-3); justify-content: center; }
-.stats { display: flex; justify-content: center; gap: var(--s-3); margin-top: var(--s-5); flex-wrap: wrap; }
-.stats > div { padding: var(--s-3) var(--s-4); min-width: 6.5rem; text-align: center; }
-.stats strong { display: block; font-size: var(--fs-2xl); line-height: 1.1; color: var(--ink); font-variant-numeric: tabular-nums; }
-.stats span { color: var(--ink-3); font-size: var(--fs-sm); }
-.routine { list-style: none; margin: 0; padding: 0; }
-.routine-head { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-4); align-items: center; margin-bottom: var(--s-4); }
-#done-msg .next { display: block; margin-top: .4rem; color: var(--ink-2); }
-#done-msg a { color: var(--accent-ink); font-weight: 600; }
 #done-msg .next a { margin-left: 0; }
 /* finger-hole chart */
 .chart-tools { display: flex; flex-wrap: wrap; gap: var(--s-2) 1.25rem; align-items: center; margin-bottom: var(--s-3); }
@@ -225,39 +210,11 @@ output.vol { font-weight: 600; font-variant-numeric: tabular-nums; min-width: 3.
 .tuner-verdict.ok { color: var(--ok); }
 .tuner-trace { width: 100%; height: 140px; background: var(--surface-2); border-radius: var(--r-md); display: block; }
 .tuner-foot { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-4); justify-content: space-between; align-items: center; margin-top: var(--s-3); }
-/* progress: stats, calendar, notes, data */
-.pstats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: var(--s-3); margin-bottom: var(--s-4); }
-.pstats > div { padding: var(--s-3) var(--s-4); text-align: center; }
-.pstats strong { display: block; font-size: var(--fs-2xl); color: var(--ink); }
-.pstats span { color: var(--ink-3); font-size: .8rem; }
-.cal-card, .data-panel { margin-bottom: var(--s-4); }
-.cal-head { display: flex; align-items: center; gap: var(--s-2); margin-bottom: var(--s-2); }
-.cal-head h3 { flex: 1; text-align: center; margin: 0; }
-.cal-dow, .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: .3rem; }
-.cal-dow span { text-align: center; color: var(--ink-3); font-size: var(--fs-xs); }
-.cal-grid { margin-top: .3rem; }
-.cal-day { font: inherit; min-height: 2.6rem; border-radius: var(--r-sm); border: 2px solid transparent; background: var(--surface-2); color: var(--ink); cursor: pointer; position: relative; }
-.cal-day.lv1 { background: color-mix(in srgb, var(--ok) 30%, var(--surface)); }
-.cal-day.lv2 { background: var(--ok); color: var(--on-ok); font-weight: 600; }
-.cal-day.today { border-color: var(--accent); }
-.cal-day:disabled { opacity: .4; cursor: default; }
-.cal-day.sel { outline: 3px solid var(--focus); outline-offset: 1px; }
-.cal-day.has-note::after { content: ''; position: absolute; top: 4px; right: 5px; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
-.cal-legend { color: var(--ink-3); font-size: .8rem; margin: .6rem 0 0; }
-.cal-legend i { display: inline-block; width: .9rem; height: .9rem; border-radius: 4px; vertical-align: -2px; margin: 0 .25rem 0 .75rem; }
-.cal-legend .lv1 { background: color-mix(in srgb, var(--ok) 30%, var(--surface)); }
-.cal-legend .lv2 { background: var(--ok); }
-.day-detail { margin-top: var(--s-4); border-top: 1px solid var(--line); padding-top: var(--s-3); }
-.day-detail h4 { margin: 0 0 .25rem; }
-.note-label { display: block; font-weight: 600; }
-.note-label textarea { display: block; width: 100%; margin-top: .35rem; font: inherit; font-weight: 400; padding: .5rem .7rem; border-radius: var(--r-sm); border: 1px solid var(--line-2); background: var(--surface); color: var(--ink); resize: vertical; }
-.data-panel h3 { margin-top: 0; }
 
 /* ===== 8. dialogs: routine editor and the "how to play" demos ===== */
-#demo, #routine-editor { padding: 1.25rem; border: 1px solid var(--line); border-radius: var(--r-card); background: var(--surface); color: var(--ink); box-shadow: var(--shadow-sheet); }
+#demo { padding: 1.25rem; border: 1px solid var(--line); border-radius: var(--r-card); background: var(--surface); color: var(--ink); box-shadow: var(--shadow-sheet); }
 #demo { width: min(760px, 94vw); max-height: 92vh; overflow: auto; }
-#routine-editor { width: min(620px, 94vw); max-height: 92vh; overflow: auto; }
-#demo::backdrop, #routine-editor::backdrop { background: var(--scrim); }
+#demo::backdrop { background: var(--scrim); }
 .demo-head { display: flex; justify-content: space-between; gap: var(--s-4); align-items: flex-start; }
 .demo-head h2 { margin: 0; }
 .demo-head .lead { margin: 0; }
@@ -292,11 +249,6 @@ output.vol { font-weight: 600; font-variant-numeric: tabular-nums; min-width: 3.
 .cue { display: flex; align-items: center; gap: var(--s-3); background: var(--surface-2); border-radius: var(--r-md); padding: .6rem var(--s-4); font-weight: 600; }
 .cue-icon { font-size: 2rem; }
 .cue-stage { color: var(--accent-ink); font-weight: 600; }
-.re-list { list-style: none; padding: 0; margin: var(--s-4) 0 var(--s-2); display: grid; gap: var(--s-2); }
-.re-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2) var(--s-3); background: var(--surface-2); border-radius: var(--r-md); padding: var(--s-2) var(--s-3); }
-.re-on { flex: 1 1 11rem; display: flex; align-items: center; gap: var(--s-2); font-weight: 600; }
-.re-on input { width: 1.4rem; height: 1.4rem; }
-.re-min input { width: 4rem; font: inherit; padding: .3rem .4rem; border-radius: 8px; border: 1px solid var(--line-2); background: var(--surface); color: var(--ink); min-height: 2.4rem; }
 
 /* ===== 9. phones: tab bar at the bottom ===== */
 @media (max-width: 720px) {
