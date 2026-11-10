@@ -22,6 +22,8 @@
     });
     return best;
   }
+  // A block's short name for lists: without the parenthesis, and with non-breaking hyphens so "cool-down" stays on one line.
+  const short = (t) => t.replace(/\s*\(.*\)/, '').replace(/-/g, '\u2011');
   function stats() {
     const A = App(), log = A.state().log, days = A.practisedDays();
     const total = days.reduce((s, k) => s + (log[k].minutes || 0), 0);
@@ -52,7 +54,7 @@
     const A = App(), box = $('#day-detail');
     if (!selected) { box.innerHTML = '<p class="hint">Select a day to see details.</p>'; return; }
     const e = A.state().log[selected], d = new Date(selected + 'T00:00:00');
-    const names = (e && e.blocks || []).map((id) => ((A.BLOCKS.find((b) => b.id === id) || {}).title || '').replace(/\s*\(.*\)/, '')).filter(Boolean);
+    const names = (e && e.blocks || []).map((id) => short((A.BLOCKS.find((b) => b.id === id) || {}).title || '')).filter(Boolean);
     const sum = A.practised(selected)
       ? `${e.minutes ? e.minutes + ' minutes' : 'Practised'}${e.complete ? ' · full routine' : ''}`
       : 'No practice logged.';
@@ -83,7 +85,7 @@
     $('#re-list').innerHTML = plan.map((p, i) => {
       const b = A.BLOCKS.find((x) => x.id === p.id);
       return `<li class="row re-row"><input type="checkbox" data-i="${i}" data-f="on" ${p.on ? 'checked' : ''} aria-label="Include ${b.title}">
-        <span class="grow"><b>${b.title.replace(/\s*\(.*\)/, '')}</b></span>
+        <span class="grow"><b>${short(b.title)}</b></span>
         <label class="re-min"><input type="number" min="1" max="60" value="${p.min}" data-i="${i}" data-f="min" aria-label="Minutes for ${b.title}"></label>
         <button type="button" class="iconbtn" data-up="${i}" aria-label="Move ${b.title} up" ${i === 0 ? 'disabled' : ''}>${I('up')}</button>
         <button type="button" class="iconbtn" data-down="${i}" aria-label="Move ${b.title} down" ${i === plan.length - 1 ? 'disabled' : ''}>${I('down')}</button></li>`;
