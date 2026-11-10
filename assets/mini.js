@@ -1,7 +1,7 @@
 /* Now-playing bar (#mini): one slim bar above the tab bar that says what is sounding and what is counting down.
 
    It shows when the tanpura, the taal or a practice-block timer is running, and
-     - on every tab but Home: for sound or a timer (Home has the sound controls itself);
+     - on every tab but Home and Alankar: for sound or a timer (they have the sound controls themselves);
      - on Home: only for a timer, which Home does not show.
    It reads FluteApp (app.js) and redraws when its audio or timer state changes, or when a tab opens.
      text area: goes to Home (sound) or to the running card on Practice (timer);
@@ -24,7 +24,8 @@
       const sound = [];
       if (drone) sound.push(`Tanpura · ${A.saName(A.sa()).replace(/ \(low\)$/, '')}`);
       if (tabla) sound.push(`${A.taalName().split(' · ')[0]} · ${A.bpm()} BPM`);
-      const visible = t.show || ((drone || tabla) && !home);
+      // The Alankar tab has its own player with the same controls, so sound alone does not show the bar there.
+      const visible = t.show || ((drone || tabla) && !home && N.current() !== 'alankar');
       let line1, line2;
       if (t.show) { line1 = `${fmt(t.remaining)} · ${t.title}`; line2 = sound.join(' · ') || (t.running ? 'Practice timer' : 'Paused'); }
       else { line1 = sound[0] || ''; line2 = sound[1] || ''; }
