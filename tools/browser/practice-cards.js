@@ -64,7 +64,7 @@ const ok = (c, msg, extra) => { if (!c) fails++; console.log((c ? 'ok   ' : 'FAI
   ok(await p.evaluate(() => document.activeElement.classList.contains('pc-toggle') && document.activeElement.closest('li').dataset.id === 'sa'), 'chip tap focuses that card\'s Pause button');
   // pause / reset on the card
   await p.click('li[data-id="sa"] .pc-toggle'); await p.waitForTimeout(300);
-  ok(await p.evaluate(() => document.querySelector('li[data-id="sa"] .pc-toggle').textContent === 'Start' && /Paused/.test(document.querySelector('li[data-id="sa"] .pc-badge').textContent)), 'Pause shows Start + Paused badge');
+  ok(await p.evaluate(() => document.querySelector('li[data-id="sa"] .pc-toggle').textContent === 'Resume' && /Paused/.test(document.querySelector('li[data-id="sa"] .pc-badge').textContent)), 'Pause shows Resume + Paused badge');
   // ---------- 3. reload restores the paused timer and its card ----------
   await p.click('.pc-dot >> nth=0'); await p.waitForTimeout(500);
   await p.reload(); await p.waitForTimeout(800);
@@ -128,7 +128,7 @@ const ok = (c, msg, extra) => { if (!c) fails++; console.log((c ? 'ok   ' : 'FAI
   p = await page({ width: 375, height: 740 }, { reduce: true });
   await p.goto(URL); await seed(p, { settings: { onboarded: true } }); await p.goto(URL + '#practice'); await p.waitForTimeout(500);
   await p.click('#pc-next'); await p.waitForTimeout(80);
-  ok((await S(p)).idx === 1 && await p.evaluate(() => { const t = document.querySelector('#routine'); return Math.abs(t.scrollLeft - (document.querySelector('.pc-card.is-current').offsetLeft + document.querySelector('.pc-card.is-current').offsetWidth / 2 - t.clientWidth / 2)) < 2; }), 'reduced motion: card changes instantly');
+  ok((await S(p)).idx === 1 && await p.evaluate(() => { const t = document.querySelector('#routine'); return Math.abs(t.scrollLeft - (document.querySelector('.pc-card.is-current').offsetLeft - parseFloat(getComputedStyle(t).paddingLeft))) < 2; }), 'reduced motion: card changes instantly');
   await p.context().close();
 
   console.log('console errors/warnings:', errs);

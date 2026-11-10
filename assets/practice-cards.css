@@ -1,24 +1,57 @@
-/* Practice view (#view-practice): the swipeable practice cards. Built on the tokens and card styles in styles.css:
-   the card look and its states (active, running, done) come from there. The cards come first on the screen: a slim
-   Today strip sits above them, and the stats and the long hint sit below. */
+/* Practice view (#view-practice): the Today summary, the swipeable practice cards and the Progress section below them.
+   Built only on the tokens and shared components in styles.css (.view-head, .eyebrow, .btn, .step, .iconbtn, .bar, .list/.row,
+   .seg, dialog.sheet). Direction: paper and ink, one terracotta accent for the main action and the current state, 1 px
+   lines for depth, a serif for titles, a light tabular timer as the biggest thing on the card. */
 
-#practice { padding-top: var(--s-5); }
+#practice { padding-top: calc(var(--s-4) + env(safe-area-inset-top, 0px)); padding-bottom: var(--s-4); }
+#practice .view-head { margin-bottom: var(--s-2); }
+#practice .view-head .title-lg { margin: 0; }
 
-/* ----- today strip ----- */
-.practice-top { margin: 0 0 var(--s-3); }
-#practice .today { max-width: none; margin: 0; }
-#practice .t-line { margin: 0; font-size: var(--fs-sm); line-height: 1.4; }
-#practice .t-bar { margin: var(--s-2) 0; max-width: none; }
-#practice .t-actions { justify-content: flex-start; gap: var(--s-2); }
+/* text-style actions: quiet, no box; the accent only on the main one */
+.pc-link { display: inline-flex; align-items: center; gap: .4rem; min-height: var(--tap); padding: 0; border: 0; background: none; color: var(--accent-ink); font: 600 var(--fs-md)/1.2 var(--sans); text-decoration: none; cursor: pointer; }
+.pc-link.quiet { color: var(--ink-2); }
+.pc-link:hover { text-decoration: underline; }
+.pc-link .i { width: 1.0625rem; height: 1.0625rem; }
 
-/* ----- carousel: a horizontal scroll-snap track; the cards peek in from the sides ----- */
+/* ----- today summary ----- */
+#practice .today { max-width: none; margin: 0; padding: 0 var(--s-1); }
+.pc-date { margin: 0; color: var(--ink-3); font-size: var(--fs-md); }
+.pc-prog { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s-3); margin-top: var(--s-3); }
+.pc-prog p { margin: 0; }
+#t-line b { font-weight: 600; font-variant-numeric: tabular-nums; }
+.pc-streak { color: var(--ink-3); font-size: var(--fs-md); }
+#streak { font-variant-numeric: tabular-nums; }
+#practice .t-bar { margin-top: var(--s-2); }
+#t-fill { width: 0; transition: width .4s var(--ease); }
+.pc-today-actions { display: flex; align-items: center; justify-content: space-between; gap: var(--s-4); margin-top: var(--s-1); }
+#t-go { flex: 1 1 auto; min-width: 0; justify-content: flex-start; }
+#t-go .lbl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#t-ragas { flex: none; }
+
+/* ----- step bar and the line above the cards ----- */
+.pc { margin-top: 0; }
+.pc-steps { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: var(--s-1); margin: calc(-1 * var(--s-2)) var(--s-1) 0; }
+.pc-dot { position: relative; height: var(--tap); padding: 0; border: 0; background: none; cursor: pointer; }
+.pc-dot::before { content: ''; position: absolute; left: 0; right: 0; top: 50%; height: 3px; margin-top: -1.5px; border-radius: 2px; background: var(--line-2); opacity: .45; transition: background .2s, opacity .2s; }
+.pc-dot.is-done::before { background: var(--ink); opacity: 1; }
+.pc-dot.is-running::before, .pc-dot.is-current::before { background: var(--accent); opacity: 1; }
+.pc-dot:focus-visible { outline-offset: -4px; border-radius: 4px; }
+.pc-stepline { display: flex; align-items: center; gap: var(--s-3); margin: calc(-1 * var(--s-3)) var(--s-1) var(--s-2); }
+.pc-stepline .eyebrow { white-space: nowrap; }
+.pc-next-label { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; text-align: right; }
+.pc-arrows { display: flex; gap: var(--s-2); margin-left: auto; }
+.pc-arrows .step { width: 2.5rem; height: 2.5rem; }
+
+/* ----- carousel: a scroll-snap track; cards start at the gutter and the next one peeks in at the right edge ----- */
+.pc { --peek: 1.25rem; }
 .pc-carousel { margin-inline: calc(-1 * var(--gutter)); }
 .pc-track {
   position: relative; /* so card.offsetLeft is measured from the track */
   display: flex; gap: var(--s-3); margin: 0; list-style: none;
-  padding: .35rem max(var(--gutter), calc((100% - 34rem) / 2)) 1.1rem;
+  padding: var(--s-1) calc(var(--s-3) + var(--peek)) var(--s-3) var(--gutter);
   overflow-x: auto; overflow-y: hidden;
-  scroll-snap-type: x mandatory; overscroll-behavior-x: contain; scrollbar-width: none;
+  scroll-snap-type: x mandatory; scroll-padding-inline: var(--gutter);
+  overscroll-behavior-x: contain; scrollbar-width: none;
   touch-action: pan-x pan-y; /* swipe sideways for the track, scroll the page up and down */
   -webkit-overflow-scrolling: touch;
 }
@@ -26,68 +59,134 @@
 
 /* ----- one card ----- */
 .pc-track > .pc-card {
-  flex: 0 0 100%; max-width: 34rem; scroll-snap-align: center; scroll-snap-stop: always;
-  display: flex; flex-direction: column; align-items: stretch; gap: .35rem;
-  padding: 1.1rem 1.25rem 1rem;
-  opacity: .72; transform: scale(.975); transition: opacity .25s, transform .25s var(--ease), border-color .25s, box-shadow .25s;
+  flex: 0 0 100%; max-width: 34rem; scroll-snap-align: start; scroll-snap-stop: always;
+  display: flex; flex-direction: column; align-items: stretch;
+  padding: 1.25rem; border-radius: var(--r-card);
+  opacity: .62; transition: opacity .25s, border-color .25s;
 }
-.pc-track > .pc-card.is-current { opacity: 1; transform: none; }
-.pc-track > .pc-card.done.is-current { opacity: .92; }
-.pc-card h3 { margin: .1rem 0 0; font-size: var(--fs-xl); line-height: 1.25; text-decoration: none !important; }
+.pc-track > .pc-card.is-current { opacity: 1; }
+.pc-card h3 { margin: .125rem 0 0; font: 600 1.625rem/1.15 var(--serif); letter-spacing: -.005em; text-wrap: balance; }
 .pc-card p { margin: 0; }
-.pc-top { display: flex; align-items: center; gap: .6rem; min-height: 2.6rem; }
-.pc-icon { display: grid; place-items: center; width: 2.6rem; height: 2.6rem; border-radius: var(--r-md); background: var(--accent-soft); font-size: 1.5rem; line-height: 1; }
-.pc-step { color: var(--muted); font-size: var(--fs-sm); font-weight: 600; }
-.pc-badge { margin-left: auto; padding: .15rem .7rem; border-radius: var(--r-pill); background: var(--accent-soft); color: var(--accent-ink); font-size: .8rem; font-weight: 600; white-space: nowrap; }
-.pc-card.running .pc-badge { background: var(--accent); color: var(--on-accent); }
-.pc-card.done .pc-step::after { content: ' · done ✓'; color: var(--ok-ink); }
-.pc-min { color: var(--accent-ink) !important; font-weight: 700; }
-.pc-text { color: var(--muted) !important; font-size: .95rem !important; }
+.pc-top { display: flex; align-items: center; justify-content: space-between; gap: var(--s-2); min-height: 1.5rem; }
+.pc-min { margin-top: var(--s-1) !important; color: var(--ink-3); font-size: var(--fs-md); }
+.pc-text { margin-top: var(--s-3) !important; color: var(--ink-2); font-size: var(--fs-md); line-height: 1.5; }
+.pc-badge { padding: .125rem .5rem; border-radius: 6px; background: var(--accent-soft); color: var(--accent-ink); font: 600 .6875rem/1.4 var(--sans); letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+.pc-badge[data-state="running"] { background: var(--accent); color: var(--on-accent); }
+.pc-badge[data-state="done"] { background: none; color: var(--ok); padding-inline: 0; }
 
-/* the timer: the biggest thing on the card */
-.pc-timer { text-align: center; margin: var(--s-2) 0 .1rem; }
-.pc-time { font-size: var(--fs-display); font-weight: 300; letter-spacing: -.02em; line-height: 1.05; font-variant-numeric: tabular-nums; color: var(--ink); }
-.pc-card.active:not(.running) .pc-time { opacity: .75; }
-.pc-actions { display: flex; gap: .6rem; }
-.pc-card .btn { font-weight: 700; }
-.pc-card .btn:hover { transform: none; }
-.pc-card .btn.pc-toggle { flex: 1 1 auto; min-height: 3.5rem; font-size: var(--fs-lg); padding: .6rem 1.2rem; }
-.pc-card .btn.pc-reset { flex: 0 0 auto; min-height: 3.5rem; font-size: var(--fs-md); padding: .6rem 1.2rem; background: transparent; color: var(--ink); border: 1px solid var(--line-strong); box-shadow: none; }
-.pc-card .btn.pc-reset:disabled { opacity: .4; cursor: default; }
-.pc-card .btn.pc-how { align-self: center; margin-top: .35rem; min-height: 2.6rem; font-size: var(--fs-sm); padding: .4rem 1rem; background: transparent; color: var(--ink); border: 1px solid var(--line-strong); box-shadow: none; }
+/* the timer: the biggest thing on the card; Reset sits beside it and only shows when there is something to reset */
+.pc-timer { position: relative; margin-top: var(--s-5); text-align: center; }
+.pc-time { display: block; font: 300 var(--fs-display)/1 var(--sans); letter-spacing: -.02em; font-variant-numeric: tabular-nums; color: var(--ink); }
+.pc-card.active:not(.running) .pc-time { opacity: .72; }
+.pc-reset { position: absolute; right: 0; top: 50%; transform: translateY(-50%); }
+.pc-reset:disabled { opacity: 0; pointer-events: none; }
+.pc-bar { height: 3px; margin: var(--s-3) 0 var(--s-4); }
+.pc-bar > i { width: 0; transition: width .25s linear; }
+.pc-card.running .pc-bar > i { background: var(--accent); }
 
-/* the done tick: a big, easy target */
-.pc-done { display: flex; align-items: center; justify-content: center; gap: .6rem; min-height: 2.9rem; margin-top: .25rem; border-top: 1px solid var(--line); padding-top: .55rem; font-weight: 600; cursor: pointer; }
-.pc-done input { width: 1.6rem; height: 1.6rem; margin: 0; flex: none; accent-color: var(--ok); }
+/* one primary action, then the two quiet ones */
+.pc-toggle { width: 100%; min-height: var(--tap-big); border-radius: 14px; font-size: var(--fs-lg); }
+.pc-two { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-2); margin-top: var(--s-2); }
+.pc-two .btn { min-width: 0; padding: 0 var(--s-2); font-size: var(--fs-md); }
+.pc-done { position: relative; cursor: pointer; }
+.pc-done input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.pc-done:has(input:checked) { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-ink); }
+.pc-done:has(input:focus-visible) { outline: 3px solid var(--focus); outline-offset: 2px; }
 
-/* ----- position indicator and arrows ----- */
-.pc-nav { display: flex; align-items: center; justify-content: center; gap: var(--s-2); margin-top: .1rem; }
-.pc-nav .dock-btn { min-width: var(--tap); min-height: var(--tap); padding: 0; }
-.pc-dots { display: flex; align-items: center; }
-.pc-dot { width: 1.7rem; height: var(--tap); padding: 0; border: 0; background: none; cursor: pointer; position: relative; }
-.pc-dot::before { content: ''; position: absolute; left: 50%; top: 50%; width: .6rem; height: .6rem; margin: -.3rem 0 0 -.3rem; border-radius: 50%; background: color-mix(in srgb, var(--muted) 55%, transparent); transition: transform .2s, background .2s; }
-.pc-dot.is-done::before { background: var(--ok); }
-.pc-dot.is-running::before { background: var(--accent); }
-.pc-dot.is-current::before { transform: scale(1.6); box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent2); }
-.pc-count { margin: 0; text-align: center; color: var(--muted); font-size: var(--fs-sm); font-weight: 600; }
-.pc-status { margin: .35rem 0 0; text-align: center; font-weight: 600; min-height: 1.5em; }
-.pc-hint { text-align: center; margin: .25rem 0 0; }
-#practice .routine-head { margin: var(--s-3) 0 .25rem; }
+/* below the cards */
+.pc-status { min-height: 1.5em; margin: var(--s-1) var(--s-1) 0; color: var(--ink-3); font-size: var(--fs-sm); }
+.pc-links { display: flex; align-items: center; justify-content: space-between; margin: 0 var(--s-1); }
+.pc-hint { margin: var(--s-1) var(--s-1) 0; }
 
-/* ----- stats below the cards ----- */
-#practice .stats { margin: var(--s-5) 0 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 var(--s-2); }
-#practice .stats > div { min-width: 0; padding: var(--s-3) var(--s-2); }
-#practice .stats strong { font-size: var(--fs-2xl); }
-#practice .stats span { font-size: .8rem; display: block; }
+/* the completion message: a calm heading and the next steps as list rows */
+.pc-complete { margin-top: var(--s-5); }
+.pc-complete-head { display: grid; gap: 2px; margin: 0 var(--s-1) var(--s-3); }
+.pc-complete-head b { font: 600 var(--fs-xl)/1.2 var(--serif); }
+.pc-complete-head span { color: var(--ink-2); }
+.pc-complete a.row { color: var(--ink); text-decoration: none; }
+.pc-complete a.row:hover { background: var(--surface-2); }
+.pc-complete .row .i { color: var(--ink-3); }
 
-@media (min-width: 721px) { .pc-hint { display: none; } }
-@media (prefers-reduced-motion: reduce) { .pc-track { scroll-behavior: auto; } .pc-dot::before, .pc-track > .pc-card { transition: none; } }
-
-/* Narrow phones: the "ragas for now" button keeps only its icon, so the Today strip stays on one row and the
-   first card's Start button is not pushed under the tools bar. */
-@media (max-width: 420px) {
-  #practice .t-actions { flex-wrap: nowrap; }
-  #practice .t-actions #t-go { flex: 1 1 auto; min-width: 0; }
-  #practice #t-ragas { flex: 0 0 auto; padding-inline: var(--s-3); }
-  #practice #t-ragas .lbl { display: none; }
+/* Wide screens: one comfortable column (the cards are a phone-sized shape), the hint is not needed. */
+@media (min-width: 721px) {
+  .pc-hint { display: none; }
+  #practice, #progress { max-width: 40rem; }
+  .pc-track > .pc-card { max-width: none; }
 }
+
+/* Narrow phones: the "ragas for now" link keeps only its icon (it has an aria-label), the quiet buttons stay on one line,
+   and the eyebrow line gets tighter so "Next: ..." is not cut short. */
+@media (max-width: 380px) {
+  #t-ragas .lbl { display: none; }
+  .pc-two .btn { white-space: nowrap; padding: 0 var(--s-1); font-size: var(--fs-sm); gap: .35rem; }
+  .pc-stepline { gap: var(--s-2); }
+  .pc-stepline .eyebrow { letter-spacing: .08em; }
+  .pc-arrows { gap: var(--s-1); }
+  .pc-arrows .step { width: 2.25rem; height: 2.25rem; }
+}
+/* Short screens: a little less air inside the card, so Start and the two quiet buttons stay above the tab bar. */
+@media (max-height: 800px) {
+  .pc-track > .pc-card { padding: 1rem 1.25rem; }
+  .pc-text { margin-top: var(--s-2) !important; font-size: var(--fs-sm); }
+  .pc-timer { margin-top: var(--s-4); }
+  .pc-time { font-size: 3.5rem; }
+  .pc-bar { margin: var(--s-2) 0 var(--s-3); }
+  .pc-card h3 { font-size: 1.5rem; }
+}
+@media (prefers-reduced-motion: reduce) { .pc-track { scroll-behavior: auto; } .pc-dot::before, .pc-track > .pc-card, #t-fill, .pc-bar > i { transition: none; } }
+
+/* ===== Progress: stats without boxes, a calendar of plain days, the day as a list row, backup as list rows ===== */
+#progress { padding-top: var(--s-5); padding-bottom: var(--s-6); }
+.pg-title { margin: 0 var(--s-1) var(--s-4); font: 600 var(--fs-2xl)/1.2 var(--serif); }
+.pg-eyebrow { margin: var(--s-6) var(--s-1) var(--s-2); }
+
+.pstats { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--s-2); margin: 0 var(--s-1) var(--s-5); }
+.pstats > div { min-width: 0; }
+.pstats strong { display: block; font: 600 var(--fs-2xl)/1.1 var(--sans); font-variant-numeric: tabular-nums; }
+.pstats span { display: block; margin-top: 2px; color: var(--ink-3); font-size: .6875rem; line-height: 1.25; }
+
+.cal-head { display: grid; grid-template-columns: 1fr auto auto auto; align-items: center; gap: var(--s-1); margin-bottom: var(--s-2); }
+.cal-head h3 { margin: 0 0 0 var(--s-1); font: 600 var(--fs-xl)/1.2 var(--serif); }
+#cal-today { padding: 0 var(--s-2); font-size: var(--fs-sm); }
+.cal-dow, .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); }
+.cal-dow { margin-bottom: var(--s-1); text-align: center; color: var(--ink-3); font-size: .6875rem; letter-spacing: .06em; text-transform: uppercase; }
+.cal-grid { row-gap: 2px; }
+.cal-day { position: relative; justify-self: center; width: 2.5rem; height: 2.5rem; padding: 0; border: 0; border-radius: 50%; background: none; color: var(--ink); font: 500 var(--fs-md) var(--sans); font-variant-numeric: tabular-nums; cursor: pointer; }
+.cal-day:hover { background: var(--surface-2); }
+.cal-day.lv1 { background: var(--accent-soft); color: var(--accent-ink); }
+.cal-day.lv2 { background: var(--accent); color: var(--on-accent); font-weight: 600; }
+.cal-day.today { font-weight: 700; box-shadow: inset 0 0 0 1.5px var(--ink); }
+.cal-day.sel { outline: 2px solid var(--ink); outline-offset: 2px; }
+.cal-day:disabled { opacity: .35; cursor: default; background: none; }
+.cal-day.has-note::after { content: ''; position: absolute; left: 50%; bottom: 5px; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: currentColor; opacity: .75; }
+.cal-legend { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-1) var(--s-3); margin: var(--s-3) var(--s-1) 0; color: var(--ink-3); font-size: var(--fs-xs); }
+.cal-legend i { display: inline-block; width: .625rem; height: .625rem; margin-right: .3rem; border-radius: 50%; vertical-align: -1px; }
+.cal-legend .lv1 { background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent); }
+.cal-legend .lv2 { background: var(--accent); }
+.cal-legend .nt { width: 4px; height: 4px; margin-right: .4rem; background: var(--ink-3); }
+
+.day-detail { margin-top: var(--s-4); }
+.note-row { display: flex; cursor: text; }
+.note-row small { display: block; margin-bottom: 2px; }
+.note-row textarea { display: block; width: 100%; padding: 0; border: 0; background: transparent; color: var(--ink); font: inherit; line-height: 1.4; resize: vertical; }
+.note-row textarea:focus-visible { outline: none; }
+.note-row:has(textarea:focus-visible) { outline: 3px solid var(--focus); outline-offset: -3px; }
+
+.pg-data .row.danger b { color: var(--danger); }
+#data-msg { margin: var(--s-2) var(--s-1) 0; }
+
+/* ===== the routine editor: a bottom sheet with list rows ===== */
+.re-presets { margin-bottom: var(--s-3); }
+.re-presets > button { display: grid; place-items: center; align-content: center; min-height: 2.75rem; line-height: 1.2; }
+.re-presets small { display: block; font-size: .6875rem; font-weight: 500; opacity: .8; }
+.dd-names { margin-top: 2px; }
+.re-list { margin: 0; padding: 0; list-style: none; }
+.re-row { gap: var(--s-2); padding: var(--s-2) var(--s-3); }
+.re-row > input[type="checkbox"] { flex: none; width: 1.5rem; height: 1.5rem; margin: 0; }
+.re-row b { font-size: var(--fs-md); }
+.re-min input { width: 3.25rem; min-height: 2.5rem; padding: 0 var(--s-1); border: 1px solid var(--line-2); border-radius: var(--r-sm); background: var(--surface); color: var(--ink); font: inherit; text-align: center; }
+.re-row .iconbtn { width: 2.25rem; height: 2.25rem; }
+.re-row .iconbtn:disabled { opacity: .3; cursor: default; }
+.re-total { margin: var(--s-3) var(--s-1); color: var(--ink-2); font-weight: 600; font-variant-numeric: tabular-nums; }
+.re-actions { display: grid; gap: var(--s-2); }
+.re-actions .btn { width: 100%; min-height: var(--tap-big); border-radius: 14px; font-size: var(--fs-lg); }

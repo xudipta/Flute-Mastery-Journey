@@ -114,8 +114,6 @@
   }
   function renderStats() {
     const checked = ROUTINE.filter((r) => state.checks[r.id]).reduce((a, r) => a + r.min, 0);
-    $('#streak').textContent = streak();
-    $('#total').textContent = practisedDays().length;
     $('#minutes').textContent = checked;
     $('#done-msg').hidden = !(state.log[todayKey()] && state.log[todayKey()].complete);
     if (typeof renderToday === 'function') renderToday();
@@ -139,6 +137,15 @@
   const emit = (k) => (listeners[k] || []).forEach((f) => { try { f(); } catch (e) { console.error(e); } });
   const on = (k, fn) => { (listeners[k] = listeners[k] || []).push(fn); };
 
+  // How a block is shown on its card: a short serif name, a small kind label above it and a hint after the minutes.
+  const CARD = {
+    breath: { name: 'Pranayama & posture', kind: 'Breath', hint: 'no flute' },
+    sa: { name: 'Sur sadhana', kind: 'Long tones', hint: 'with the tanpura' },
+    alankar: { name: 'Alankars', kind: 'Patterns', hint: 'slow and even' },
+    raga: { name: 'Raga alaap', kind: 'Raga', hint: 'with the tanpura' },
+    taal: { name: 'Taan & taal', kind: 'Rhythm', hint: 'with the tabla' },
+    cool: { name: 'Bandish', kind: 'Cool-down', hint: 'end softly on Sa' }
+  };
   // The Today card sits at the top of the Practice view.
   function markOnboarded() { if (!settings.onboarded) { settings.onboarded = true; saveSettings(); } }
   function renderToday() {
@@ -146,13 +153,15 @@
     const total = ROUTINE.reduce((s, r) => s + r.min, 0);
     const done = ROUTINE.filter((r) => state.checks[r.id]).reduce((s, r) => s + r.min, 0);
     const next = ROUTINE.find((r) => !state.checks[r.id]);
-    const sn = streak();
-    $('#t-fill').style.width = Math.round(100 * done / total) + '%';
-    $('.t-bar').setAttribute('aria-valuenow', Math.round(100 * done / total));
-    $('#t-line').textContent = next
-      ? `${done} of ${total} minutes done${sn ? ` · ${sn}-day streak` : ''}. Next up: ${next.title} (${next.min} min).`
-      : `All ${total} minutes done. Today's riyaaz is complete${sn ? ` · ${sn}-day streak` : ''}.`;
-    $('#t-go').textContent = next ? (done ? `Continue: ${next.title}` : 'Start today\'s riyaaz') : 'Practise a block again';
+    const sn = streak(), pct = total ? Math.round(100 * done / total) : 0;
+    $('#t-date').textContent = new Date().toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' });
+    $('#t-total').textContent = total;
+    $('#t-fill').style.width = pct + '%';
+    const bar = $('.t-bar');
+    bar.setAttribute('aria-valuenow', pct); bar.setAttribute('aria-valuetext', `${done} of ${total} minutes`);
+    $('#streak').textContent = sn; $('#streak').hidden = !sn;
+    $('#t-streak-label').textContent = sn ? '-day streak' : 'Start a streak today';
+    FluteUI.setLabel($('#t-go'), next ? (done ? `Continue: ${CARD[next.id].name}` : 'Start today\'s riyaaz') : 'Practise a block again');
     $('#t-go').dataset.state = next ? 'go' : 'again';
     FluteUI.setLabel($('#t-ragas'), `${nowGroup()} ragas`);
     $('#t-ragas').setAttribute('aria-label', `${nowGroup()} ragas`);
@@ -169,29 +178,31 @@
     if (val) state.checkMins[id] = ROUTINE.find((r) => r.id === id).min; else delete state.checkMins[id];
     rows[id].box.checked = val;
     rows[id].li.classList.toggle('done', val);
+    paintCard(ROUTINE.find((r) => r.id === id));
     recordToday();
     store.set(state); renderStats();
     if (window.PracticeCards) PracticeCards.sync();
   }
   const list = $('#routine');
-  const BLOCK_ICON = { breath: '🌬️', sa: '🎵', alankar: '🔁', raga: '🎼', taal: '🥁', cool: '🌙' };
   // Each block is one slide of the swipeable practice cards (carousel behaviour is in practice-cards.js). The
   // card shows live time only for the block the shared timer is on; the others show their full length.
   function renderRoutine() {
     list.innerHTML = ''; Object.keys(rows).forEach((k) => delete rows[k]);
     ROUTINE.forEach((r, i) => {
+      const c = CARD[r.id] || { name: r.title, kind: '', hint: '' };
       const li = document.createElement('li');
       li.className = 'pc-card'; li.dataset.id = r.id;
       li.setAttribute('role', 'group'); li.setAttribute('aria-roledescription', 'slide');
       li.setAttribute('aria-label', `${r.title}, ${i + 1} of ${ROUTINE.length}`);
-      li.innerHTML = `<div class="pc-top"><span class="pc-icon" aria-hidden="true">${BLOCK_ICON[r.id] || '🪈'}</span><span class="pc-step">${i + 1} of ${ROUTINE.length}</span><span class="pc-badge" hidden></span></div>
-        <h3>${r.title}</h3><p class="pc-min">${r.min} min</p><p class="pc-text">${r.text}</p>
-        <div class="pc-timer" role="timer"><span class="pc-time">${fmt0(r.min * 60)}</span></div>
-        <div class="pc-actions"><button type="button" class="btn primary pc-toggle" data-timer>Start</button><button type="button" class="btn ghost pc-reset" disabled>Reset</button></div>
-        <button type="button" class="btn small ghost pc-how" data-how>Show me how</button>
-        <label class="pc-done"><input type="checkbox" aria-label="Done: ${r.title}"> <span>Done</span></label>`;
+      li.innerHTML = `<div class="pc-top"><span class="eyebrow pc-kind">${c.kind}</span><span class="pc-badge" hidden></span></div>
+        <h3>${c.name}</h3><p class="pc-min">${r.min} min${c.hint ? ' · ' + c.hint : ''}</p><p class="pc-text">${r.text}</p>
+        <div class="pc-timer" role="timer"><span class="pc-time">${fmt0(r.min * 60)}</span><button type="button" class="iconbtn pc-reset" aria-label="Reset the timer" disabled>${FluteUI.icon('replay')}</button></div>
+        <div class="bar pc-bar" aria-hidden="true"><i></i></div>
+        <button type="button" class="btn primary pc-toggle" data-timer>${FluteUI.icon('play')}<span class="lbl">Start</span></button>
+        <div class="pc-two"><button type="button" class="btn ghost pc-how" data-how>${FluteUI.icon('play')}<span class="lbl">Show me how</span></button>
+        <label class="btn ghost pc-done"><input type="checkbox" aria-label="Done: ${r.title}">${FluteUI.icon('check')}<span class="lbl">Mark done</span></label></div>`;
       const box = li.querySelector('input');
-      rows[r.id] = { li, box, time: li.querySelector('.pc-time'), toggle: li.querySelector('.pc-toggle'), reset: li.querySelector('.pc-reset'), badge: li.querySelector('.pc-badge') };
+      rows[r.id] = { li, box, time: li.querySelector('.pc-time'), toggle: li.querySelector('.pc-toggle'), reset: li.querySelector('.pc-reset'), badge: li.querySelector('.pc-badge'), fill: li.querySelector('.pc-bar > i'), doneLbl: li.querySelector('.pc-done .lbl') };
       box.checked = !!state.checks[r.id];
       li.classList.toggle('done', box.checked);
       box.addEventListener('change', () => { setChecked(r.id, box.checked); if (!box.checked) offerUndo(r); });
@@ -202,6 +213,7 @@
       rows[r.id].reset.addEventListener('click', () => { if (block && block.id === r.id) { stop(); remaining = block.min * 60; renderTimer(); } });
       li.querySelector('[data-how]').addEventListener('click', () => PracticeDemos.open(r.id));
       list.appendChild(li);
+      if (box.checked) { const w = rows[r.id]; w.badge.hidden = false; w.badge.textContent = 'Done'; w.badge.dataset.state = 'done'; w.fill.style.width = '100%'; w.doneLbl.textContent = 'Done'; }
     });
     $('#routine-total').textContent = ROUTINE.reduce((a, r) => a + r.min, 0);
     if (window.PracticeCards) PracticeCards.sync();
@@ -231,20 +243,27 @@
   // timer can be seen from any tab.
   const baseTitle = document.title;
   let cardKey = '', timerShow = false;
+  // One card's live parts: time, Start/Pause/Resume, the badge (Running, Paused or Done), the thin progress line.
+  function paintCard(r) {
+    const row = rows[r.id]; if (!row) return;
+    const mine = !!block && block.id === r.id, shown = mine && !!block && remaining > 0 && (!!handle || remaining < r.min * 60);
+    const total = r.min * 60, running = mine && !!handle, paused = shown && !handle, done = !!state.checks[r.id];
+    row.time.textContent = fmt(mine ? remaining : total);
+    FluteUI.setLabel(row.toggle, running ? 'Pause' : paused ? 'Resume' : 'Start');
+    FluteUI.setIcon(row.toggle, running ? 'pause' : 'play');
+    row.reset.disabled = !(mine && (!!handle || remaining < total));
+    row.li.classList.toggle('active', mine);
+    row.li.classList.toggle('running', running);
+    row.fill.style.width = (mine ? Math.round(100 * (1 - remaining / total)) : done ? 100 : 0) + '%';
+    row.badge.hidden = !(shown || done);
+    if (shown) row.badge.textContent = running ? 'Running' : 'Paused'; else if (done) row.badge.textContent = 'Done';
+    row.badge.dataset.state = shown ? (running ? 'running' : 'paused') : done ? 'done' : '';
+    row.doneLbl.textContent = done ? 'Done' : 'Mark done';
+  }
   function renderTimer() {
     const show = !!block && remaining > 0 && (!!handle || remaining < block.min * 60);
     // Cards: the block the timer is on shows live time, Pause/Start and a badge; the others show their full length.
-    ROUTINE.forEach((r) => {
-      const row = rows[r.id]; if (!row) return;
-      const mine = !!block && block.id === r.id;
-      row.time.textContent = fmt(mine ? remaining : r.min * 60);
-      row.toggle.textContent = mine && handle ? 'Pause' : 'Start';
-      row.reset.disabled = !(mine && (!!handle || remaining < r.min * 60));
-      row.li.classList.toggle('active', mine);
-      row.li.classList.toggle('running', mine && !!handle);
-      row.badge.hidden = !(mine && show);
-      if (mine && show) row.badge.textContent = handle ? '● Running' : '⏸ Paused';
-    });
+    ROUTINE.forEach(paintCard);
     const key = (block ? block.id : '') + (handle ? 'r' : '') + (show ? 's' : '');
     if (key !== cardKey) { cardKey = key; if (window.PracticeCards) PracticeCards.sync(); }
     timerShow = show;

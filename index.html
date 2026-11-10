@@ -138,70 +138,76 @@
     <!-- Practice: today's blocks, the timer, the progress calendar -->
     <section class="view" id="view-practice" data-view="practice" hidden>
     <section id="practice">
-      <div class="view-head"><h1 class="title-lg">Practice</h1></div>
-      <div class="practice-top">
-        <div class="today" id="today">
-          <p id="t-line" class="t-line"></p>
-          <div class="t-bar" role="progressbar" aria-label="Minutes practised today" aria-valuemin="0" aria-valuemax="100"><div id="t-fill"></div></div>
-          <div class="t-actions">
-            <button class="btn sm primary" id="t-go" type="button">Continue</button>
-            <a class="btn sm ghost" href="#ragas" id="t-ragas"><svg class="i" aria-hidden="true" focusable="false"><use href="#i-clock"/></svg><span class="lbl">Ragas for now</span></a>
-          </div>
+      <div class="view-head">
+        <h1 class="title-lg">Practice</h1>
+        <button type="button" class="iconbtn" id="pc-cal" aria-label="Progress and calendar"><svg class="i" aria-hidden="true" focusable="false"><use href="#i-cal"/></svg></button>
+      </div>
+      <div class="today" id="today">
+        <p class="pc-date" id="t-date"></p>
+        <div class="pc-prog">
+          <p id="t-line"><b><span id="minutes">0</span> of <span id="t-total">0</span> min</b></p>
+          <p class="pc-streak"><span id="streak">0</span><span id="t-streak-label">-day streak</span></p>
+        </div>
+        <div class="bar t-bar" role="progressbar" aria-label="Minutes practised today" aria-valuemin="0" aria-valuemax="100"><i id="t-fill"></i></div>
+        <div class="pc-today-actions">
+          <button class="pc-link" id="t-go" type="button"><span class="lbl">Continue</span></button>
+          <a class="pc-link quiet" href="#ragas" id="t-ragas"><svg class="i" aria-hidden="true" focusable="false"><use href="#i-clock"/></svg><span class="lbl">Ragas for now</span></a>
         </div>
       </div>
       <div class="pc">
+        <div id="pc-dots" class="pc-steps" role="group" aria-label="Choose a block"></div>
+        <div class="pc-stepline">
+          <span class="eyebrow" id="pc-step-label"></span>
+          <span class="eyebrow pc-next-label" id="pc-next-label"></span>
+          <span class="pc-arrows">
+            <button id="pc-prev" class="step" type="button" aria-label="Previous block"><svg class="i" aria-hidden="true" focusable="false"><use href="#i-left"/></svg></button>
+            <button id="pc-next" class="step" type="button" aria-label="Next block"><svg class="i" aria-hidden="true" focusable="false"><use href="#i-right"/></svg></button>
+          </span>
+        </div>
+        <p id="pc-count" class="sr-only" aria-live="polite"></p>
         <div class="pc-carousel" role="group" aria-roledescription="carousel" aria-label="Today's practice blocks">
           <ol id="routine" class="routine pc-track" role="presentation"></ol>
         </div>
-        <div class="pc-nav">
-          <button id="pc-prev" class="step" type="button" aria-label="Previous block"><svg class="i" aria-hidden="true" focusable="false"><use href="#i-left"/></svg></button>
-          <div id="pc-dots" class="pc-dots"></div>
-          <button id="pc-next" class="step" type="button" aria-label="Next block"><svg class="i" aria-hidden="true" focusable="false"><use href="#i-right"/></svg></button>
-        </div>
-        <p id="pc-count" class="pc-count" aria-live="polite"></p>
         <p id="timer-label" class="pc-status" role="status">Pick a block to start its timer</p>
-        <div class="routine-head">
-          <button id="run-all" class="btn primary" type="button">Start full routine · <span id="routine-total">0</span> min</button>
-          <button id="edit-routine" class="btn sm ghost" type="button">Edit routine</button>
+        <div class="pc-links">
+          <button id="run-all" class="pc-link" type="button">Start full routine · <span id="routine-total">0</span> min</button>
+          <button id="edit-routine" class="pc-link quiet" type="button">Edit routine</button>
         </div>
-        <p class="hint pc-hint">Swipe, or use the arrow buttons or keys, to move between blocks. Tick each block as you finish it; a full routine logs a session and grows your streak. Timers run one after another, and each block ticks itself off with a bell.</p>
+        <p class="hint pc-hint">Swipe to move between blocks. A full routine logs a session and grows your streak.</p>
       </div>
-      <div class="stats">
-        <div><strong id="streak">0</strong><span>day streak</span></div>
-        <div><strong id="total">0</strong><span>sessions logged</span></div>
-        <div><strong id="minutes">0</strong><span>minutes today</span></div>
+      <div id="done-msg" class="pc-complete" hidden>
+        <p class="pc-complete-head"><b>Routine complete</b><span>Session logged. See you tomorrow.</span></p>
+        <div class="list">
+          <a class="row" href="#progress" id="add-note"><span class="grow"><b>Add a note about today</b></span><svg class="i" aria-hidden="true" focusable="false"><use href="#i-right"/></svg></a>
+          <a class="row" href="#ragas" id="done-ragas"><span class="grow"><b>Ragas for this time of day</b></span><svg class="i" aria-hidden="true" focusable="false"><use href="#i-right"/></svg></a>
+          <a class="row" href="#tuner"><span class="grow"><b>Check your tone with the tuner</b></span><svg class="i" aria-hidden="true" focusable="false"><use href="#i-right"/></svg></a>
+        </div>
       </div>
-      <p id="done-msg" class="done" hidden>Routine complete — session logged. See you tomorrow! <a href="#progress" id="add-note">Add a note about today</a>
-        <span class="next">Want to keep playing? <a href="#ragas" id="done-ragas">Ragas for this time of day</a> · <a href="#tuner">Check your tone with the tuner</a></span></p>
     </section>
 
     <section id="progress">
-      <h2>Your progress</h2>
-      <p class="lead">Every day you practise is marked. Tap a day to see what you did and add a note.</p>
+      <h2 class="pg-title">Progress</h2>
       <div class="pstats" id="pstats"></div>
-      <div class="cal-card">
+      <div class="cal">
         <div class="cal-head">
-          <button id="cal-prev" class="step" type="button" aria-label="Previous month"><svg class="i" aria-hidden="true" focusable="false"><use href="#i-left"/></svg></button>
           <h3 id="cal-title" aria-live="polite"></h3>
-          <button id="cal-next" class="step" type="button" aria-label="Next month"><svg class="i" aria-hidden="true" focusable="false"><use href="#i-right"/></svg></button>
-          <button id="cal-today" class="btn sm ghost" type="button">Today</button>
+          <button id="cal-prev" class="iconbtn" type="button" aria-label="Previous month"><svg class="i" aria-hidden="true" focusable="false"><use href="#i-left"/></svg></button>
+          <button id="cal-next" class="iconbtn" type="button" aria-label="Next month"><svg class="i" aria-hidden="true" focusable="false"><use href="#i-right"/></svg></button>
+          <button id="cal-today" class="pc-link quiet" type="button">Today</button>
         </div>
         <div class="cal-dow" aria-hidden="true"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
         <div id="cal-grid" class="cal-grid" role="group" aria-label="Practice calendar"></div>
-        <p class="cal-legend" aria-hidden="true"><i class="lv1"></i> some practice <i class="lv2"></i> full routine</p>
+        <p class="cal-legend" aria-hidden="true"><i class="lv1"></i> some practice <i class="lv2"></i> full routine <i class="nt"></i> note</p>
         <div id="day-detail" class="day-detail" aria-live="polite"></div>
       </div>
-      <div class="data-panel">
-        <h3>Your data</h3>
-        <p class="hint">Progress is saved only in this browser. Export a backup file to keep it safe or move it to another device.</p>
-        <div class="demo-controls">
-          <button id="data-export" class="btn sm" type="button">Export backup</button>
-          <button id="data-import" class="btn sm ghost" type="button">Import backup</button>
-          <input type="file" id="import-file" accept="application/json,.json" hidden>
-          <button id="reset-progress" class="link" type="button">Reset all progress</button>
-        </div>
-        <p id="data-msg" class="hint" role="status"></p>
+      <h3 class="eyebrow pg-eyebrow">Your data</h3>
+      <div class="list pg-data">
+        <button id="data-export" class="row" type="button"><span class="grow"><b>Export backup</b><small>Download a file to keep, or to move to another device</small></span></button>
+        <button id="data-import" class="row" type="button"><span class="grow"><b>Import backup</b><small>Merge a backup file into this device</small></span></button>
+        <input type="file" id="import-file" accept="application/json,.json" hidden>
+        <button id="reset-progress" class="row danger" type="button"><span class="grow"><b>Reset all progress</b><small>Deletes history, notes and settings from this browser</small></span></button>
       </div>
+      <p id="data-msg" class="hint" role="status">Progress is saved only in this browser.</p>
     </section>
 
     </section>
@@ -306,7 +312,7 @@
   </main>
 
   <footer>
-    <p>Built with patience. Progress is saved only in your browser. <a href="#progress">Back it up in Your progress</a>.</p>
+    <p>Built with patience. Progress is saved only in your browser. <a href="#progress">Back it up under Progress</a>.</p>
     <p class="app-line"><button id="install" class="link" hidden>Install as an app</button><span id="ios-hint" hidden>To install on iPhone or iPad, tap Share, then Add to Home Screen.</span><span id="offline-ok" hidden>✓ Ready to use offline</span></p>
   </footer>
   <!-- now playing: shown on every tab but Home while the tanpura, the taal or a block timer is running (assets/mini.js) -->
@@ -380,12 +386,18 @@
       </div>
     </div>
   </dialog>
-  <dialog id="routine-editor" aria-labelledby="re-title">
-    <div class="demo-head"><div><h2 id="re-title">Edit your routine</h2><p class="lead">Turn blocks on or off, set minutes and change the order.</p></div><button id="re-close" class="iconbtn" type="button" aria-label="Close"><svg class="i" aria-hidden="true" focusable="false"><use href="#i-x"/></svg></button></div>
-    <div class="demo-controls" id="re-presets"><span class="hint">Presets:</span></div>
-    <ol id="re-list" class="re-list"></ol>
-    <p id="re-total" class="hint" role="status"></p>
-    <div class="demo-controls"><button id="re-save" class="btn sm primary" type="button">Save routine</button><button id="re-cancel" class="btn sm ghost" type="button">Cancel</button></div>
+  <dialog class="sheet" id="routine-editor" aria-labelledby="re-title">
+    <div class="sheet-in">
+      <div class="grab"></div>
+      <div class="sheet-head"><h2 id="re-title">Edit your routine</h2><button id="re-close" class="iconbtn" type="button" data-close aria-label="Close"><svg class="i" aria-hidden="true" focusable="false"><use href="#i-x"/></svg></button></div>
+      <div class="sheet-body">
+        <p class="hint sheet-note">Turn blocks on or off, set minutes and change the order.</p>
+        <div class="seg re-presets" id="re-presets" role="group" aria-label="Presets"></div>
+        <ol id="re-list" class="list re-list"></ol>
+        <p id="re-total" class="re-total" role="status"></p>
+        <div class="re-actions"><button id="re-save" class="btn primary" type="button">Save routine</button><button id="re-cancel" class="btn ghost" type="button" data-close>Cancel</button></div>
+      </div>
+    </div>
   </dialog>
   <!-- the "how to play" demos (ragas, practice blocks): one bottom sheet, filled by assets/demo.js -->
   <dialog class="sheet" id="demo" aria-labelledby="demo-title">

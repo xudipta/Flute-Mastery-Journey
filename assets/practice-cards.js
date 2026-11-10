@@ -1,6 +1,7 @@
 /* Practice view (#view-practice): the swipeable practice cards.
    app.js builds one card (<li class="pc-card" data-id>) per block of today's routine inside #routine and owns the
-   single shared timer; this file is only the carousel: scroll-snap track, position indicator, arrow buttons and keys.
+   single shared timer; this file is only the carousel: a scroll-snap track whose cards start at the page gutter (the next
+   card peeks in at the right edge), the step bar, the "Step N of M / Next: ..." line, arrow buttons and keys.
 
    API (window.PracticeCards):
      goTo(target, opts)  open a card; target is a block id or an index. opts: { smooth = true, vertical }
@@ -13,6 +14,7 @@
   'use strict';
   const $ = (s, p = document) => p.querySelector(s);
   const track = $('#routine'), prev = $('#pc-prev'), next = $('#pc-next'), dots = $('#pc-dots'), count = $('#pc-count');
+  const stepLabel = $('#pc-step-label'), nextLabel = $('#pc-next-label');
   if (!track) return;
 
   const reduce = () => root.matchMedia && root.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -21,11 +23,12 @@
 
   let idx = 0, touched = false, firstShown = false, lockUntil = 0, raf = 0, dotCount = 0;
 
-  // The card whose centre is nearest the middle of the track.
+  // Cards sit at the left padding of the track (the page gutter), so a card is "in view" when its left edge is nearest there.
+  const padLeft = () => parseFloat(getComputedStyle(track).paddingLeft) || 0;
   function centred() {
-    const mid = track.scrollLeft + track.clientWidth / 2;
+    const at = track.scrollLeft + padLeft();
     let best = 0, bd = Infinity;
-    slides().forEach((s, i) => { const d = Math.abs(s.offsetLeft + s.offsetWidth / 2 - mid); if (d < bd) { bd = d; best = i; } });
+    slides().forEach((s, i) => { const d = Math.abs(s.offsetLeft - at); if (d < bd) { bd = d; best = i; } });
     return best;
   }
   const firstUndone = () => { const s = slides(), i = s.findIndex((x) => !x.classList.contains('done')); return i < 0 ? 0 : i; };
@@ -34,14 +37,18 @@
     const s = slides()[i]; if (!s) return;
     const behavior = smooth && !reduce() ? 'smooth' : 'instant';
     if (smooth) lockUntil = performance.now() + 700; // ignore the scroll events of our own animation
-    if (vertical) s.scrollIntoView({ block: vertical, inline: 'center', behavior });
-    else track.scrollTo({ left: Math.max(0, s.offsetLeft + s.offsetWidth / 2 - track.clientWidth / 2), behavior });
+    if (vertical) s.scrollIntoView({ block: vertical, inline: 'start', behavior });
+    else track.scrollTo({ left: Math.max(0, s.offsetLeft - padLeft()), behavior });
   }
 
   function update() {
     const s = slides(), n = s.length;
     idx = Math.max(0, Math.min(n - 1, idx));
     count.textContent = n ? `${idx + 1} of ${n}` : '';
+    stepLabel.textContent = n ? `Step ${idx + 1} of ${n}` : '';
+    const after = s[idx + 1], name = after && after.querySelector('h3');
+    nextLabel.textContent = name ? `Next: ${name.textContent}` : '';
+    nextLabel.hidden = !name;
     prev.disabled = idx <= 0; next.disabled = idx >= n - 1;
     s.forEach((x, i) => x.classList.toggle('is-current', i === idx));
     [...dots.children].forEach((d, i) => {
@@ -112,6 +119,12 @@
       });
     });
   }
+
+  // The calendar button in the view header jumps to the Progress section further down this view.
+  const calBtn = $('#pc-cal');
+  if (calBtn) calBtn.addEventListener('click', () => {
+    const t = $('#progress'); if (t) t.scrollIntoView({ block: 'start', behavior: reduce() ? 'instant' : 'smooth' });
+  });
 
   root.PracticeCards = { goTo, sync, index: () => idx };
   sync();

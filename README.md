@@ -8,7 +8,7 @@ An interactive, animated guide to the **Indian classical bansuri** — daily riy
 - A paper-and-ink look in light and dark mode with one terracotta accent, a serif for titles and the system sans for everything else: one set of design tokens, flat surfaces with 1 px lines (no gradients, glows or coloured shadows), one set of monoline SVG icons, round play buttons, bottom sheets for choices, and safe-area padding on notched phones. Contrast is checked in `tools/check-contrast.js`
 - App-style navigation: five tabs (Home, Practice, Alankar, Ragas, Learn) in a bottom tab bar on phones and a top bar on desktop. The tanpura, tabla and timer keep playing when you change tab, and Back/Forward and links such as `#practice` or `#tuner` work
 - Alankar tab: 18 practice patterns (straight run, groups of three to five, skips, criss-cross, arches ...) in 10 scales (Shuddha, Kalyan, Kafi, Asavari, Khamaj, Bhairav and four pentatonic ragas), played ascending then descending on the Sa you chose. Play them with the tanpura and a tabla taal (or a click), at 1, 2 or 4 notes a beat, with a tempo slider, a speed trainer that raises the tempo every few rounds, the finger chart lighting up note by note, and a Stop bar that stays on screen
-- Daily riyaaz as swipeable cards, one per practice block, each with its own large timer (a running block keeps running when you swipe away, survives a reload and shows in the now-playing bar), plus a streak tracker (saved in your browser)
+- Practice: today's date, minutes done and streak at the top, then the routine as swipeable cards, one per block, with a step bar, a large light timer and one clear Start (a running block keeps running when you swipe away, survives a reload and shows in the now-playing bar); your progress is saved in your browser
 - Keeps the screen on while a timer, the tanpura or the tabla is running, and keeps the sound and the end-of-block bell steady when the phone locks or another app is in front
 - Home is a Tanpura and Taal player on one screen: the scale (Sa) is the big letter, with ◀ ▶ semitone steps and a sheet of all scales; "Hear Sa" lets you check the tanpura against a clean note. The tanpura and the taal sit in one panel (play buttons, volume, tempo −/+ and the beat grid with sam ✕, tali numbers and khali ○), and two sheets hold the taal list with a tempo slider and tap tempo, and the tuning options (first string, pluck speed, fine tune, volumes). The Today card and your streak sit at the top of Practice
 - A slim now-playing bar above the tab bar shows what is sounding (tanpura, taal) and what is counting down (a block timer) on every tab but Home, with a button that stops the sound
@@ -19,8 +19,8 @@ An interactive, animated guide to the **Indian classical bansuri** — daily riy
 - Tap-to-hear six-hole finger chart across three octaves (komal/tivra and note-name options, play the scale), with half-covered holes
 - A raga's row opens a bottom sheet with its mood, vadi/samvadi/thaat, and (for 16 ragas) an animated "How to play" demo: aroha, avaroha and pakad on a finger-hole diagram with sound, speed and loop
 - "Show me how" animated demos for each daily practice block (breathing, long tones, alankars, alaap, taan & taal, cool-down)
-- Your progress: practice calendar with day notes, streaks, and backup/restore (export and import)
-- Editable routine: presets (15, 30, 55 min), on/off, minutes and order
+- Progress: stats, a calendar of plain days (filled for a full routine, a dot for a note), the chosen day as a list row with its note, and backup and restore as list rows (export and import)
+- Editable routine (a bottom sheet): presets (15, 30, 55 min), on/off, minutes and order
 - Learn tab: the tuner, the finger-hole guide, a five-stage roadmap as a timeline, and eight core bansuri techniques (meend, kan, taan, tonguing ...)
 
 ## Install and offline

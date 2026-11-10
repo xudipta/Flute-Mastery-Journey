@@ -12,7 +12,6 @@
   let view = new Date(), selected = null;
   view.setDate(1);
 
-  const pluralDays = (n) => `${n} ${n === 1 ? 'day' : 'days'}`;
   function bestStreak(A) {
     const keys = A.practisedDays().sort();
     let best = 0, run = 0, prev = null;
@@ -23,13 +22,15 @@
     });
     return best;
   }
+  // A block's short name for lists: without the parenthesis, and with non-breaking hyphens so "cool-down" stays on one line.
+  const short = (t) => t.replace(/\s*\(.*\)/, '').replace(/-/g, '\u2011');
   function stats() {
     const A = App(), log = A.state().log, days = A.practisedDays();
     const total = days.reduce((s, k) => s + (log[k].minutes || 0), 0);
     const now = new Date(), mon = new Date(now); mon.setDate(now.getDate() - ((now.getDay() + 6) % 7));
-    let week = 0, weekDays = 0;
-    days.forEach((k) => { if (k >= A.dateKey(mon)) { week += log[k].minutes || 0; weekDays++; } });
-    const items = [[A.streak(), 'day streak'], [bestStreak(A), 'best streak'], [days.length, 'days practised'], [week, `min this week (${pluralDays(weekDays)})`], [total, 'minutes in total']];
+    let week = 0;
+    days.forEach((k) => { if (k >= A.dateKey(mon)) week += log[k].minutes || 0; });
+    const items = [[A.streak(), 'day streak'], [bestStreak(A), 'best streak'], [days.length, 'days practised'], [week, 'min this week'], [total, 'minutes in total']];
     $('#pstats').innerHTML = items.map(([n, l]) => `<div><strong>${n}</strong><span>${l}</span></div>`).join('');
   }
   function renderCalendar() {
@@ -53,13 +54,15 @@
     const A = App(), box = $('#day-detail');
     if (!selected) { box.innerHTML = '<p class="hint">Select a day to see details.</p>'; return; }
     const e = A.state().log[selected], d = new Date(selected + 'T00:00:00');
-    const names = (e && e.blocks || []).map((id) => (A.BLOCKS.find((b) => b.id === id) || {}).title).filter(Boolean);
+    const names = (e && e.blocks || []).map((id) => short((A.BLOCKS.find((b) => b.id === id) || {}).title || '')).filter(Boolean);
     const sum = A.practised(selected)
-      ? `${e.minutes ? e.minutes + ' minutes' : 'Practised'}${e.complete ? ' · full routine' : ''}${names.length ? ': ' + names.join(', ') : ''}`
+      ? `${e.minutes ? e.minutes + ' minutes' : 'Practised'}${e.complete ? ' · full routine' : ''}`
       : 'No practice logged.';
-    box.innerHTML = `<h4>${d.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' })}</h4><p>${sum}</p>
-      <label class="note-label">Note <span class="hint">(what you worked on, tempo, how it felt)</span>
-      <textarea id="day-note" rows="2" maxlength="500" placeholder="e.g. Yaman alaap at 60 BPM, meend on Ga felt steadier"></textarea></label>`;
+    const when = d.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' });
+    box.innerHTML = `<div class="list">
+      <div class="row"><div class="grow"><b>${when}</b><small>${sum}</small>${names.length ? `<small class="dd-names">${names.join(' · ')}</small>` : ''}</div></div>
+      <label class="row note-row"><span class="grow"><small>Note: what you worked on, tempo, how it felt</small>
+      <textarea id="day-note" rows="2" maxlength="500" aria-label="Note for ${when}" placeholder="e.g. Yaman alaap at 60 BPM, meend on Ga felt steadier"></textarea></span></label></div>`;
     const ta = $('#day-note'); ta.value = (e && e.note) || '';
     ta.addEventListener('input', () => {
       const st = A.state();
@@ -76,27 +79,32 @@
     const t = plan.filter((p) => p.on).reduce((s, p) => s + p.min, 0);
     $('#re-total').textContent = `Total: ${t} minutes`; $('#re-save').disabled = !plan.some((p) => p.on);
   }
+  const same = (mins) => plan.every((p) => (mins[p.id] > 0) === p.on && (!p.on || p.min === mins[p.id]));
   function renderEditor() {
-    const A = App();
+    const A = App(), I = root.FluteUI.icon;
     $('#re-list').innerHTML = plan.map((p, i) => {
       const b = A.BLOCKS.find((x) => x.id === p.id);
-      return `<li class="re-row"><label class="re-on"><input type="checkbox" data-i="${i}" data-f="on" ${p.on ? 'checked' : ''} aria-label="Include ${b.title}"> <span>${b.title}</span></label>
-        <label class="re-min"><input type="number" min="1" max="60" value="${p.min}" data-i="${i}" data-f="min" aria-label="Minutes for ${b.title}"> min</label>
-        <button type="button" class="dock-btn" data-up="${i}" aria-label="Move ${b.title} up" ${i === 0 ? 'disabled' : ''}>▲</button>
-        <button type="button" class="dock-btn" data-down="${i}" aria-label="Move ${b.title} down" ${i === plan.length - 1 ? 'disabled' : ''}>▼</button></li>`;
+      return `<li class="row re-row"><input type="checkbox" data-i="${i}" data-f="on" ${p.on ? 'checked' : ''} aria-label="Include ${b.title}">
+        <span class="grow"><b>${short(b.title)}</b></span>
+        <label class="re-min"><input type="number" min="1" max="60" value="${p.min}" data-i="${i}" data-f="min" aria-label="Minutes for ${b.title}"></label>
+        <button type="button" class="iconbtn" data-up="${i}" aria-label="Move ${b.title} up" ${i === 0 ? 'disabled' : ''}>${I('up')}</button>
+        <button type="button" class="iconbtn" data-down="${i}" aria-label="Move ${b.title} down" ${i === plan.length - 1 ? 'disabled' : ''}>${I('down')}</button></li>`;
     }).join('');
+    [...$('#re-presets').children].forEach((b) => b.setAttribute('aria-pressed', same(PRESETS[b.dataset.preset])));
     editorTotal();
   }
   function openEditor() {
     const A = App();
     plan = (A.settings.routine || A.defaultPlan()).map((p) => Object.assign({}, p));
     A.BLOCKS.forEach((b) => { if (!plan.some((p) => p.id === b.id)) plan.push({ id: b.id, min: b.min, on: false }); });
-    renderEditor(); $('#routine-editor').showModal();
+    renderEditor(); root.FluteUI.openSheet($('#routine-editor'));
   }
   function setupEditor() {
     const dlg = $('#routine-editor'), presets = $('#re-presets');
     Object.keys(PRESETS).forEach((name) => {
-      const b = document.createElement('button'); b.type = 'button'; b.className = 'btn small ghost'; b.textContent = name;
+      const b = document.createElement('button'); b.type = 'button'; b.dataset.preset = name;
+      const [label] = name.split(' · '), mins15 = Object.values(PRESETS[name]).reduce((a, n) => a + n, 0);
+      b.innerHTML = `<span>${label}</span><small>${mins15} min</small>`;
       b.addEventListener('click', () => {
         const mins = PRESETS[name];
         plan.forEach((p) => { p.on = mins[p.id] > 0; if (mins[p.id] > 0) p.min = mins[p.id]; });
@@ -105,10 +113,8 @@
       presets.appendChild(b);
     });
     $('#edit-routine').addEventListener('click', openEditor);
-    $('#re-close').addEventListener('click', () => dlg.close());
-    $('#re-cancel').addEventListener('click', () => dlg.close());
-    $('#re-save').addEventListener('click', () => { App().setPlan(plan.map((p) => ({ id: p.id, min: p.min, on: p.on }))); dlg.close(); });
-    dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
+    // closing (the X, Cancel, Escape and a tap outside) is handled by the sheet itself (assets/ui.js)
+    $('#re-save').addEventListener('click', () => { App().setPlan(plan.map((p) => ({ id: p.id, min: p.min, on: p.on }))); root.FluteUI.closeSheet(dlg); });
     $('#re-list').addEventListener('change', (e) => {
       const t = e.target, i = Number(t.dataset.i); if (Number.isNaN(i)) return;
       if (t.dataset.f === 'on') plan[i].on = t.checked;

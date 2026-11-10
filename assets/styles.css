@@ -99,15 +99,12 @@ input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border-radius
 input[type="range"]:focus-visible { outline-offset: 0; border-radius: 4px; }
 output.vol { font-weight: 600; font-variant-numeric: tabular-nums; min-width: 3.2rem; color: var(--ink-2); font-size: var(--fs-sm); }
 /* ===== 5. cards =====
-   One flat card look everywhere (panels, calendar, practice cards, stats): a surface with a 1 px line.
+   One flat card look for the practice cards: a surface with a 1 px line.
    States: default, active (selected), running (in progress), done. */
-.panel, .cal-card, .data-panel, .pstats > div, .stats > div, .pc-track > .pc-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card); }
-.panel, .cal-card, .data-panel { padding: var(--s-4); }
-.panel + .panel { margin-top: var(--gap); }
-:is(.panel, .pc-card).active { border-color: var(--ink-3); }
-:is(.panel, .pc-card).running { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
-:is(.panel, .pc-card).done { border-color: color-mix(in srgb, var(--ok) 55%, var(--line)); }
-.done { background: var(--surface); border: 1px solid color-mix(in srgb, var(--ok) 55%, var(--line)); border-left: 3px solid var(--ok); padding: var(--s-4); border-radius: var(--r-md); }
+.pc-track > .pc-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card); }
+.pc-card.active { border-color: var(--ink-3); }
+.pc-card.running { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.pc-card.done { border-color: color-mix(in srgb, var(--ok) 55%, var(--line)); }
 
 /* ===== 6. app shell: header, tab bar, now-playing bar, toast ===== */
 .site-header { position: sticky; top: 0; z-index: 5; display: flex; justify-content: space-between; align-items: center; gap: var(--s-4); padding: calc(.25rem + env(safe-area-inset-top)) max(1.5rem, env(safe-area-inset-right)) .25rem max(1.5rem, env(safe-area-inset-left)); background: var(--bg); border-bottom: 1px solid var(--line); }
@@ -141,56 +138,8 @@ output.vol { font-weight: 600; font-variant-numeric: tabular-nums; min-width: 3.
 @media (min-width: 721px) { .mini { left: 50%; right: auto; width: min(26rem, calc(100vw - 1.5rem)); transform: translateX(-50%); bottom: 1rem; } }
 
 /* ===== 7. shared content ===== */
-/* practice: today strip, stats, completion message */
-.today { max-width: 40rem; margin: 0 auto; }
-.t-line { color: var(--ink-2); }
-.t-bar { height: 4px; border-radius: 2px; background: var(--surface-2); overflow: hidden; margin: var(--s-4) auto; max-width: 30rem; }
-#t-fill { height: 100%; width: 0; background: var(--accent); border-radius: inherit; transition: width .4s var(--ease); }
-.t-actions { display: flex; flex-wrap: wrap; gap: var(--s-3); justify-content: center; }
-.stats { display: flex; justify-content: center; gap: var(--s-3); margin-top: var(--s-5); flex-wrap: wrap; }
-.stats > div { padding: var(--s-3) var(--s-4); min-width: 6.5rem; text-align: center; }
-.stats strong { display: block; font-size: var(--fs-2xl); line-height: 1.1; color: var(--ink); font-variant-numeric: tabular-nums; }
-.stats span { color: var(--ink-3); font-size: var(--fs-sm); }
-.routine { list-style: none; margin: 0; padding: 0; }
-.routine-head { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-4); align-items: center; margin-bottom: var(--s-4); }
-#done-msg .next { display: block; margin-top: .4rem; color: var(--ink-2); }
-#done-msg a { color: var(--accent-ink); font-weight: 600; }
 #done-msg .next a { margin-left: 0; }
-/* progress: stats, calendar, notes, data */
-.pstats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: var(--s-3); margin-bottom: var(--s-4); }
-.pstats > div { padding: var(--s-3) var(--s-4); text-align: center; }
-.pstats strong { display: block; font-size: var(--fs-2xl); color: var(--ink); }
-.pstats span { color: var(--ink-3); font-size: .8rem; }
-.cal-card, .data-panel { margin-bottom: var(--s-4); }
-.cal-head { display: flex; align-items: center; gap: var(--s-2); margin-bottom: var(--s-2); }
-.cal-head h3 { flex: 1; text-align: center; margin: 0; }
-.cal-dow, .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: .3rem; }
-.cal-dow span { text-align: center; color: var(--ink-3); font-size: var(--fs-xs); }
-.cal-grid { margin-top: .3rem; }
-.cal-day { font: inherit; min-height: 2.6rem; border-radius: var(--r-sm); border: 2px solid transparent; background: var(--surface-2); color: var(--ink); cursor: pointer; position: relative; }
-.cal-day.lv1 { background: color-mix(in srgb, var(--ok) 30%, var(--surface)); }
-.cal-day.lv2 { background: var(--ok); color: var(--on-ok); font-weight: 600; }
-.cal-day.today { border-color: var(--accent); }
-.cal-day:disabled { opacity: .4; cursor: default; }
-.cal-day.sel { outline: 3px solid var(--focus); outline-offset: 1px; }
-.cal-day.has-note::after { content: ''; position: absolute; top: 4px; right: 5px; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
-.cal-legend { color: var(--ink-3); font-size: .8rem; margin: .6rem 0 0; }
-.cal-legend i { display: inline-block; width: .9rem; height: .9rem; border-radius: 4px; vertical-align: -2px; margin: 0 .25rem 0 .75rem; }
-.cal-legend .lv1 { background: color-mix(in srgb, var(--ok) 30%, var(--surface)); }
-.cal-legend .lv2 { background: var(--ok); }
-.day-detail { margin-top: var(--s-4); border-top: 1px solid var(--line); padding-top: var(--s-3); }
-.day-detail h4 { margin: 0 0 .25rem; }
-.note-label { display: block; font-weight: 600; }
-.note-label textarea { display: block; width: 100%; margin-top: .35rem; font: inherit; font-weight: 400; padding: .5rem .7rem; border-radius: var(--r-sm); border: 1px solid var(--line-2); background: var(--surface); color: var(--ink); resize: vertical; }
-.data-panel h3 { margin-top: 0; }
-
-/* ===== 8. dialogs: routine editor and the practice demos' content (the demo sheet itself is in ragas.css) ===== */
-#routine-editor { padding: 1.25rem; border: 1px solid var(--line); border-radius: var(--r-card); background: var(--surface); color: var(--ink); box-shadow: var(--shadow-sheet); }
-#routine-editor { width: min(620px, 94vw); max-height: 92vh; overflow: auto; }
-#routine-editor::backdrop { background: var(--scrim); }
-.demo-head { display: flex; justify-content: space-between; gap: var(--s-4); align-items: flex-start; }
-.demo-head h2 { margin: 0; }
-.demo-head .lead { margin: 0; }
+/* ===== 8. practice demos' content (the demo sheet itself is in ragas.css, the routine editor is a sheet) ===== */
 .demo-cap { min-height: 1.6em; color: var(--ink); }
 .demo-controls { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-3); align-items: center; }
 .demo-controls .btn.on { outline: 3px solid var(--focus); }
@@ -212,11 +161,6 @@ output.vol { font-weight: 600; font-variant-numeric: tabular-nums; min-width: 3.
 .cue { display: flex; align-items: center; gap: var(--s-3); background: var(--surface-2); border-radius: var(--r-md); padding: .6rem var(--s-4); font-weight: 600; }
 .cue-icon { font-size: 2rem; }
 .cue-stage { color: var(--accent-ink); font-weight: 600; }
-.re-list { list-style: none; padding: 0; margin: var(--s-4) 0 var(--s-2); display: grid; gap: var(--s-2); }
-.re-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2) var(--s-3); background: var(--surface-2); border-radius: var(--r-md); padding: var(--s-2) var(--s-3); }
-.re-on { flex: 1 1 11rem; display: flex; align-items: center; gap: var(--s-2); font-weight: 600; }
-.re-on input { width: 1.4rem; height: 1.4rem; }
-.re-min input { width: 4rem; font: inherit; padding: .3rem .4rem; border-radius: 8px; border: 1px solid var(--line-2); background: var(--surface); color: var(--ink); min-height: 2.4rem; }
 
 /* ===== 9. phones: tab bar at the bottom ===== */
 @media (max-width: 720px) {
@@ -241,7 +185,7 @@ output.vol { font-weight: 600; font-variant-numeric: tabular-nums; min-width: 3.
      .eyebrow                            small caps label above a group
      .btn  (+ .primary .ghost .sm .on)   the one primary action of a screen is .primary; .small and .big are older names for .sm
      .round (+ .quiet)                   56 px round play/stop button; accent when active, .quiet when idle
-     .step                               36 px round stepper (previous/next, − / +); .dock-btn is the older name, used by generated markup
+     .step                               36 px round stepper (previous/next, − / +)
      .iconbtn                            40 px icon-only button (close, calendar)
      .list > .row                        grouped list; a row has a leading element, .grow (with <b> and <small>) and a trailing element; .row.sel
      .seg                                segmented control: buttons with aria-checked="true" / aria-pressed="true" / .on
@@ -263,7 +207,7 @@ output.vol { font-weight: 600; font-variant-numeric: tabular-nums; min-width: 3.
 .view-head:has(> .iconbtn) { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--s-3); }
 .eyebrow { margin: 0; font: 600 .6875rem/1.2 var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
 
-.btn, .dock-btn, .step, .iconbtn, .round { font-family: inherit; }
+.btn, .step, .iconbtn, .round { font-family: inherit; }
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; min-height: var(--tap); padding: 0 1rem; border: 1px solid var(--line-2); border-radius: var(--r-md); background: var(--surface); color: var(--ink); font-weight: 600; font-size: var(--fs-md); line-height: 1.2; text-decoration: none; cursor: pointer; transition: background .15s, border-color .15s, color .15s, transform .1s var(--ease); }
 .btn:hover { background: var(--surface-2); }
 .btn:active { transform: scale(.98); }
@@ -284,13 +228,11 @@ output.vol { font-weight: 600; font-variant-numeric: tabular-nums; min-width: 3.
 .round[aria-busy="true"] { opacity: .7; animation: pulse 1s ease-in-out infinite; }
 @keyframes pulse { 50% { opacity: .45; } }
 
-.step, .dock-btn { display: inline-flex; align-items: center; justify-content: center; gap: .35rem; min-width: 2.25rem; height: 2.25rem; padding: 0 .5rem; border-radius: 1.125rem; border: 1px solid var(--line-2); background: var(--surface); color: var(--ink); font-weight: 600; cursor: pointer; flex: none; transition: background .15s, transform .1s var(--ease); }
-.step .i, .dock-btn .i { width: 1.125rem; height: 1.125rem; }
-.dock-btn { min-width: 2.5rem; height: 2.5rem; padding: 0 .6rem; border-radius: 1.25rem; }
-.step:hover, .dock-btn:hover { background: var(--surface-2); }
-.step:active, .dock-btn:active { transform: scale(.94); }
-.step:disabled, .dock-btn:disabled { opacity: .35; cursor: default; }
-.dock-btn.on { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-ink); }
+.step { display: inline-flex; align-items: center; justify-content: center; gap: .35rem; min-width: 2.25rem; height: 2.25rem; padding: 0 .5rem; border-radius: 1.125rem; border: 1px solid var(--line-2); background: var(--surface); color: var(--ink); font-weight: 600; cursor: pointer; flex: none; transition: background .15s, transform .1s var(--ease); }
+.step .i { width: 1.125rem; height: 1.125rem; }
+.step:hover { background: var(--surface-2); }
+.step:active { transform: scale(.94); }
+.step:disabled { opacity: .35; cursor: default; }
 .iconbtn { width: 2.5rem; height: 2.5rem; border: 0; border-radius: var(--r-md); display: grid; place-items: center; background: transparent; color: var(--ink-2); cursor: pointer; flex: none; }
 .iconbtn:hover { background: var(--surface-2); color: var(--ink); }
 .iconbtn .i { width: 1.375rem; height: 1.375rem; }
