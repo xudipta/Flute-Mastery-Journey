@@ -104,10 +104,10 @@ const near = (a, b, tol) => Math.abs(a - b) <= tol;
 
   // ----- change notes per beat while playing -----
   await reset();
-  await p.click('#al-laya [data-v="2"]'); await wait(3500);
+  await p.click('#al-laya [data-v="2"]'); await wait(4500); // 3 notes a second at 90 BPM: enough intervals (>8) even when the first beats start late
   g = await grab(); spb = 60 / (await bpmNow());
   const tail = g.notes.slice(2), tdt = tail.slice(1).map((n, i) => n.t - tail[i].t);
-  check('2 notes per beat: spacing is half a beat', tdt.length > 8 && tdt.every((d) => near(d, spb / 2, 0.0006)), 'worst ' + Math.max(...tdt.map((d) => Math.abs(d - spb / 2) * 1000)).toFixed(3) + ' ms');
+  check('2 notes per beat: spacing is half a beat', tdt.length > 8 && tdt.every((d) => near(d, spb / 2, 0.0006)), tdt.length + ' intervals, worst ' + Math.max(...tdt.map((d) => Math.abs(d - spb / 2) * 1000)).toFixed(3) + ' ms');
   check('2 notes per beat: every note is on a beat or half a beat after one', tail.every((n) => g.hits.some((h) => near(h.when, n.t, 0.001)) || g.hits.some((h) => near(h.when + spb / 2, n.t, 0.001))));
   check('a tempo set by hand during play is kept when you stop (trainer off)', await (async () => { await p.click('#al-play'); await wait(300); return (await bpmNow()) === 100; })());
 

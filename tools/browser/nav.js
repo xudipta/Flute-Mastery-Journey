@@ -28,6 +28,9 @@ const S = process.argv[2] || require('os').tmpdir(); // screenshots go here
 
   // --- tabs, Back/Forward, scroll restore, focus
   const p = await fresh(null, '');
+  // every view is a direct child of <main>: a view left unclosed would nest the next ones inside it, and they would
+  // all disappear together with it
+  ok(await p.evaluate(() => { const v = [...document.querySelectorAll('.view')]; return v.length === 5 && v.every((e) => e.parentElement.id === 'main'); }), 'the five views are siblings inside <main>');
   for (const v of ['practice', 'alankar', 'ragas', 'learn', 'home']) {
     await p.click(`.tabbar a[data-view="${v}"]`); await p.waitForTimeout(80);
     const s = await state(p); ok(s.view === v && s.hash === '#' + v && s.tab[0] === v, `tab ${v}`, { focus: s.focus });

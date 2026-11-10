@@ -17,6 +17,9 @@ const ALLOW = new Set(['lv1', 'lv2', 'has-note', 'today', 'sel', 'is-done', 'is-
 
 // shared components (v2) in styles.css that no view uses yet; remove a name here when a view starts using it
 for (const n of ['chip', 'field']) ALLOW.add(n);
+// the old name of .step, kept in the shared block while the Ragas and Learn views are restyled; when no view uses
+// .dock-btn any more, delete its rules from styles.css and this line
+ALLOW.add('dock-btn');
 
 const used = (name) => ALLOW.has(name) || new RegExp('(^|[^\\w-])' + name.replace(/[-]/g, '\\-') + '([^\\w-]|$)').test(sources);
 
